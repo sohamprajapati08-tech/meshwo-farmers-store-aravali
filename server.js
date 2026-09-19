@@ -21,6 +21,23 @@ app.get('/our-farm', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'our-farm.html'));
 });
 
+// Health check endpoint for monitoring & keep-alive
+app.get('/health', (req, res) => {
+  res.status(200).send('OK');
+});
+
+// Auto Keep-Alive for Render Free Tier (Prevents Sleep & "Spinning Up" Loading Screen)
+if (process.env.RENDER_EXTERNAL_URL) {
+  const https = require('https');
+  const pingUrl = `${process.env.RENDER_EXTERNAL_URL}/health`;
+  setInterval(() => {
+    try {
+      https.get(pingUrl, () => {}).on('error', () => {});
+    } catch (e) {}
+  }, 10 * 60 * 1000); // Pings every 10 minutes to stay 24/7 awake
+  console.log(`[Keep-Alive] Configured auto-ping for ${pingUrl}`);
+}
+
 const multer = require('multer');
 const fs = require('fs');
 
