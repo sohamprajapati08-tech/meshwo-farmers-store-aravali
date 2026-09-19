@@ -15,6 +15,7 @@
   "dependencies": {
     "better-sqlite3": "^13.0.3",
     "cors": "^2.8.6",
+    "dotenv": "^18.0.1",
     "express": "^5.2.1",
     "multer": "^2.4.0",
     "pdf-export-images": "^1.2.0",

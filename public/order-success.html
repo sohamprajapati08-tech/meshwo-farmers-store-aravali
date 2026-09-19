@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="gu-IN">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Order Confirmed | Meshwo Farmers - Aravalli Tribal Organic Store</title>
+  <meta name="description" content="Thank you for your order! Your pure Vedic forest harvest from Shamlaji tribal women farmers is confirmed.">
+  <link rel="icon" type="image/jpeg" href="/images/meshwo_logo.jpg">
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Playfair+Display:ital,wght@0,600;0,700;0,800;1,600&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="/css/theme.css?v=13.0">
+  <style>
+    .success-container {
+      max-width: 680px;
+      margin: 40px auto;
+      padding: 0 16px 60px;
+    }
+    .success-card {
+      background: #FFFFFF;
+      border: 1.5px solid #EAE5D9;
+      border-radius: 16px;
+      padding: 36px 28px;
+      box-shadow: 0 12px 36px rgba(26, 62, 27, 0.07);
+      text-align: center;
+    }
+    .success-badge-icon {
+      width: 76px;
+      height: 76px;
+      background: #EAF5E7;
+      border-radius: 50%;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 20px;
+      color: #2E7D32;
+    }
+    .order-tag {
+      display: inline-block;
+      background: #EAF2E5;
+      color: #1A3E1B;
+      font-weight: 800;
+      font-size: 15px;
+      padding: 6px 20px;
+      border-radius: 30px;
+      margin-bottom: 18px;
+      letter-spacing: 0.5px;
+    }
+    .payment-status-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: #DCFCE7;
+      color: #15803D;
+      font-size: 12px;
+      font-weight: 800;
+      padding: 4px 12px;
+      border-radius: 20px;
+      margin-top: 4px;
+    }
+    .payment-status-pill.pending {
+      background: #FEF3C7;
+      color: #B45309;
+    }
+    .receipt-box {
+      background: #FAF9F6;
+      border: 1px solid #E6E1D5;
+      border-radius: 12px;
+      padding: 22px;
+      text-align: left;
+      margin: 24px 0;
+      font-size: 13.5px;
+      line-height: 1.9;
+    }
+    .receipt-row {
+      display: flex;
+      justify-content: space-between;
+      border-bottom: 1px dashed #EAE5D9;
+      padding: 6px 0;
+    }
+    .receipt-row:last-child {
+      border-bottom: none;
+    }
+    .item-row {
+      display: flex;
+      justify-content: space-between;
+      font-size: 13px;
+      color: #444;
+      padding: 4px 0;
+    }
+  </style>
+</head>
+
+<body class="checkout-page-body">
+
+  <!-- TOP HEADER -->
+  <header class="checkout-header-bar">
+    <div class="checkout-header-inner">
+      <a href="/" class="checkout-brand-center" style="margin: 0 auto;">
+        <img src="/images/meshwo_logo.jpg" alt="Meshwo Farmers" class="checkout-brand-logo">
+        <div>
+          <div class="checkout-brand-title">MESHWO FARMERS</div>
+          <div class="checkout-brand-sub">ARAVALLI TRIBAL HARVEST</div>
+        </div>
+      </a>
+    </div>
+  </header>
+
+  <!-- MAIN CONTAINER -->
+  <main class="success-container">
+    <div class="success-card" id="successCard">
+      <!-- Loading State -->
+      <div id="verifyingSpinner" style="padding: 40px 20px;">
+        <div style="font-size: 32px; animation: spin 1s infinite linear; display: inline-block;">⏳</div>
+        <h2 style="font-family: var(--font-heading); color: var(--primary-color); margin-top: 14px; font-size: 20px;">
+          Verifying Payment &amp; Securing Order...
+        </h2>
+        <p style="color: #666; font-size: 13px; margin-top: 6px;">Please wait while we confirm your transaction with the bank gateway.</p>
+      </div>
+
+      <!-- Success Details Box (Revealed after verification) -->
+      <div id="verifiedSuccessContent" style="display: none;">
+        <div class="success-badge-icon">
+          <svg viewBox="0 0 24 24" width="42" height="42" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="20 6 9 17 4 12"></polyline>
+          </svg>
+        </div>
+
+        <h1 style="font-family: var(--font-heading); color: var(--primary-color); font-size: 26px; margin-bottom: 6px;">
+          Payment Successful &amp; Order Booked!
+        </h1>
+        <div class="order-tag" id="succOrderNumber">
+          Order ID: #MF-000000
+        </div>
+
+        <p style="font-size: 14px; color: #4B5547; max-width: 520px; margin: 0 auto 16px; line-height: 1.6;">
+          જય શ્રી કૃષ્ણ! Thank you, <strong id="succCustomerName">Customer</strong>! Your payment has been securely confirmed by the hosted payment gateway. Tribal women farmers at Shamlaji are packing your fresh Vedic harvest.
+        </p>
+
+        <!-- Status Pill -->
+        <div>
+          <span class="payment-status-pill" id="succPaymentPill">
+            <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg>
+            <span id="succPaymentStatusText">Payment Confirmed &bull; 100% Bank Verified</span>
+          </span>
+        </div>
+
+        <!-- Receipt Box -->
+        <div class="receipt-box">
+          <div class="receipt-row">
+            <span style="color: #6D7869;">Transaction Ref / Session:</span>
+            <code id="succTxId" style="background: #EAE6DB; padding: 2px 8px; border-radius: 4px; font-weight: 700; color: #1A3E1B;">-</code>
+          </div>
+          <div class="receipt-row">
+            <span style="color: #6D7869;">Payment Gateway / Mode:</span>
+            <strong id="succPaymentMethod" style="color: #1A3E1B;">Razorpay Hosted Gateway</strong>
+          </div>
+          <div class="receipt-row">
+            <span style="color: #6D7869;">Customer WhatsApp / Mobile:</span>
+            <strong id="succCustomerPhone">-</strong>
+          </div>
+          <div class="receipt-row">
+            <span style="color: #6D7869;">Delivery Address:</span>
+            <span id="succAddress" style="text-align: right; max-width: 65%;">-</span>
+          </div>
+
+          <!-- Items Ordered -->
+          <div style="margin-top: 12px; padding-top: 10px; border-top: 1px dashed #D0C9BA;">
+            <div style="font-size: 12px; font-weight: 800; color: #1A3E1B; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.5px;">Harvest Items</div>
+            <div id="succItemsList">
+              <!-- Dynamically rendered -->
+            </div>
+          </div>
+
+          <!-- Total Amount -->
+          <div class="receipt-row" style="margin-top: 10px; border-top: 1.5px solid #1A3E1B; padding-top: 10px; font-size: 16px; font-weight: 800; color: #1A3E1B;">
+            <span>Total Paid:</span>
+            <span id="succTotalAmount">₹0</span>
+          </div>
+        </div>
+
+        <!-- Trust Note -->
+        <div style="background: #F4F8F3; border: 1px solid #D6E8D3; border-radius: 10px; padding: 12px 16px; font-size: 12px; color: #1A3E1B; margin-bottom: 24px; text-align: left; line-height: 1.5;">
+          🚚 <strong>Despatch Guarantee:</strong> Dispatched from Shamlaji Cooperative directly to your address within 24-48 hours. Tracking details will be shared on WhatsApp.
+        </div>
+
+        <!-- Action Buttons -->
+        <div style="display: flex; gap: 12px; justify-content: center; flex-wrap: wrap;">
+          <a href="/" class="checkout-submit-btn" style="width: auto; padding: 12px 28px; text-decoration: none;">
+            ← Continue Shopping
+          </a>
+          <a id="succWhatsAppBtn" href="https://wa.me/916356785785" target="_blank" class="checkout-submit-btn" style="width: auto; padding: 12px 24px; background: #25D366; text-decoration: none;">
+            💬 WhatsApp Support (6356785785)
+          </a>
+        </div>
+      </div>
+
+      <!-- Error State -->
+      <div id="verifyErrorContent" style="display: none; padding: 30px 10px;">
+        <div style="font-size: 48px; margin-bottom: 12px;">⚠️</div>
+        <h2 style="font-family: var(--font-heading); color: #C2410C; font-size: 22px; margin-bottom: 8px;">
+          Payment Status Notice
+        </h2>
+        <p id="verifyErrorMsg" style="color: #666; font-size: 14px; max-width: 480px; margin: 0 auto 20px; line-height: 1.6;">
+          We could not automatically confirm your payment token. If money was deducted, our team will verify it manually.
+        </p>
+        <div style="display: flex; gap: 10px; justify-content: center;">
+          <a href="/checkout.html" class="checkout-submit-btn" style="width: auto; padding: 10px 22px; text-decoration: none; background: #555;">
+            Return to Checkout
+          </a>
+          <a href="https://wa.me/916356785785" target="_blank" class="checkout-submit-btn" style="width: auto; padding: 10px 22px; text-decoration: none; background: #25D366;">
+            Contact Support
+          </a>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <style>
+    @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+  </style>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', async function () {
+      const urlParams = new URLSearchParams(window.location.search);
+      const orderNumber = urlParams.get('order_number') || urlParams.get('order_id');
+      const sessionId = urlParams.get('session_id');
+      const paymentId = urlParams.get('razorpay_payment_id') || urlParams.get('payment_id') || urlParams.get('razorpay_payment_link_id');
+      const signature = urlParams.get('razorpay_signature');
+      const statusParam = urlParams.get('status') || urlParams.get('razorpay_payment_link_status');
+
+      if (!orderNumber) {
+        document.getElementById('verifyingSpinner').style.display = 'none';
+        document.getElementById('verifyErrorContent').style.display = 'block';
+        document.getElementById('verifyErrorMsg').textContent = 'No Order ID found in request URL.';
+        return;
+      }
+
+      try {
+        const response = await fetch('/api/checkout/verify-session', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            order_number: orderNumber,
+            session_id: sessionId,
+            payment_id: paymentId,
+            signature: signature,
+            status: statusParam
+          })
+        });
+
+        const data = await response.json();
+
+        document.getElementById('verifyingSpinner').style.display = 'none';
+
+        if (data.success && data.order) {
+          const ord = data.order;
+          document.getElementById('verifiedSuccessContent').style.display = 'block';
+          document.getElementById('succOrderNumber').textContent = `Order ID: ${ord.order_number}`;
+          document.getElementById('succCustomerName').textContent = ord.customer_name || 'Valued Customer';
+          document.getElementById('succCustomerPhone').textContent = ord.customer_phone || '-';
+          document.getElementById('succAddress').textContent = `${ord.address || ''}, ${ord.city || ''} ${ord.pincode || ''}`;
+          document.getElementById('succPaymentMethod').textContent = ord.payment_method || 'Online Hosted Checkout';
+          document.getElementById('succTxId').textContent = ord.transaction_id || paymentId || sessionId || 'COMPLETED';
+          document.getElementById('succTotalAmount').textContent = `₹${(ord.total || 0).toLocaleString('en-IN')}`;
+
+          const pill = document.getElementById('succPaymentPill');
+          const pillText = document.getElementById('succPaymentStatusText');
+          if (ord.payment_status && ord.payment_status.toLowerCase().includes('paid')) {
+            pill.className = 'payment-status-pill';
+            pillText.textContent = `Payment Confirmed (${ord.payment_status})`;
+          } else {
+            pill.className = 'payment-status-pill pending';
+            pillText.textContent = `Payment Status: ${ord.payment_status || 'Processing'}`;
+          }
+
+          // Parse and render items
+          try {
+            const items = typeof ord.items_json === 'string' ? JSON.parse(ord.items_json) : (ord.items_json || []);
+            const itemsContainer = document.getElementById('succItemsList');
+            if (itemsContainer && Array.isArray(items)) {
+              itemsContainer.innerHTML = items.map(item => `
+                <div class="item-row">
+                  <span>${item.title || item.name} (${item.selectedVariant || item.variantLabel || 'Standard'}) × ${item.quantity || 1}</span>
+                  <strong>₹${((item.price || 0) * (item.quantity || 1)).toLocaleString('en-IN')}</strong>
+                </div>
+              `).join('');
+            }
+          } catch (e) {
+            console.warn('Could not parse items_json', e);
+          }
+
+          // Clear client cart
+          try {
+            localStorage.removeItem('dwarkesh_cart');
+            const user = JSON.parse(localStorage.getItem('dwarkesh_user') || 'null');
+            if (user && user.phone) {
+              localStorage.removeItem(`dwarkesh_cart_${user.phone}`);
+            }
+            sessionStorage.removeItem('dwarkesh_checkout_coupon');
+          } catch (e) {}
+
+          // Update WhatsApp link with order number
+          const waBtn = document.getElementById('succWhatsAppBtn');
+          if (waBtn) {
+            waBtn.href = `https://wa.me/916356785785?text=${encodeURIComponent(`Jay Shree Krishna! I have completed payment for Order #${ord.order_number}. Please confirm dispatch.`)}`;
+          }
+
+        } else {
+          document.getElementById('verifyErrorContent').style.display = 'block';
+          document.getElementById('verifyErrorMsg').textContent = data.message || 'Could not verify payment status with server.';
+        }
+
+      } catch (err) {
+        console.error(err);
+        document.getElementById('verifyingSpinner').style.display = 'none';
+        document.getElementById('verifyErrorContent').style.display = 'block';
+        document.getElementById('verifyErrorMsg').textContent = 'Network or verification error. Our team will verify your payment manually.';
+      }
+    });
+  </script>
+</body>
+
+</html>

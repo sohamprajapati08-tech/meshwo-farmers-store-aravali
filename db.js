@@ -102,6 +102,8 @@ db.exec(`
 // Safe migrations for orders table
 try { db.exec("ALTER TABLE orders ADD COLUMN payment_status TEXT DEFAULT 'Pending'"); } catch(e){}
 try { db.exec("ALTER TABLE orders ADD COLUMN transaction_id TEXT"); } catch(e){}
+try { db.exec("ALTER TABLE orders ADD COLUMN payment_session_id TEXT"); } catch(e){}
+try { db.exec("ALTER TABLE orders ADD COLUMN payment_url TEXT"); } catch(e){}
 
 // Seed Admin User (admin001 / admin@001)
 const adminCount = db.prepare('SELECT COUNT(*) as count FROM admin_users').get().count;

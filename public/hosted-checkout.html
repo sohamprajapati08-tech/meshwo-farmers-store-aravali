@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="gu-IN">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Secure Hosted Checkout | Bank Payment Gateway</title>
+  <link rel="icon" type="image/jpeg" href="/images/meshwo_logo.jpg">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary: #0F172A;
+      --bank-blue: #0284C7;
+      --success: #16A34A;
+      --bg: #F8FAFC;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Inter', sans-serif; }
+    body { background: var(--bg); color: #334155; min-height: 100vh; display: flex; flex-direction: column; }
+    
+    .gateway-header {
+      background: #FFFFFF;
+      border-bottom: 1px solid #E2E8F0;
+      padding: 16px 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .brand-wrap { display: flex; align-items: center; gap: 12px; }
+    .brand-logo { width: 36px; height: 36px; border-radius: 6px; object-fit: cover; }
+    .brand-title { font-weight: 800; font-size: 15px; color: #0F172A; }
+    .brand-sub { font-size: 11px; color: #64748B; font-weight: 600; }
+    
+    .sec-badge {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      background: #F0FDF4;
+      color: #16A34A;
+      padding: 6px 12px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 700;
+      border: 1px solid #DCFCE7;
+    }
+
+    .main-wrap {
+      max-width: 540px;
+      margin: 40px auto;
+      padding: 0 16px;
+      width: 100%;
+    }
+    .checkout-card {
+      background: #FFFFFF;
+      border-radius: 16px;
+      border: 1px solid #E2E8F0;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.06);
+      overflow: hidden;
+    }
+    .order-banner {
+      background: linear-gradient(135deg, #1A3E1B 0%, #2E7D32 100%);
+      color: #FFF;
+      padding: 24px;
+    }
+    .amount-display {
+      font-size: 32px;
+      font-weight: 900;
+      margin-top: 6px;
+    }
+    .card-body { padding: 24px; }
+    
+    .tabs {
+      display: flex;
+      border-bottom: 2px solid #F1F5F9;
+      margin-bottom: 20px;
+      gap: 16px;
+    }
+    .tab {
+      padding: 8px 12px;
+      font-size: 13px;
+      font-weight: 700;
+      color: #64748B;
+      cursor: pointer;
+      border-bottom: 2px solid transparent;
+      margin-bottom: -2px;
+    }
+    .tab.active {
+      color: #0284C7;
+      border-color: #0284C7;
+    }
+
+    .form-group { margin-bottom: 14px; text-align: left; }
+    .form-label { font-size: 12px; font-weight: 700; color: #475569; display: block; margin-bottom: 6px; }
+    .form-input {
+      width: 100%;
+      padding: 11px 14px;
+      border: 1.5px solid #CBD5E1;
+      border-radius: 8px;
+      font-size: 14px;
+      transition: border-color 0.2s;
+    }
+    .form-input:focus { outline: none; border-color: #0284C7; }
+
+    .pay-btn {
+      width: 100%;
+      background: #16A34A;
+      color: #FFF;
+      border: none;
+      padding: 14px;
+      border-radius: 8px;
+      font-size: 15px;
+      font-weight: 800;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      transition: background 0.2s;
+      margin-top: 18px;
+    }
+    .pay-btn:hover { background: #15803D; }
+
+    .cancel-btn {
+      width: 100%;
+      background: transparent;
+      color: #64748B;
+      border: 1px solid #CBD5E1;
+      padding: 10px;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 700;
+      cursor: pointer;
+      margin-top: 10px;
+    }
+    .cancel-btn:hover { background: #F8FAFC; color: #0F172A; }
+  </style>
+</head>
+
+<body>
+
+  <header class="gateway-header">
+    <div class="brand-wrap">
+      <img src="/images/meshwo_logo.jpg" alt="Logo" class="brand-logo">
+      <div>
+        <div class="brand-title">MESHWO FARMERS ARAVALLI</div>
+        <div class="brand-sub">Official Hosted Checkout Portal</div>
+      </div>
+    </div>
+    <div class="sec-badge">
+      <span>🔒 256-Bit SSL Encrypted</span>
+    </div>
+  </header>
+
+  <main class="main-wrap">
+    <div class="checkout-card">
+      <div class="order-banner">
+        <div style="font-size: 12px; text-transform: uppercase; letter-spacing: 1px; opacity: 0.85;">Total Payable Amount</div>
+        <div class="amount-display" id="displayAmount">₹0</div>
+        <div style="font-size: 13px; margin-top: 6px; opacity: 0.9;">
+          Order Ref: <strong id="displayOrderNumber">MF-000000</strong>
+        </div>
+      </div>
+
+      <div class="card-body">
+        <div class="tabs">
+          <div class="tab active" onclick="switchTab('upi')">⚡ UPI / QR</div>
+          <div class="tab" onclick="switchTab('card')">💳 Debit &amp; Credit Cards</div>
+          <div class="tab" onclick="switchTab('netbanking')">🏦 NetBanking</div>
+        </div>
+
+        <!-- UPI Tab -->
+        <div id="tabContentUpi">
+          <div class="form-group">
+            <label class="form-label">Instant UPI Payment (GPay / PhonePe / Paytm)</label>
+            <input type="text" class="form-input" id="upiIdInput" value="customer@okhdfcbank" placeholder="yourname@upi">
+          </div>
+          <div style="background: #F8FAFC; border: 1px dashed #CBD5E1; border-radius: 8px; padding: 12px; text-align: center; margin-bottom: 12px;">
+            <span style="font-size: 12px; color: #64748B;">Supported Apps: Google Pay &bull; PhonePe &bull; Paytm &bull; BHIM UPI</span>
+          </div>
+        </div>
+
+        <!-- Card Tab -->
+        <div id="tabContentCard" style="display: none;">
+          <div class="form-group">
+            <label class="form-label">Card Number</label>
+            <input type="text" class="form-input" value="4532 •••• •••• 8891" placeholder="Card number">
+          </div>
+          <div style="display: flex; gap: 10px;">
+            <div class="form-group" style="flex: 1;">
+              <label class="form-label">Valid Thru</label>
+              <input type="text" class="form-input" value="08/29" placeholder="MM/YY">
+            </div>
+            <div class="form-group" style="flex: 1;">
+              <label class="form-label">CVV</label>
+              <input type="password" class="form-input" value="789" placeholder="CVV">
+            </div>
+          </div>
+        </div>
+
+        <!-- NetBanking Tab -->
+        <div id="tabContentNetbanking" style="display: none;">
+          <div class="form-group">
+            <label class="form-label">Select Bank</label>
+            <select class="form-input">
+              <option>State Bank of India (SBI)</option>
+              <option selected>HDFC Bank</option>
+              <option>ICICI Bank</option>
+              <option>Axis Bank</option>
+              <option>Kotak Mahindra Bank</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Buttons -->
+        <button type="button" class="pay-btn" id="payNowBtn" onclick="handleSimulatedPayment()">
+          <span>🔒 AUTHORIZE &amp; PAY NOW &rarr;</span>
+        </button>
+
+        <button type="button" class="cancel-btn" onclick="handleCancelPayment()">
+          ✕ Cancel and Return to Store
+        </button>
+
+        <div style="font-size: 11px; text-align: center; color: #94A3B8; margin-top: 16px;">
+          Certified Payment Gateway &bull; Compliant with RBI Security Guidelines &bull; Meshwo Farmers Cooperative
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <script>
+    const urlParams = new URLSearchParams(window.location.search);
+    const orderNumber = urlParams.get('order_number') || 'MF-000000';
+    const amount = urlParams.get('amount') || '0';
+
+    document.getElementById('displayOrderNumber').textContent = orderNumber;
+    document.getElementById('displayAmount').textContent = `₹${parseFloat(amount).toLocaleString('en-IN')}`;
+
+    function switchTab(tab) {
+      document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+      event.target.classList.add('active');
+
+      document.getElementById('tabContentUpi').style.display = tab === 'upi' ? 'block' : 'none';
+      document.getElementById('tabContentCard').style.display = tab === 'card' ? 'block' : 'none';
+      document.getElementById('tabContentNetbanking').style.display = tab === 'netbanking' ? 'block' : 'none';
+    }
+
+    function handleSimulatedPayment() {
+      const btn = document.getElementById('payNowBtn');
+      btn.disabled = true;
+      btn.innerHTML = '<span>⏳ Processing Bank Transaction...</span>';
+
+      setTimeout(() => {
+        const fakePaymentId = 'pay_' + Math.random().toString(36).substring(2, 12);
+        // Redirect to success URL
+        window.location.href = `/order-success.html?order_number=${encodeURIComponent(orderNumber)}&payment_id=${fakePaymentId}&status=paid`;
+      }, 1200);
+    }
+
+    function handleCancelPayment() {
+      window.location.href = `/checkout.html?status=cancelled&order_number=${encodeURIComponent(orderNumber)}`;
+    }
+  </script>
+</body>
+
+</html>

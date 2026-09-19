@@ -1501,6 +1501,10 @@ async function executeOrderSubmission(paymentMethod, paymentStatus, transactionI
 // CUSTOMER QUICK LOGIN (Mobile Number & Full Name Only)
 // -------------------------------------------------------------
 async function openAuthModal(reason) {
+  const currentPath = window.location.pathname;
+  const redirect = (reason === 'checkout' || state.pendingCheckout) ? '/checkout.html' : currentPath;
+  window.location.href = `/login.html?redirect=${encodeURIComponent(redirect)}${reason ? '&reason=' + encodeURIComponent(reason) : ''}`;
+  return;
   const modal = document.getElementById('authModal');
   const body = document.getElementById('authModalBody');
   if (!modal || !body) return;

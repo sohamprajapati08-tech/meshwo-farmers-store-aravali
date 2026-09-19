@@ -104,13 +104,13 @@
 
         <!-- Right: User, Wishlist, Cart (Pic 2 Right) -->
         <div class="header-right-actions">
-          <button class="header-icon-btn desktop-only-btn" id="headerUserBtn" onclick="openAuthModal()" title="Login / Account"
+          <a href="/login.html" class="header-icon-btn desktop-only-btn" id="headerUserBtn" title="Login / Account"
             aria-label="Account">
             <svg viewBox="0 0 24 24">
               <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
               <circle cx="12" cy="7" r="4"></circle>
             </svg>
-          </button>
+          </a>
 
           <button class="header-icon-btn" onclick="toggleWishlistModal()" title="Wishlist" aria-label="Wishlist">
             <svg viewBox="0 0 24 24">
@@ -1590,7 +1590,7 @@
       </a>
 
       <div class="mobile-menu-section-title" style="margin-top: 18px;">ACCOUNT &amp; SUPPORT</div>
-      <a href="javascript:void(0)" onclick="openAuthModal(); toggleMobileDrawer();" class="mobile-nav-item">
+      <a href="/login.html" class="mobile-nav-item">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
         <span>Login / My Account</span>
       </a>

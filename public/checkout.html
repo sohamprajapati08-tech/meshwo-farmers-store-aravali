@@ -64,6 +64,11 @@
       <div class="checkout-form-column">
         <form id="dedicatedCheckoutForm" onsubmit="submitDedicatedCheckout(event)">
           
+          <!-- Payment Cancelled Notice (shown when redirected from cancelled payment) -->
+          <div id="checkoutCancelNotice" style="display: none; background: #FEF2F2; border: 1.5px solid #EF4444; border-radius: 10px; padding: 14px 18px; margin-bottom: 20px; font-size: 13.5px; color: #991B1B; line-height: 1.5;">
+            ⚠️ <strong>Payment Was Not Completed:</strong> You cancelled or interrupted the online payment. Your cart items are preserved below. You can re-attempt online payment or choose Cash on Delivery.
+          </div>
+
           <!-- STEP 1: CONTACT INFORMATION -->
           <div class="checkout-section-box">
             <div class="checkout-section-header">
@@ -163,14 +168,14 @@
                 <div class="checkout-pay-card-subtitle">Pay on Doorstep</div>
               </div>
 
-              <!-- Razorpay -->
+              <!-- Online Hosted Checkout (Razorpay / Stripe) -->
               <div class="checkout-pay-card" id="payMethodCardRAZORPAY" onclick="selectDedicatedPaymentMethod('RAZORPAY')">
                 <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.8" style="color: #0C75EB;">
                   <rect x="1" y="4" width="22" height="16" rx="2"></rect>
                   <line x1="1" y1="10" x2="23" y2="10"></line>
                 </svg>
-                <div class="checkout-pay-card-title">Razorpay Gateway</div>
-                <div class="checkout-pay-card-subtitle">Cards / UPI / NetBanking</div>
+                <div class="checkout-pay-card-title">Online Payment</div>
+                <div class="checkout-pay-card-subtitle">Hosted Checkout &bull; UPI / Cards</div>
               </div>
 
               <!-- Direct UPI / QR -->
@@ -207,14 +212,14 @@
               </div>
             </div>
 
-            <!-- Razorpay Info Notice -->
+            <!-- Hosted Checkout Info Notice -->
             <div id="dedicatedRazorpayNotice" style="display: none; background: #EBF3FC; border: 1px solid #0C75EB; border-radius: 8px; padding: 14px; margin-bottom: 16px; font-size: 13px; color: #0C2340; line-height: 1.5;">
-              ⚡ <strong>100% Automated Bank Verified Checkout:</strong> Clicking Confirm Order will open the official Razorpay Bank Gateway supporting UPI Apps, Debit/Credit Cards, and NetBanking.
+              ⚡ <strong>100% Automated Bank Secured Hosted Checkout:</strong> Clicking Book Order will redirect you to the official 256-bit encrypted Payment Page supporting Google Pay, PhonePe, Paytm, Debit/Credit Cards, and NetBanking.
             </div>
 
-            <!-- Place Order CTA Button -->
+            <!-- Place / Book Order CTA Button -->
             <button type="submit" id="dedicatedSubmitOrderBtn" class="checkout-submit-btn">
-              <span>CONFIRM &amp; PLACE ORDER (Cash on Delivery) &rarr;</span>
+              <span>BOOK ORDER (Cash on Delivery) &rarr;</span>
             </button>
 
             <!-- Trust Line -->
@@ -434,12 +439,22 @@
         if (document.getElementById('chkCustPincode') && user.pincode) document.getElementById('chkCustPincode').value = user.pincode;
         
         const badge = document.getElementById('checkoutUserStatusBadge');
-        if (badge) badge.textContent = `✓ Logged In as ${user.name || user.phone}`;
+        if (badge) badge.innerHTML = `✓ Logged In as ${user.name || user.phone} &bull; <a href="/login.html" style="color: var(--primary-color); text-decoration: underline;">Change Account</a>`;
+      } else {
+        const badge = document.getElementById('checkoutUserStatusBadge');
+        if (badge) badge.innerHTML = `<a href="/login.html?redirect=/checkout.html" style="color: var(--primary-color); text-decoration: underline; font-weight: 700;">Have an account? Login &rarr;</a>`;
       }
 
       // Check coupon
       const savedCoupon = sessionStorage.getItem('dwarkesh_checkout_coupon');
       if (savedCoupon) checkoutState.appliedCoupon = savedCoupon;
+
+      // Check cancellation parameter from payment gateway return
+      const urlParams = new URLSearchParams(window.location.search);
+      if (urlParams.get('status') === 'cancelled' || urlParams.get('payment') === 'cancelled') {
+        const cancelBanner = document.getElementById('checkoutCancelNotice');
+        if (cancelBanner) cancelBanner.style.display = 'block';
+      }
 
       renderCheckoutOrderSummary();
       updateCartBadgeCount();
@@ -530,7 +545,7 @@
       if (method === 'UPI') {
         if (upiBox) upiBox.style.display = 'block';
         if (rzpNotice) rzpNotice.style.display = 'none';
-        if (btn) btn.innerHTML = `<span>I HAVE PAID VIA UPI &bull; CONFIRM ORDER (₹${total.toLocaleString('en-IN')}) &rarr;</span>`;
+        if (btn) btn.innerHTML = `<span>I HAVE PAID VIA UPI &bull; BOOK ORDER (₹${total.toLocaleString('en-IN')}) &rarr;</span>`;
 
         const upiId = checkoutState.settings.payment_upi_id || 'sohamprajapati08@okicici';
         const upiImg = document.getElementById('chkUpiQrImg');
@@ -549,13 +564,13 @@
       } else if (method === 'RAZORPAY') {
         if (upiBox) upiBox.style.display = 'none';
         if (rzpNotice) rzpNotice.style.display = 'block';
-        if (btn) btn.innerHTML = `<span>⚡ PAY VIA RAZORPAY GATEWAY (₹${total.toLocaleString('en-IN')}) &rarr;</span>`;
+        if (btn) btn.innerHTML = `<span>⚡ BOOK ORDER &amp; PAY ONLINE (Secure Hosted Checkout &bull; ₹${total.toLocaleString('en-IN')}) &rarr;</span>`;
 
       } else {
         // COD
         if (upiBox) upiBox.style.display = 'none';
         if (rzpNotice) rzpNotice.style.display = 'none';
-        if (btn) btn.innerHTML = `<span>CONFIRM &amp; PLACE ORDER (Cash on Delivery &bull; ₹${total.toLocaleString('en-IN')}) &rarr;</span>`;
+        if (btn) btn.innerHTML = `<span>BOOK ORDER (Cash on Delivery &bull; ₹${total.toLocaleString('en-IN')}) &rarr;</span>`;
       }
     }
 
@@ -619,74 +634,44 @@
 
       const fullAddress = `${address}${landmark ? ', Near ' + landmark : ''}, ${city}, ${state} - ${pincode}`;
 
-      // 1. RAZORPAY GATEWAY
+      // 1. SECURE HOSTED ONLINE CHECKOUT (Razorpay / Stripe)
       if (checkoutState.selectedPaymentMethod === 'RAZORPAY') {
         const btn = document.getElementById('dedicatedSubmitOrderBtn');
-        if (btn) { btn.disabled = true; btn.textContent = 'Connecting to Razorpay Bank Gateway...'; }
+        if (btn) {
+          btn.disabled = true;
+          btn.innerHTML = '<span>⏳ Creating Secure Bank Payment Session...</span>';
+        }
 
         try {
-          const res = await fetch('/api/payment/razorpay-order', {
+          // Send cart & customer order details to backend
+          const res = await fetch('/api/checkout/create-session', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
-              amount: total,
               customer_name: name,
               customer_phone: phone,
-              customer_email: email || `${phone}@meshwofarmers.in`
+              customer_email: email,
+              address: fullAddress,
+              city,
+              state,
+              pincode,
+              items: checkoutState.cart,
+              coupon_code: checkoutState.appliedCoupon
             })
           });
-          const orderData = await res.json();
-          if (!orderData.success) {
-            alert(orderData.message || 'Razorpay initialization failed.');
+
+          const sessionData = await res.json();
+          if (!sessionData.success || !sessionData.payment_url) {
+            alert(sessionData.message || 'Payment Gateway session creation failed. Please try again or select Cash on Delivery.');
             if (btn) { btn.disabled = false; updateCheckoutPaymentUi(); }
             return;
           }
 
-          const options = {
-            key: orderData.key_id,
-            amount: orderData.order.amount,
-            currency: 'INR',
-            name: 'Meshwo Farmers Aravalli',
-            description: 'Vedic Forest Organic Produce Order',
-            image: '/images/meshwo_logo.jpg',
-            order_id: orderData.order.id,
-            prefill: {
-              name: name,
-              contact: phone,
-              email: email || `${phone}@meshwofarmers.in`
-            },
-            theme: { color: '#1A3E1B' },
-            handler: async function (response) {
-              await sendFinalOrderToServer({
-                customer_name: name,
-                customer_phone: phone,
-                customer_email: email,
-                address: fullAddress,
-                city,
-                pincode,
-                items: checkoutState.cart,
-                subtotal,
-                discount,
-                shipping_fee,
-                total,
-                coupon_code: checkoutState.appliedCoupon,
-                payment_method: 'RAZORPAY',
-                payment_status: 'Paid (Bank Verified)',
-                transaction_id: response.razorpay_payment_id || response.razorpay_order_id
-              });
-            },
-            modal: {
-              ondismiss: function () {
-                if (btn) { btn.disabled = false; updateCheckoutPaymentUi(); }
-              }
-            }
-          };
-
-          const rzp = new Razorpay(options);
-          rzp.open();
+          // Step 4: Redirection - send Secure Payment URL to browser & redirect automatically
+          window.location.href = sessionData.payment_url;
         } catch (err) {
-          console.error(err);
-          alert('Could not initiate Razorpay. Please try UPI or Cash on Delivery.');
+          console.error('Hosted Checkout error:', err);
+          alert('Could not connect to payment gateway. Please check your network or select Cash on Delivery.');
           if (btn) { btn.disabled = false; updateCheckoutPaymentUi(); }
         }
         return;
