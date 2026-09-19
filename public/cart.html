@@ -163,8 +163,8 @@
               <div id="cartPageCouponMsg" style="font-size: 11px; margin-top: 4px; display: none;"></div>
             </div>
 
-            <!-- Checkout CTA Button -->
-            <button type="button" class="cart-checkout-btn-main" onclick="openCheckoutModal()">
+            <!-- Checkout CTA Button (Opens dedicated full checkout page, NO popups) -->
+            <button type="button" class="cart-checkout-btn-main" onclick="window.location.href = '/checkout.html'">
               <span>PROCEED TO SECURE CHECKOUT &rarr;</span>
             </button>
 
@@ -619,6 +619,54 @@
       setTimeout(renderCartPage, 600); // Re-sync after products fetch
     });
   </script>
+
+  <!-- TWO BROTHERS STYLE MOBILE BOTTOM NAVIGATION BAR -->
+  <nav class="tb-mobile-bottom-bar" id="tbMobileBottomBar">
+    <a href="/" class="tb-bottom-tab" id="tabHome">
+      <div class="tb-tab-icon-box">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+          <polyline points="9 22 9 12 15 12 15 22"></polyline>
+        </svg>
+      </div>
+      <span class="tb-tab-label">Home</span>
+    </a>
+
+    <a href="/#shop" class="tb-bottom-tab" id="tabShop">
+      <div class="tb-tab-icon-box">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="3" y="3" width="7" height="7"></rect>
+          <rect x="14" y="3" width="7" height="7"></rect>
+          <rect x="14" y="14" width="7" height="7"></rect>
+          <rect x="3" y="14" width="7" height="7"></rect>
+        </svg>
+      </div>
+      <span class="tb-tab-label">Shop</span>
+    </a>
+
+    <a href="/our-farm.html" class="tb-bottom-tab" id="tabFarm">
+      <div class="tb-tab-icon-box">
+        <span class="tb-badge-pill">100% ORG</span>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10Z"></path>
+          <path d="M2 21c0-3 1.85-5.36 5.08-6"></path>
+        </svg>
+      </div>
+      <span class="tb-tab-label">Our Farm</span>
+    </a>
+
+    <a href="/cart.html" class="tb-bottom-tab active" id="tabCart">
+      <div class="tb-tab-icon-box">
+        <span class="tb-cart-count-badge cart-badge">0</span>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path>
+          <line x1="3" y1="6" x2="21" y2="6"></line>
+          <path d="M16 10a4 4 0 0 1-8 0"></path>
+        </svg>
+      </div>
+      <span class="tb-tab-label">Cart</span>
+    </a>
+  </nav>
 </body>
 
 </html>

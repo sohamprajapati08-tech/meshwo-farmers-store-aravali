@@ -26,6 +26,11 @@ app.get('/cart', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'cart.html'));
 });
 
+// Clean URL route for Dedicated Checkout page
+app.get('/checkout', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'checkout.html'));
+});
+
 // Health check endpoint for monitoring & keep-alive
 app.get('/health', (req, res) => {
   res.status(200).send('OK');

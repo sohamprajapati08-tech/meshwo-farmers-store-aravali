@@ -401,14 +401,10 @@ function handleAddToCart(productId) {
 
   saveCart();
   updateCartBadge();
-  renderCartDrawer();
   if (typeof renderCartPage === 'function') renderCartPage();
 
-  if (window.innerWidth <= 960) {
-    showMobileCartToast(product.title);
-  } else {
-    openCartDrawer();
-  }
+  // Directly navigate to Dedicated Cart Page (No popups)
+  window.location.href = '/cart.html';
 }
 
 function showMobileCartToast(productTitle) {
@@ -418,7 +414,7 @@ function showMobileCartToast(productTitle) {
     toast.id = 'mobileCartToast';
     toast.style.cssText = `
       position: fixed;
-      bottom: 16px;
+      bottom: 74px;
       left: 14px;
       right: 14px;
       background: #1C2B18;
@@ -454,7 +450,7 @@ function showMobileCartToast(productTitle) {
   clearTimeout(window._mobileCartToastTimer);
   window._mobileCartToastTimer = setTimeout(() => {
     toast.style.transform = 'translateY(140%)';
-  }, 4000);
+  }, 3500);
 }
 
 function saveCart() {
@@ -464,7 +460,7 @@ function saveCart() {
 }
 
 function updateCartBadge() {
-  const total = state.cart.reduce((sum, it) => sum + it.quantity, 0);
+  const total = state.cart.reduce((sum, it) => sum + (it.quantity || 1), 0);
   const headerBadge = document.getElementById('cartCount');
   const mobileBadge = document.getElementById('mobileCartCount');
   const bottomBadge = document.getElementById('bottomNavCartBadge');
@@ -472,6 +468,11 @@ function updateCartBadge() {
   if (headerBadge) headerBadge.textContent = total;
   if (mobileBadge) mobileBadge.textContent = total;
   if (bottomBadge) bottomBadge.textContent = total;
+
+  document.querySelectorAll('.cart-badge, .tb-cart-count-badge').forEach(el => {
+    el.textContent = total;
+    el.style.display = total > 0 ? 'inline-flex' : 'none';
+  });
 }
 
 // Mobile Slide-Out Drawer Toggle (Pic 2 Hamburger Menu)
@@ -491,21 +492,9 @@ function toggleMobileDrawer() {
   }
 }
 
-// Open / Close Cart Drawer
+// Open Dedicated Cart Page (No popups across desktop & mobile)
 function openCartDrawer() {
-  if (window.innerWidth <= 960) {
-    window.location.href = '/cart.html';
-    return;
-  }
-  if (typeof syncCartWithLiveProducts === 'function') {
-    try { syncCartWithLiveProducts(); } catch (e) { console.warn('Sync error:', e); }
-  }
-  renderCartDrawer();
-  const drawer = document.getElementById('cartDrawer');
-  const backdrop = document.getElementById('drawerBackdrop');
-  if (drawer) drawer.classList.add('open');
-  if (backdrop) backdrop.classList.add('open');
-  document.body.style.overflow = 'hidden';
+  window.location.href = '/cart.html';
 }
 
 function closeCartDrawer() {
@@ -880,63 +869,11 @@ function openCheckoutModal() {
     alert('Your cart is empty. Please add items to checkout.');
     return;
   }
-
-  // MANDATORY CUSTOMER LOGIN: Login required before ordering
-  const savedUser = state.currentUser || JSON.parse(localStorage.getItem('dwarkesh_user') || 'null');
-  if (!savedUser || !savedUser.phone) {
-    closeCartDrawer();
-    state.pendingCheckout = true;
-    openAuthModal('checkout');
-    return;
-  }
-
-  closeCartDrawer();
-  const subtotal = state.cart.reduce((sum, it) => sum + (it.price * it.quantity), 0);
-  const threshold = (state.settings && state.settings.free_shipping_threshold) ? parseFloat(state.settings.free_shipping_threshold) : 999;
-  const standardFee = (state.settings && state.settings.standard_shipping_fee) ? parseFloat(state.settings.standard_shipping_fee) : 99;
-  const shipping = subtotal >= threshold ? 0 : standardFee;
-  const discount = state.appliedCoupon ? Math.round((subtotal * 10) / 100) : 0;
-  const total = Math.max(0, subtotal - discount + shipping);
-
-  const payableTotalEl = document.getElementById('checkoutPayableTotal');
-  if (payableTotalEl) payableTotalEl.textContent = `₹${total.toLocaleString('en-IN')}`;
-
-  // Pre-fill customer details from state or saved login
-  if (savedUser) {
-    if (document.getElementById('custName')) document.getElementById('custName').value = savedUser.name || '';
-    if (document.getElementById('custPhone')) document.getElementById('custPhone').value = savedUser.phone || '';
-    if (document.getElementById('custEmail')) document.getElementById('custEmail').value = savedUser.email || '';
-  }
-
-  // Reset payment selection to COD default
-  state.selectedPaymentMethod = 'COD';
-  document.querySelectorAll('.pay-card-item, .pay-select-card').forEach((card, idx) => {
-    if (idx === 0) {
-      card.classList.add('selected');
-      card.style.border = '1.5px solid var(--primary-color)';
-      card.style.background = '#F4F8F1';
-    } else {
-      card.classList.remove('selected');
-      card.style.border = '1px solid var(--border-color)';
-      card.style.background = '#FFFFFF';
-    }
-  });
-
-  const upiPreview = document.getElementById('upiQrPreviewBox') || document.getElementById('upiPaymentBox');
-  if (upiPreview) upiPreview.style.display = 'none';
-
-  const submitBtn = document.getElementById('submitOrderBtn');
-  if (submitBtn) {
-    submitBtn.disabled = false;
-    submitBtn.textContent = `Confirm & Place Order (Cash on Delivery) →`;
-  }
-
-  document.getElementById('checkoutModal').classList.add('open');
-  document.body.style.overflow = 'hidden';
+  window.location.href = '/checkout.html';
 }
-
 function closeCheckoutModal() {
-  document.getElementById('checkoutModal').classList.remove('open');
+  const modal = document.getElementById('checkoutModal');
+  if (modal) modal.classList.remove('open');
   document.body.style.overflow = '';
 }
 

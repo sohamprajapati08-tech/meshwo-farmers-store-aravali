@@ -1,0 +1,810 @@
+<!DOCTYPE html>
+<html lang="gu-IN">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Secure Checkout | Meshwo Farmers - Aravalli Tribal Organic Store</title>
+  <meta name="description" content="Complete your order for 100% pure Vedic tribal forest harvest directly from tribal women farmers of Shamlaji, Aravalli.">
+  <link rel="icon" type="image/jpeg" href="/images/meshwo_logo.jpg">
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Playfair+Display:ital,wght@0,600;0,700;0,800;1,600&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="/css/theme.css?v=13.0">
+  <!-- Razorpay Checkout SDK -->
+  <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+</head>
+
+<body class="checkout-page-body">
+
+  <!-- TOP HEADER (Clean Distraction-Free Checkout Header) -->
+  <header class="checkout-header-bar">
+    <div class="checkout-header-inner">
+      <a href="/cart.html" class="checkout-back-link">
+        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2">
+          <path d="M19 12H5M12 19l-7-7 7-7" />
+        </svg>
+        <span>Back to Cart</span>
+      </a>
+
+      <a href="/" class="checkout-brand-center">
+        <img src="/images/meshwo_logo.jpg" alt="Meshwo Farmers" class="checkout-brand-logo">
+        <div>
+          <div class="checkout-brand-title">MESHWO FARMERS</div>
+          <div class="checkout-brand-sub">ARAVALLI TRIBAL HARVEST</div>
+        </div>
+      </a>
+
+      <div class="checkout-security-badge">
+        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2">
+          <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+          <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+        </svg>
+        <span>100% Bank Secured Checkout</span>
+      </div>
+    </div>
+  </header>
+
+  <!-- MAIN CHECKOUT CONTAINER -->
+  <main class="checkout-main-wrap" id="checkoutMainContainer">
+    <!-- Stepper Navigation -->
+    <div style="display: flex; align-items: center; justify-content: center; gap: 10px; margin-bottom: 24px; font-size: 13px; font-weight: 700; color: #737E6F;">
+      <a href="/cart.html" style="color: var(--primary-color); text-decoration: none;">1. Cart</a>
+      <span>&rarr;</span>
+      <span style="color: #1A3E1B; font-weight: 800; border-bottom: 2px solid #1A3E1B; padding-bottom: 2px;">2. Information &amp; Delivery</span>
+      <span>&rarr;</span>
+      <span>3. Order Complete</span>
+    </div>
+
+    <div class="checkout-grid" id="checkoutActiveGrid">
+      <!-- LEFT COLUMN: CHECKOUT FORM -->
+      <div class="checkout-form-column">
+        <form id="dedicatedCheckoutForm" onsubmit="submitDedicatedCheckout(event)">
+          
+          <!-- STEP 1: CONTACT INFORMATION -->
+          <div class="checkout-section-box">
+            <div class="checkout-section-header">
+              <h2 class="checkout-section-title">
+                <span class="checkout-step-badge">1</span>
+                <span>Contact &amp; Customer Details</span>
+              </h2>
+              <div id="checkoutUserStatusBadge" style="font-size: 12px; color: #1A3E1B; font-weight: 700;"></div>
+            </div>
+
+            <div class="checkout-form-row-2">
+              <div class="checkout-form-group" style="margin-bottom: 0;">
+                <label class="checkout-label">Full Name *</label>
+                <input type="text" id="chkCustName" class="checkout-input" placeholder="e.g. Ramesh Patel" required>
+              </div>
+              <div class="checkout-form-group" style="margin-bottom: 0;">
+                <label class="checkout-label">Mobile Number (WhatsApp) *</label>
+                <input type="tel" id="chkCustPhone" class="checkout-input" placeholder="10-digit mobile number" maxlength="10" required>
+              </div>
+            </div>
+
+            <div class="checkout-form-group" style="margin-top: 14px; margin-bottom: 0;">
+              <label class="checkout-label">Email Address (Optional, for digital receipt)</label>
+              <input type="email" id="chkCustEmail" class="checkout-input" placeholder="e.g. ramesh@gmail.com">
+            </div>
+          </div>
+
+          <!-- STEP 2: SHIPPING ADDRESS -->
+          <div class="checkout-section-box">
+            <div class="checkout-section-header">
+              <h2 class="checkout-section-title">
+                <span class="checkout-step-badge">2</span>
+                <span>Delivery Address</span>
+              </h2>
+              <span style="font-size: 11px; color: #6D7869; font-weight: 600;">Pan-India Delivery</span>
+            </div>
+
+            <div class="checkout-form-group">
+              <label class="checkout-label">Street Address / House No. / Road *</label>
+              <textarea id="chkCustAddress" class="checkout-textarea" rows="2" placeholder="House / Flat No., Society / Street Name" required></textarea>
+            </div>
+
+            <div class="checkout-form-row-2">
+              <div class="checkout-form-group" style="margin-bottom: 0;">
+                <label class="checkout-label">Landmark (Optional)</label>
+                <input type="text" id="chkCustLandmark" class="checkout-input" placeholder="Near Temple / School / Hospital">
+              </div>
+              <div class="checkout-form-group" style="margin-bottom: 0;">
+                <label class="checkout-label">City / Town *</label>
+                <input type="text" id="chkCustCity" class="checkout-input" placeholder="e.g. Ahmedabad, Modasa, Surat" required>
+              </div>
+            </div>
+
+            <div class="checkout-form-row-2" style="margin-top: 14px; margin-bottom: 0;">
+              <div class="checkout-form-group" style="margin-bottom: 0;">
+                <label class="checkout-label">State *</label>
+                <select id="chkCustState" class="checkout-select" required>
+                  <option value="Gujarat" selected>Gujarat</option>
+                  <option value="Maharashtra">Maharashtra</option>
+                  <option value="Rajasthan">Rajasthan</option>
+                  <option value="Madhya Pradesh">Madhya Pradesh</option>
+                  <option value="Delhi">Delhi</option>
+                  <option value="Karnataka">Karnataka</option>
+                  <option value="Tamil Nadu">Tamil Nadu</option>
+                  <option value="Uttar Pradesh">Uttar Pradesh</option>
+                  <option value="Punjab">Punjab</option>
+                  <option value="Haryana">Haryana</option>
+                  <option value="Other India State">Other India State</option>
+                </select>
+              </div>
+              <div class="checkout-form-group" style="margin-bottom: 0;">
+                <label class="checkout-label">Pincode *</label>
+                <input type="text" id="chkCustPincode" class="checkout-input" placeholder="6-digit Pincode" maxlength="6" required>
+              </div>
+            </div>
+          </div>
+
+          <!-- STEP 3: PAYMENT OPTIONS -->
+          <div class="checkout-section-box">
+            <div class="checkout-section-header">
+              <h2 class="checkout-section-title">
+                <span class="checkout-step-badge">3</span>
+                <span>Payment Method</span>
+              </h2>
+              <span style="font-size: 11px; color: #1B4D21; font-weight: 700;">🛡️ 100% Secure</span>
+            </div>
+
+            <div class="checkout-pay-methods-grid">
+              <!-- COD -->
+              <div class="checkout-pay-card selected" id="payMethodCardCOD" onclick="selectDedicatedPaymentMethod('COD')">
+                <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.8" style="color: var(--primary-color);">
+                  <rect x="2" y="6" width="20" height="12" rx="2"></rect>
+                  <circle cx="12" cy="12" r="2"></circle>
+                  <path d="M6 12h.01M18 12h.01"></path>
+                </svg>
+                <div class="checkout-pay-card-title">Cash on Delivery</div>
+                <div class="checkout-pay-card-subtitle">Pay on Doorstep</div>
+              </div>
+
+              <!-- Razorpay -->
+              <div class="checkout-pay-card" id="payMethodCardRAZORPAY" onclick="selectDedicatedPaymentMethod('RAZORPAY')">
+                <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.8" style="color: #0C75EB;">
+                  <rect x="1" y="4" width="22" height="16" rx="2"></rect>
+                  <line x1="1" y1="10" x2="23" y2="10"></line>
+                </svg>
+                <div class="checkout-pay-card-title">Razorpay Gateway</div>
+                <div class="checkout-pay-card-subtitle">Cards / UPI / NetBanking</div>
+              </div>
+
+              <!-- Direct UPI / QR -->
+              <div class="checkout-pay-card" id="payMethodCardUPI" onclick="selectDedicatedPaymentMethod('UPI')">
+                <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.8" style="color: #2E7D32;">
+                  <rect x="3" y="3" width="7" height="7"></rect>
+                  <rect x="14" y="3" width="7" height="7"></rect>
+                  <rect x="14" y="14" width="7" height="7"></rect>
+                  <rect x="3" y="14" width="7" height="7"></rect>
+                </svg>
+                <div class="checkout-pay-card-title">Direct UPI / QR</div>
+                <div class="checkout-pay-card-subtitle">Instant GPay/PhonePe</div>
+              </div>
+            </div>
+
+            <!-- UPI Payment Box (Displayed when UPI is chosen) -->
+            <div id="dedicatedUpiBox" class="checkout-upi-panel" style="display: none;">
+              <div style="font-size: 13px; font-weight: 800; color: var(--primary-color); margin-bottom: 10px;">
+                Scan &amp; Pay via GPay, PhonePe, Paytm, or BHIM
+              </div>
+              <img id="chkUpiQrImg" src="/uploads/upi_qr.jpeg" alt="UPI QR Code" style="width: 170px; height: 170px; border-radius: 8px; border: 1px solid #CCC; margin: 0 auto 10px; display: block;">
+              <div style="font-size: 13px; margin-bottom: 12px; color: #333;">
+                UPI ID: <strong id="chkUpiIdDisplay">sohamprajapati08@okicici</strong>
+                <button type="button" onclick="navigator.clipboard.writeText('sohamprajapati08@okicici'); alert('📋 UPI ID Copied!');" style="background: none; border: 1px solid #888; padding: 2px 8px; border-radius: 4px; font-size: 11px; margin-left: 6px; cursor: pointer;">Copy</button>
+              </div>
+              <div style="margin-bottom: 14px;">
+                <a id="chkUpiDirectLink" href="upi://pay?pa=sohamprajapati08@okicici&pn=Meshwo%20Farmers" class="checkout-submit-btn" style="display: inline-flex; width: auto; padding: 9px 20px; font-size: 13px; background: #2E7D32; text-decoration: none;">
+                  ⚡ Pay Directly in UPI App
+                </a>
+              </div>
+              <div style="text-align: left; background: #FFFFFF; padding: 12px 14px; border-radius: 8px; border: 1px solid #D9D3C7; max-width: 420px; margin: 0 auto;">
+                <label class="checkout-label">Enter 12-Digit UPI Transaction UTR / Ref No *</label>
+                <input type="text" id="chkUpiUtrInput" class="checkout-input" placeholder="e.g. 425109876543">
+              </div>
+            </div>
+
+            <!-- Razorpay Info Notice -->
+            <div id="dedicatedRazorpayNotice" style="display: none; background: #EBF3FC; border: 1px solid #0C75EB; border-radius: 8px; padding: 14px; margin-bottom: 16px; font-size: 13px; color: #0C2340; line-height: 1.5;">
+              ⚡ <strong>100% Automated Bank Verified Checkout:</strong> Clicking Confirm Order will open the official Razorpay Bank Gateway supporting UPI Apps, Debit/Credit Cards, and NetBanking.
+            </div>
+
+            <!-- Place Order CTA Button -->
+            <button type="submit" id="dedicatedSubmitOrderBtn" class="checkout-submit-btn">
+              <span>CONFIRM &amp; PLACE ORDER (Cash on Delivery) &rarr;</span>
+            </button>
+
+            <!-- Trust Line -->
+            <div style="text-align: center; margin-top: 14px; font-size: 12px; color: #6D7869; display: flex; align-items: center; justify-content: center; gap: 14px; flex-wrap: wrap;">
+              <span>🌱 100% Vedic Forest Harvest</span>
+              <span>•</span>
+              <span>🔒 256-Bit SSL Encrypted</span>
+              <span>•</span>
+              <span>🤝 Direct Tribal Women Cooperative</span>
+            </div>
+          </div>
+
+        </form>
+      </div>
+
+      <!-- RIGHT COLUMN: ORDER SUMMARY -->
+      <div class="checkout-summary-column">
+        <div class="checkout-summary-card">
+          <h3 class="checkout-summary-title">Order Summary (<span id="chkItemsCountLabel">0</span> items)</h3>
+
+          <!-- Items list -->
+          <div class="checkout-summary-items-list" id="chkSummaryItemsList">
+            <!-- Rendered by JS -->
+          </div>
+
+          <!-- Coupon Code Input -->
+          <div style="margin: 16px 0; padding-top: 14px; border-top: 1px dashed #E0DACB;">
+            <div style="display: flex; gap: 8px;">
+              <input type="text" id="chkCouponInput" class="checkout-input" style="padding: 9px 12px; font-size: 12.5px; text-transform: uppercase;" placeholder="COUPON (E.G. DWARKESH10)">
+              <button type="button" onclick="applyDedicatedCoupon()" class="checkout-submit-btn" style="width: auto; padding: 9px 16px; font-size: 12.5px;">APPLY</button>
+            </div>
+            <div id="chkCouponMsg" style="font-size: 11.5px; margin-top: 6px; display: none;"></div>
+          </div>
+
+          <!-- Price Calculation Rows -->
+          <div style="font-size: 13.5px; line-height: 1.9; color: #444; border-top: 1px solid #EAE5D9; padding-top: 14px;">
+            <div style="display: flex; justify-content: space-between;">
+              <span>Cart Subtotal:</span>
+              <strong id="chkSummarySubtotal" style="color: #222;">₹0</strong>
+            </div>
+            <div style="display: flex; justify-content: space-between;">
+              <span>Pan-India Delivery:</span>
+              <span id="chkSummaryDelivery" style="font-weight: 700; color: #2E7D32;">FREE</span>
+            </div>
+            <div id="chkSummaryDiscountRow" style="display: none; justify-content: space-between; color: #C2410C;">
+              <span>Coupon Discount (10%):</span>
+              <strong id="chkSummaryDiscount">-₹0</strong>
+            </div>
+            <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1.5px dashed #D5CEBD; margin-top: 10px; padding-top: 12px; font-size: 16px;">
+              <strong style="color: #1A3E1B;">Grand Total:</strong>
+              <strong id="chkSummaryTotal" style="font-size: 20px; color: #1A3E1B;">₹0</strong>
+            </div>
+          </div>
+
+          <!-- Delivery Notice -->
+          <div style="margin-top: 16px; background: #F6FAF4; border: 1px solid #D6EAD2; border-radius: 8px; padding: 12px; font-size: 12px; color: #1A3E1B; line-height: 1.5;">
+            🚚 <strong>Dispatched from Shamlaji Farm:</strong> Expected delivery in 3-5 business days across India. Fresh batches guaranteed.
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ORDER SUCCESS CONFIRMATION VIEW (Shown in-place after order is placed, ZERO POPUPS) -->
+    <div id="checkoutSuccessView" class="checkout-success-view" style="display: none;">
+      <div style="width: 72px; height: 72px; background: #EAF5E7; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; margin-bottom: 16px;">
+        <svg viewBox="0 0 24 24" width="40" height="40" fill="none" stroke="#2E7D32" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="20 6 9 17 4 12"></polyline>
+        </svg>
+      </div>
+
+      <h1 style="font-family: var(--font-heading); color: var(--primary-color); font-size: 26px; margin-bottom: 6px;">Order Placed Successfully!</h1>
+      <div style="display: inline-block; background: #EAF2E5; color: #1A3E1B; font-weight: 800; font-size: 14px; padding: 6px 18px; border-radius: 20px; margin-bottom: 16px;" id="successOrderNumberBadge">
+        Order ID: #MF-000000
+      </div>
+
+      <p style="font-size: 14.5px; color: #4B5547; max-width: 520px; margin: 0 auto 24px; line-height: 1.6;">
+        જય શ્રી કૃષ્ણ! Thank you, <strong id="successCustName">Customer</strong>! Your sacred Vedic farm harvest is secured and being prepared by our tribal women cooperative at Shamlaji.
+      </p>
+
+      <!-- Details Card -->
+      <div style="background: #FAF9F6; border: 1px solid #E6E1D5; border-radius: 10px; padding: 20px; text-align: left; max-width: 520px; margin: 0 auto 24px; font-size: 13.5px; line-height: 1.9;">
+        <div><strong>Delivery Address:</strong> <span id="successAddress">Address</span></div>
+        <div><strong>WhatsApp / Phone:</strong> <span id="successPhone">Phone</span></div>
+        <div><strong>Payment Method:</strong> <span id="successPaymentMethod">COD</span></div>
+        <div><strong>Payment Status:</strong> <span id="successPaymentStatus" style="color: #2E7D32; font-weight: 800;">Pending</span></div>
+        <div><strong>Transaction ID:</strong> <code id="successTxId" style="background: #EAE6DB; padding: 2px 6px; border-radius: 4px; font-weight: 700;">-</code></div>
+        <div style="margin-top: 10px; border-top: 1px dashed #D0C9BA; padding-top: 8px; font-size: 15px; font-weight: 800; color: #1A3E1B;">
+          Payable Amount: <span id="successTotalAmount">₹0</span>
+        </div>
+      </div>
+
+      <!-- Action Buttons -->
+      <div style="display: flex; gap: 12px; justify-content: center; flex-wrap: wrap;">
+        <a href="/" class="checkout-submit-btn" style="width: auto; padding: 12px 24px; text-decoration: none;">
+          ← Continue Shopping Harvest
+        </a>
+        <a id="successWhatsAppHelp" href="https://wa.me/916356785785" target="_blank" class="checkout-submit-btn" style="width: auto; padding: 12px 24px; background: #25D366; text-decoration: none;">
+          💬 WhatsApp Support (6356785785)
+        </a>
+      </div>
+    </div>
+  </main>
+
+  <!-- TWO BROTHERS STYLE MOBILE BOTTOM NAVIGATION BAR -->
+  <nav class="tb-mobile-bottom-bar" id="tbMobileBottomBar">
+    <a href="/" class="tb-bottom-tab" id="tabHome">
+      <div class="tb-tab-icon-box">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+          <polyline points="9 22 9 12 15 12 15 22"></polyline>
+        </svg>
+      </div>
+      <span class="tb-tab-label">Home</span>
+    </a>
+
+    <a href="/#shop" class="tb-bottom-tab" id="tabShop">
+      <div class="tb-tab-icon-box">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="3" y="3" width="7" height="7"></rect>
+          <rect x="14" y="3" width="7" height="7"></rect>
+          <rect x="14" y="14" width="7" height="7"></rect>
+          <rect x="3" y="14" width="7" height="7"></rect>
+        </svg>
+      </div>
+      <span class="tb-tab-label">Shop</span>
+    </a>
+
+    <a href="/our-farm.html" class="tb-bottom-tab" id="tabFarm">
+      <div class="tb-tab-icon-box">
+        <span class="tb-badge-pill">100% ORG</span>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10Z"></path>
+          <path d="M2 21c0-3 1.85-5.36 5.08-6"></path>
+        </svg>
+      </div>
+      <span class="tb-tab-label">Our Farm</span>
+    </a>
+
+    <a href="/cart.html" class="tb-bottom-tab active" id="tabCart">
+      <div class="tb-tab-icon-box">
+        <span class="tb-cart-count-badge cart-badge">0</span>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path>
+          <line x1="3" y1="6" x2="21" y2="6"></line>
+          <path d="M16 10a4 4 0 0 1-8 0"></path>
+        </svg>
+      </div>
+      <span class="tb-tab-label">Cart</span>
+    </a>
+  </nav>
+
+  <!-- Checkout Logic Script -->
+  <script>
+    let checkoutState = {
+      cart: [],
+      selectedPaymentMethod: 'COD',
+      appliedCoupon: null,
+      settings: {
+        free_shipping_threshold: 999,
+        standard_shipping_fee: 99,
+        payment_upi_id: 'sohamprajapati08@okicici',
+        payment_upi_qr: '/uploads/upi_qr.jpeg'
+      }
+    };
+
+    function initDedicatedCheckout() {
+      // 1. Load settings
+      fetch('/api/settings')
+        .then(r => r.json())
+        .then(data => {
+          if (data && data.settings) {
+            checkoutState.settings = Object.assign(checkoutState.settings, data.settings);
+            updateCheckoutPaymentUi();
+          }
+        }).catch(e => console.warn(e));
+
+      // 2. Load cart from local storage
+      const user = JSON.parse(localStorage.getItem('dwarkesh_user') || 'null');
+      let cartKey = 'dwarkesh_cart';
+      if (user && user.phone) {
+        cartKey = `dwarkesh_cart_${user.phone}`;
+      }
+      let rawCart = localStorage.getItem(cartKey);
+      if (!rawCart) rawCart = localStorage.getItem('dwarkesh_cart');
+      try {
+        checkoutState.cart = JSON.parse(rawCart) || [];
+      } catch (e) {
+        checkoutState.cart = [];
+      }
+
+      // If cart is empty, show empty notice
+      if (checkoutState.cart.length === 0) {
+        document.getElementById('checkoutActiveGrid').innerHTML = `
+          <div style="grid-column: 1 / -1; text-align: center; background: #FFFFFF; border: 1px solid #EAE5D9; border-radius: 12px; padding: 48px 20px;">
+            <svg viewBox="0 0 24 24" width="56" height="56" fill="none" stroke="#999" stroke-width="1.5" style="margin-bottom: 14px;">
+              <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path>
+              <line x1="3" y1="6" x2="21" y2="6"></line>
+              <path d="M16 10a4 4 0 0 1-8 0"></path>
+            </svg>
+            <h2 style="font-family: var(--font-heading); color: var(--primary-color); font-size: 22px; margin-bottom: 8px;">Your cart is currently empty</h2>
+            <p style="color: #666; font-size: 14px; margin-bottom: 24px;">Please select fresh Vedic tribal farm produce to proceed with checkout.</p>
+            <a href="/" class="checkout-submit-btn" style="display: inline-flex; width: auto; padding: 12px 28px; text-decoration: none;">
+              Explore Farm Harvest &rarr;
+            </a>
+          </div>
+        `;
+        return;
+      }
+
+      // 3. Pre-fill user data
+      if (user) {
+        if (document.getElementById('chkCustName') && user.name) document.getElementById('chkCustName').value = user.name;
+        if (document.getElementById('chkCustPhone') && user.phone) document.getElementById('chkCustPhone').value = user.phone;
+        if (document.getElementById('chkCustEmail') && user.email) document.getElementById('chkCustEmail').value = user.email;
+        if (document.getElementById('chkCustAddress') && user.address) document.getElementById('chkCustAddress').value = user.address;
+        if (document.getElementById('chkCustCity') && user.city) document.getElementById('chkCustCity').value = user.city;
+        if (document.getElementById('chkCustPincode') && user.pincode) document.getElementById('chkCustPincode').value = user.pincode;
+        
+        const badge = document.getElementById('checkoutUserStatusBadge');
+        if (badge) badge.textContent = `✓ Logged In as ${user.name || user.phone}`;
+      }
+
+      // Check coupon
+      const savedCoupon = sessionStorage.getItem('dwarkesh_checkout_coupon');
+      if (savedCoupon) checkoutState.appliedCoupon = savedCoupon;
+
+      renderCheckoutOrderSummary();
+      updateCartBadgeCount();
+    }
+
+    function renderCheckoutOrderSummary() {
+      const itemsList = document.getElementById('chkSummaryItemsList');
+      const itemsCountLabel = document.getElementById('chkItemsCountLabel');
+      const subtotalEl = document.getElementById('chkSummarySubtotal');
+      const deliveryEl = document.getElementById('chkSummaryDelivery');
+      const discountRow = document.getElementById('chkSummaryDiscountRow');
+      const discountEl = document.getElementById('chkSummaryDiscount');
+      const totalEl = document.getElementById('chkSummaryTotal');
+
+      const totalQty = checkoutState.cart.reduce((sum, item) => sum + (item.quantity || 1), 0);
+      if (itemsCountLabel) itemsCountLabel.textContent = totalQty;
+
+      if (itemsList) {
+        itemsList.innerHTML = checkoutState.cart.map(item => `
+          <div class="checkout-summary-item">
+            <img src="${item.image_url || '/images/meshwo_logo.jpg'}" alt="${item.title}" class="checkout-summary-item-img" onerror="this.src='/images/meshwo_logo.jpg'">
+            <div class="checkout-summary-item-info">
+              <div class="checkout-summary-item-name">${item.title}</div>
+              <div class="checkout-summary-item-variant">${item.variantLabel || item.selectedVariant || 'Standard'} &bull; Qty: ${item.quantity}</div>
+            </div>
+            <div class="checkout-summary-item-price">₹${((item.price || 0) * (item.quantity || 1)).toLocaleString('en-IN')}</div>
+          </div>
+        `).join('');
+      }
+
+      const subtotal = checkoutState.cart.reduce((sum, it) => sum + ((it.price || 0) * (it.quantity || 1)), 0);
+      const threshold = parseFloat(checkoutState.settings.free_shipping_threshold) || 999;
+      const standardFee = parseFloat(checkoutState.settings.standard_shipping_fee) || 99;
+      const shipping = subtotal >= threshold ? 0 : standardFee;
+      const discount = checkoutState.appliedCoupon ? Math.round((subtotal * 10) / 100) : 0;
+      const total = Math.max(0, subtotal - discount + shipping);
+
+      if (subtotalEl) subtotalEl.textContent = `₹${subtotal.toLocaleString('en-IN')}`;
+      if (deliveryEl) {
+        deliveryEl.textContent = shipping === 0 ? 'FREE' : `₹${shipping}`;
+        deliveryEl.style.color = shipping === 0 ? '#2E7D32' : '#222';
+      }
+
+      if (discountRow) {
+        if (discount > 0) {
+          discountRow.style.display = 'flex';
+          discountEl.textContent = `-₹${discount.toLocaleString('en-IN')}`;
+        } else {
+          discountRow.style.display = 'none';
+        }
+      }
+
+      if (totalEl) totalEl.textContent = `₹${total.toLocaleString('en-IN')}`;
+
+      updateCheckoutPaymentUi(total);
+    }
+
+    function selectDedicatedPaymentMethod(method) {
+      checkoutState.selectedPaymentMethod = method;
+
+      ['COD', 'RAZORPAY', 'UPI'].forEach(m => {
+        const card = document.getElementById(`payMethodCard${m}`);
+        if (card) {
+          if (m === method) {
+            card.classList.add('selected');
+          } else {
+            card.classList.remove('selected');
+          }
+        }
+      });
+
+      updateCheckoutPaymentUi();
+    }
+
+    function updateCheckoutPaymentUi(calcTotal) {
+      const method = checkoutState.selectedPaymentMethod;
+      const subtotal = checkoutState.cart.reduce((sum, it) => sum + ((it.price || 0) * (it.quantity || 1)), 0);
+      const threshold = parseFloat(checkoutState.settings.free_shipping_threshold) || 999;
+      const standardFee = parseFloat(checkoutState.settings.standard_shipping_fee) || 99;
+      const shipping = subtotal >= threshold ? 0 : standardFee;
+      const discount = checkoutState.appliedCoupon ? Math.round((subtotal * 10) / 100) : 0;
+      const total = calcTotal !== undefined ? calcTotal : Math.max(0, subtotal - discount + shipping);
+
+      const upiBox = document.getElementById('dedicatedUpiBox');
+      const rzpNotice = document.getElementById('dedicatedRazorpayNotice');
+      const btn = document.getElementById('dedicatedSubmitOrderBtn');
+
+      if (method === 'UPI') {
+        if (upiBox) upiBox.style.display = 'block';
+        if (rzpNotice) rzpNotice.style.display = 'none';
+        if (btn) btn.innerHTML = `<span>I HAVE PAID VIA UPI &bull; CONFIRM ORDER (₹${total.toLocaleString('en-IN')}) &rarr;</span>`;
+
+        const upiId = checkoutState.settings.payment_upi_id || 'sohamprajapati08@okicici';
+        const upiImg = document.getElementById('chkUpiQrImg');
+        if (upiImg) {
+          if (checkoutState.settings.payment_upi_qr) {
+            upiImg.src = checkoutState.settings.payment_upi_qr;
+          } else {
+            upiImg.src = `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(`upi://pay?pa=${upiId}&pn=Meshwo%20Farmers&am=${total}&cu=INR`)}`;
+          }
+        }
+        const display = document.getElementById('chkUpiIdDisplay');
+        if (display) display.textContent = upiId;
+        const directLink = document.getElementById('chkUpiDirectLink');
+        if (directLink) directLink.href = `upi://pay?pa=${upiId}&pn=Meshwo%20Farmers&am=${total}&cu=INR`;
+
+      } else if (method === 'RAZORPAY') {
+        if (upiBox) upiBox.style.display = 'none';
+        if (rzpNotice) rzpNotice.style.display = 'block';
+        if (btn) btn.innerHTML = `<span>⚡ PAY VIA RAZORPAY GATEWAY (₹${total.toLocaleString('en-IN')}) &rarr;</span>`;
+
+      } else {
+        // COD
+        if (upiBox) upiBox.style.display = 'none';
+        if (rzpNotice) rzpNotice.style.display = 'none';
+        if (btn) btn.innerHTML = `<span>CONFIRM &amp; PLACE ORDER (Cash on Delivery &bull; ₹${total.toLocaleString('en-IN')}) &rarr;</span>`;
+      }
+    }
+
+    function applyDedicatedCoupon() {
+      const input = document.getElementById('chkCouponInput');
+      const msg = document.getElementById('chkCouponMsg');
+      if (!input) return;
+      const code = input.value.trim().toUpperCase();
+      if (!code) return;
+
+      if (code === 'DWARKESH10' || code === 'MESHWO10') {
+        checkoutState.appliedCoupon = code;
+        sessionStorage.setItem('dwarkesh_checkout_coupon', code);
+        if (msg) {
+          msg.style.display = 'block';
+          msg.style.color = '#2E7D32';
+          msg.textContent = `🎉 Coupon '${code}' Applied! 10% Extra Discount has been deducted.`;
+        }
+        renderCheckoutOrderSummary();
+      } else {
+        if (msg) {
+          msg.style.display = 'block';
+          msg.style.color = '#DC2626';
+          msg.textContent = `❌ Invalid coupon code. Use DWARKESH10 for 10% OFF.`;
+        }
+      }
+    }
+
+    async function submitDedicatedCheckout(event) {
+      event.preventDefault();
+
+      if (checkoutState.cart.length === 0) {
+        alert('Your cart is empty.');
+        return;
+      }
+
+      const name = document.getElementById('chkCustName').value.trim();
+      const phone = document.getElementById('chkCustPhone').value.trim();
+      const email = document.getElementById('chkCustEmail') ? document.getElementById('chkCustEmail').value.trim() : '';
+      const address = document.getElementById('chkCustAddress').value.trim();
+      const landmark = document.getElementById('chkCustLandmark') ? document.getElementById('chkCustLandmark').value.trim() : '';
+      const city = document.getElementById('chkCustCity').value.trim();
+      const state = document.getElementById('chkCustState') ? document.getElementById('chkCustState').value : 'Gujarat';
+      const pincode = document.getElementById('chkCustPincode').value.trim();
+
+      if (!name || !phone || !address || !city || !pincode) {
+        alert('Please fill in all mandatory fields.');
+        return;
+      }
+
+      // Save user session in localStorage
+      const userObj = { name, phone, email, address, city, state, pincode };
+      localStorage.setItem('dwarkesh_user', JSON.stringify(userObj));
+
+      const subtotal = checkoutState.cart.reduce((sum, it) => sum + ((it.price || 0) * (it.quantity || 1)), 0);
+      const threshold = parseFloat(checkoutState.settings.free_shipping_threshold) || 999;
+      const standardFee = parseFloat(checkoutState.settings.standard_shipping_fee) || 99;
+      const shipping_fee = subtotal >= threshold ? 0 : standardFee;
+      const discount = checkoutState.appliedCoupon ? Math.round((subtotal * 10) / 100) : 0;
+      const total = Math.max(0, subtotal - discount + shipping_fee);
+
+      const fullAddress = `${address}${landmark ? ', Near ' + landmark : ''}, ${city}, ${state} - ${pincode}`;
+
+      // 1. RAZORPAY GATEWAY
+      if (checkoutState.selectedPaymentMethod === 'RAZORPAY') {
+        const btn = document.getElementById('dedicatedSubmitOrderBtn');
+        if (btn) { btn.disabled = true; btn.textContent = 'Connecting to Razorpay Bank Gateway...'; }
+
+        try {
+          const res = await fetch('/api/payment/razorpay-order', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              amount: total,
+              customer_name: name,
+              customer_phone: phone,
+              customer_email: email || `${phone}@meshwofarmers.in`
+            })
+          });
+          const orderData = await res.json();
+          if (!orderData.success) {
+            alert(orderData.message || 'Razorpay initialization failed.');
+            if (btn) { btn.disabled = false; updateCheckoutPaymentUi(); }
+            return;
+          }
+
+          const options = {
+            key: orderData.key_id,
+            amount: orderData.order.amount,
+            currency: 'INR',
+            name: 'Meshwo Farmers Aravalli',
+            description: 'Vedic Forest Organic Produce Order',
+            image: '/images/meshwo_logo.jpg',
+            order_id: orderData.order.id,
+            prefill: {
+              name: name,
+              contact: phone,
+              email: email || `${phone}@meshwofarmers.in`
+            },
+            theme: { color: '#1A3E1B' },
+            handler: async function (response) {
+              await sendFinalOrderToServer({
+                customer_name: name,
+                customer_phone: phone,
+                customer_email: email,
+                address: fullAddress,
+                city,
+                pincode,
+                items: checkoutState.cart,
+                subtotal,
+                discount,
+                shipping_fee,
+                total,
+                coupon_code: checkoutState.appliedCoupon,
+                payment_method: 'RAZORPAY',
+                payment_status: 'Paid (Bank Verified)',
+                transaction_id: response.razorpay_payment_id || response.razorpay_order_id
+              });
+            },
+            modal: {
+              ondismiss: function () {
+                if (btn) { btn.disabled = false; updateCheckoutPaymentUi(); }
+              }
+            }
+          };
+
+          const rzp = new Razorpay(options);
+          rzp.open();
+        } catch (err) {
+          console.error(err);
+          alert('Could not initiate Razorpay. Please try UPI or Cash on Delivery.');
+          if (btn) { btn.disabled = false; updateCheckoutPaymentUi(); }
+        }
+        return;
+      }
+
+      // 2. DIRECT UPI QR FLOW
+      if (checkoutState.selectedPaymentMethod === 'UPI') {
+        const utr = document.getElementById('chkUpiUtrInput').value.trim();
+        if (!utr || utr.length < 6) {
+          alert('⚠️ Please scan the UPI QR code, pay in your UPI App, and enter the 12-digit UPI UTR / Transaction Reference number.');
+          document.getElementById('chkUpiUtrInput').focus();
+          return;
+        }
+
+        await sendFinalOrderToServer({
+          customer_name: name,
+          customer_phone: phone,
+          customer_email: email,
+          address: fullAddress,
+          city,
+          pincode,
+          items: checkoutState.cart,
+          subtotal,
+          discount,
+          shipping_fee,
+          total,
+          coupon_code: checkoutState.appliedCoupon,
+          payment_method: 'UPI',
+          payment_status: 'Pending Verification',
+          transaction_id: utr
+        });
+        return;
+      }
+
+      // 3. CASH ON DELIVERY FLOW
+      const codTxId = 'COD-' + Math.random().toString(36).substring(2, 8).toUpperCase();
+      await sendFinalOrderToServer({
+        customer_name: name,
+        customer_phone: phone,
+        customer_email: email,
+        address: fullAddress,
+        city,
+        pincode,
+        items: checkoutState.cart,
+        subtotal,
+        discount,
+        shipping_fee,
+        total,
+        coupon_code: checkoutState.appliedCoupon,
+        payment_method: 'COD',
+        payment_status: 'Pending (Cash on Delivery)',
+        transaction_id: codTxId
+      });
+    }
+
+    async function sendFinalOrderToServer(payload) {
+      const btn = document.getElementById('dedicatedSubmitOrderBtn');
+      if (btn) { btn.disabled = true; btn.textContent = 'Securing & Placing Order...'; }
+
+      try {
+        const res = await fetch('/api/orders', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+        const data = await res.json();
+
+        if (data.success) {
+          // Clear cart
+          const user = JSON.parse(localStorage.getItem('dwarkesh_user') || 'null');
+          if (user && user.phone) localStorage.removeItem(`dwarkesh_cart_${user.phone}`);
+          localStorage.removeItem('dwarkesh_cart');
+          sessionStorage.removeItem('dwarkesh_checkout_coupon');
+          checkoutState.cart = [];
+          updateCartBadgeCount();
+
+          // Show in-place Order Success Receipt (NO POPUP!)
+          document.getElementById('checkoutActiveGrid').style.display = 'none';
+          const successView = document.getElementById('checkoutSuccessView');
+          successView.style.display = 'block';
+
+          document.getElementById('successOrderNumberBadge').textContent = `Order ID: #${data.order_number}`;
+          document.getElementById('successCustName').textContent = payload.customer_name;
+          document.getElementById('successAddress').textContent = payload.address;
+          document.getElementById('successPhone').textContent = payload.customer_phone;
+          document.getElementById('successPaymentMethod').textContent = payload.payment_method;
+          document.getElementById('successPaymentStatus').textContent = payload.payment_status;
+          document.getElementById('successTxId').textContent = payload.transaction_id;
+          document.getElementById('successTotalAmount').textContent = `₹${payload.total.toLocaleString('en-IN')}`;
+
+          const waBtn = document.getElementById('successWhatsAppHelp');
+          if (waBtn) {
+            waBtn.href = `https://wa.me/916356785785?text=${encodeURIComponent(`Hello Meshwo Farmers! I have placed Order #${data.order_number} for ₹${payload.total}. Please confirm my shipment.`)}`;
+          }
+
+          window.scrollTo({ top: 0, behavior: 'smooth' });
+        } else {
+          alert(data.message || 'Could not place order. Please try again.');
+          if (btn) { btn.disabled = false; updateCheckoutPaymentUi(); }
+        }
+      } catch (err) {
+        console.error(err);
+        alert('Network error placing order. Please check your connection.');
+        if (btn) { btn.disabled = false; updateCheckoutPaymentUi(); }
+      }
+    }
+
+    function updateCartBadgeCount() {
+      const badges = document.querySelectorAll('.cart-badge');
+      const qty = checkoutState.cart.reduce((sum, it) => sum + (it.quantity || 1), 0);
+      badges.forEach(b => {
+        b.textContent = qty;
+        b.style.display = qty > 0 ? 'inline-flex' : 'none';
+      });
+    }
+
+    document.addEventListener('DOMContentLoaded', initDedicatedCheckout);
+  </script>
+</body>
+
+</html>
