@@ -1,0 +1,624 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Shopping Cart | MESHWO FARMERS - Sacred Aravalli &amp; Polo Forest Produce</title>
+  <meta name="description"
+    content="Review your pure tribal organic harvest cart from Meshwo Farmers Producer Co. Ltd, Shamlaji, Aravalli.">
+  <link rel="icon" type="image/jpeg" href="/images/meshwo_logo.jpg">
+  <link rel="stylesheet" href="/css/theme.css">
+  <style>
+    /* Dedicated clean overrides for cart.html */
+    body {
+      background: #FCFAF8;
+      color: var(--text-color);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .cart-main-wrapper {
+      flex: 1;
+    }
+  </style>
+</head>
+
+<body>
+  <!-- 1. TOP ANNOUNCEMENT TICKER -->
+  <div class="announcement-bar" style="background: var(--primary-color); color: #FFF; font-size: 11px; font-weight: 700; padding: 7px 10px; text-align: center; letter-spacing: 0.5px;">
+    <span>FREE PAN-INDIA DELIVERY ON HARVEST ORDERS ABOVE ₹999 &bull; DIRECT TRIBAL WOMEN SUPPORT</span>
+  </div>
+
+  <!-- 2. CART HEADER -->
+  <header class="header-main" style="background: #FFFFFF; border-bottom: 1.5px solid #EAE5D9;">
+    <div class="header-container" style="display: flex; align-items: center; justify-content: space-between; padding: 12px 16px; max-width: 1140px; margin: 0 auto;">
+      <!-- Left: Back link -->
+      <a href="/" class="cart-back-btn">
+        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="19" y1="12" x2="5" y2="12"></line>
+          <polyline points="12 19 5 12 12 5"></polyline>
+        </svg>
+        <span>Continue Shopping</span>
+      </a>
+
+      <!-- Center: Logo -->
+      <a href="/" style="display: flex; align-items: center; gap: 8px; text-decoration: none;">
+        <img src="/images/meshwo_logo.jpg" alt="MESHWO FARMERS" style="width: 38px; height: 38px; border-radius: 50%; object-fit: cover; border: 1.5px solid var(--accent-gold);">
+        <div style="text-align: left;">
+          <div style="font-family: var(--font-heading); font-size: 16px; font-weight: 800; color: var(--primary-color); line-height: 1.1;">MESHWO<sup>&reg;</sup></div>
+          <div style="font-size: 9px; font-weight: 700; color: var(--accent-gold); letter-spacing: 1px;">FARMERS STORE</div>
+        </div>
+      </a>
+
+      <!-- Right: Helpline / Account -->
+      <div style="display: flex; align-items: center; gap: 12px;">
+        <a href="https://wa.me/916356785785" target="_blank" class="desktop-only-btn" style="display: inline-flex; align-items: center; gap: 5px; color: #25D366; font-weight: 700; font-size: 12px; text-decoration: none; border: 1px solid #25D366; padding: 4px 10px; border-radius: 16px;">
+          <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="#25D366" stroke-width="2"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path></svg>
+          <span>6356785785</span>
+        </a>
+        <button class="header-icon-btn" onclick="openAuthModal()" title="Login / Account" aria-label="Account">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8">
+            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+            <circle cx="12" cy="7" r="4"></circle>
+          </svg>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- 3. MAIN CART PAGE CONTENT -->
+  <main class="cart-main-wrapper">
+    <div class="cart-page-wrap">
+      <!-- Page Title -->
+      <div class="cart-page-header">
+        <h1 class="cart-page-title">
+          <span>Shopping Cart</span>
+          <span class="cart-page-count-badge" id="cartPageCountBadge">0 items</span>
+        </h1>
+        <a href="/" class="cart-back-btn desktop-only-btn">&larr; Back to Catalog</a>
+      </div>
+
+      <!-- Free Delivery Progress Bar -->
+      <div class="cart-shipping-notice" id="cartPageShippingNotice">
+        <div class="cart-shipping-notice-text" id="cartPageShippingText">
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="1" y="3" width="15" height="13"></rect>
+            <polygon points="16 8 20 8 23 11 23 16 16 16 8"></polygon>
+            <circle cx="5.5" cy="18.5" r="2.5"></circle>
+            <circle cx="18.5" cy="18.5" r="2.5"></circle>
+          </svg>
+          <span id="cartShippingNoticeMsg">Add ₹999 more for FREE Delivery!</span>
+        </div>
+        <div class="cart-shipping-bar-track">
+          <div class="cart-shipping-bar-fill" id="cartPageShippingBar"></div>
+        </div>
+      </div>
+
+      <!-- 2-Column Responsive Cart Grid -->
+      <div class="cart-grid-container" id="cartGridContainer">
+        <!-- LEFT COLUMN: Cart Items -->
+        <div>
+          <!-- Active Items Card -->
+          <div class="cart-items-card" id="cartPageItemsCard">
+            <div class="cart-items-header">
+              Selected Farm Harvest
+            </div>
+            <div id="cartPageItemsList">
+              <!-- Injected dynamically by renderCartPage() -->
+            </div>
+          </div>
+
+          <!-- Empty State (Shown when cart is empty) -->
+          <div class="cart-page-empty" id="cartPageEmptyState" style="display: none;">
+            <div class="cart-page-empty-icon">
+              <svg viewBox="0 0 24 24" width="64" height="64" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path>
+                <line x1="3" y1="6" x2="21" y2="6"></line>
+                <path d="M16 10a4 4 0 0 1-8 0"></path>
+              </svg>
+            </div>
+            <h2 class="cart-page-empty-title">Your Farm Cart is Empty</h2>
+            <p class="cart-page-empty-desc">
+              You haven't added any pure wild honey, traditional Mahuva energy foods, or botanical soaps yet. Handcrafted organic harvest from sacred Polo Forest is waiting for you!
+            </p>
+            <a href="/" class="cart-checkout-btn-main" style="max-width: 260px; margin: 0 auto; text-decoration: none;">
+              EXPLORE HARVEST &rarr;
+            </a>
+          </div>
+        </div>
+
+        <!-- RIGHT COLUMN: Order Summary -->
+        <div id="cartSummaryCol">
+          <div class="cart-summary-card">
+            <div class="cart-summary-title">Order Summary</div>
+
+            <div class="cart-summary-line">
+              <span>Bag Subtotal</span>
+              <span id="cartPageSubtotal" style="font-weight: 700;">₹0</span>
+            </div>
+
+            <div class="cart-summary-line" id="cartPageDiscountRow" style="display: none; color: #2E7D32;">
+              <span>Coupon Discount (10%)</span>
+              <span id="cartPageDiscount" style="font-weight: 700;">-₹0</span>
+            </div>
+
+            <div class="cart-summary-line">
+              <span>Pan-India Delivery</span>
+              <span id="cartPageShipping" style="font-weight: 700; color: #2E7D32;">FREE</span>
+            </div>
+
+            <div class="cart-summary-line total-line">
+              <span>Total Payable</span>
+              <span id="cartPageTotal">₹0</span>
+            </div>
+
+            <!-- Coupon Box -->
+            <div style="margin-bottom: 16px;">
+              <div class="cart-coupon-wrap">
+                <input type="text" id="cartPageCouponInput" class="cart-coupon-input" placeholder="COUPON (E.G. DWARKESH10)">
+                <button type="button" class="cart-coupon-btn" onclick="applyCartPageCoupon()">APPLY</button>
+              </div>
+              <div id="cartPageCouponMsg" style="font-size: 11px; margin-top: 4px; display: none;"></div>
+            </div>
+
+            <!-- Checkout CTA Button -->
+            <button type="button" class="cart-checkout-btn-main" onclick="openCheckoutModal()">
+              <span>PROCEED TO SECURE CHECKOUT &rarr;</span>
+            </button>
+
+            <!-- Trust Badges -->
+            <div class="cart-trust-badges-list">
+              <div class="cart-trust-item">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+                <span>100% Raw &amp; Chemical-Free Verified</span>
+              </div>
+              <div class="cart-trust-item">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path></svg>
+                <span>Direct Benefit to Tribal Women Farmers</span>
+              </div>
+              <div class="cart-trust-item">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+                <span>Safe &amp; Encrypted Razorpay Gateway / UPI</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- Clean Minimal Footer -->
+  <footer style="text-align: center; padding: 24px 16px; background: #FAF7F2; border-top: 1px solid #ECE7DE; color: #6C7A68; font-size: 11.5px; margin-top: auto;">
+    <div style="font-family: var(--font-heading); font-weight: 800; font-size: 14px; color: var(--primary-color); margin-bottom: 4px;">MESHWO FARMERS &bull; ARAVALLI</div>
+    <p style="margin: 0; font-size: 11px; opacity: 0.85;">Pure Organic &amp; Sacred Tribal Forest Harvest</p>
+    <div style="margin-top: 8px; font-size: 10px; opacity: 0.65;">&copy; 2026 MESHWO FARMERS COOPERATIVE. ALL RIGHTS RESERVED.</div>
+  </footer>
+
+  <!-- 9. CHECKOUT MODAL -->
+  <div class="modal-overlay" id="checkoutModal">
+    <div class="modal-content wide">
+      <button class="modal-close-btn" onclick="closeCheckoutModal()">&times;</button>
+      <div id="checkoutModalBody">
+        <h2 style="font-family: var(--font-heading); color: var(--primary-color); font-size: 22px; margin-bottom: 4px;">
+          Complete Your Order
+        </h2>
+        <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 20px;">
+          MESHWO FARMERS &bull; Direct Tribal Women Producer Initiative, Shamlaji, Aravalli
+        </p>
+
+        <form id="checkoutForm" onsubmit="handlePlaceOrder(event)">
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 14px;">
+            <div>
+              <label style="display: block; font-size: 12px; font-weight: 700; color: var(--primary-color); margin-bottom: 4px;">Full Name *</label>
+              <input type="text" id="custName" placeholder="e.g. Ramesh Patel" style="width: 100%; padding: 10px; border: 1.5px solid var(--border-color); border-radius: 6px; font-size: 13px;" required>
+            </div>
+            <div>
+              <label style="display: block; font-size: 12px; font-weight: 700; color: var(--primary-color); margin-bottom: 4px;">Phone / WhatsApp *</label>
+              <input type="tel" id="custPhone" placeholder="10-digit number" style="width: 100%; padding: 10px; border: 1.5px solid var(--border-color); border-radius: 6px; font-size: 13px;" required>
+            </div>
+          </div>
+
+          <div style="margin-bottom: 14px;">
+            <label style="display: block; font-size: 12px; font-weight: 700; color: var(--primary-color); margin-bottom: 4px;">Email Address (Optional)</label>
+            <input type="email" id="custEmail" placeholder="yourname@gmail.com" style="width: 100%; padding: 10px; border: 1.5px solid var(--border-color); border-radius: 6px; font-size: 13px;">
+          </div>
+
+          <div style="margin-bottom: 14px;">
+            <label style="display: block; font-size: 12px; font-weight: 700; color: var(--primary-color); margin-bottom: 4px;">Delivery Address *</label>
+            <textarea id="custAddress" rows="2" placeholder="House/Flat No, Street, Landmark" style="width: 100%; padding: 10px; border: 1.5px solid var(--border-color); border-radius: 6px; font-size: 13px; font-family: inherit;" required></textarea>
+          </div>
+
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 20px;">
+            <div>
+              <label style="display: block; font-size: 12px; font-weight: 700; color: var(--primary-color); margin-bottom: 4px;">City / Town *</label>
+              <input type="text" id="custCity" placeholder="e.g. Ahmedabad / Modasa" style="width: 100%; padding: 10px; border: 1.5px solid var(--border-color); border-radius: 6px; font-size: 13px;" required>
+            </div>
+            <div>
+              <label style="display: block; font-size: 12px; font-weight: 700; color: var(--primary-color); margin-bottom: 4px;">Pincode *</label>
+              <input type="text" id="custPincode" placeholder="e.g. 383355" maxlength="6" style="width: 100%; padding: 10px; border: 1.5px solid var(--border-color); border-radius: 6px; font-size: 13px;" required>
+            </div>
+          </div>
+
+          <!-- Payment Options -->
+          <div style="margin-bottom: 24px;">
+            <label style="display: block; font-size: 12px; font-weight: 700; color: var(--primary-color); margin-bottom: 8px;">Select Payment Method</label>
+            <div class="pay-method-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 10px;">
+              <div class="pay-card-item active" onclick="selectPaymentMethod('COD', this)">
+                <div style="font-size: 20px; margin-bottom: 4px;">💵</div>
+                <div style="font-weight: 700; font-size: 12.5px;">Cash on Delivery</div>
+                <div style="font-size: 10px; color: var(--text-muted);">Pay when delivered</div>
+              </div>
+              <div class="pay-card-item" onclick="selectPaymentMethod('UPI_QR', this)">
+                <div style="font-size: 20px; margin-bottom: 4px;">📲</div>
+                <div style="font-weight: 700; font-size: 12.5px;">UPI QR Code</div>
+                <div style="font-size: 10px; color: var(--text-muted);">GPay / PhonePe / Paytm</div>
+              </div>
+              <div class="pay-card-item" onclick="selectPaymentMethod('RAZORPAY', this)">
+                <div style="font-size: 20px; margin-bottom: 4px;">⚡</div>
+                <div style="font-weight: 700; font-size: 12.5px;">Razorpay Gateway</div>
+                <div style="font-size: 10px; color: var(--text-muted);">Instant Auto Verification</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Dynamic UPI QR Section -->
+          <div id="upiQrSection" style="display: none; background: #FAF7F2; border: 1.5px solid var(--accent-gold); border-radius: 8px; padding: 16px; text-align: center; margin-bottom: 20px;">
+            <div style="font-weight: 800; color: var(--primary-color); font-size: 13.5px; margin-bottom: 4px;">Scan UPI QR Code to Pay</div>
+            <p style="font-size: 11.5px; color: var(--text-muted); margin-bottom: 12px;">Pay directly to Meshwo Farmers Producer Co. Ltd via any UPI app</p>
+            <div id="dynamicUpiQrWrapper" style="display: inline-block; background: #FFF; padding: 10px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); margin-bottom: 12px;">
+              <img id="dynamicUpiQrImg" src="/images/upi_qr_placeholder.png" alt="Meshwo Farmers UPI QR" style="width: 170px; height: 170px; object-fit: contain; display: block;">
+            </div>
+            <div style="font-size: 12px; font-weight: 700; color: var(--primary-color); margin-bottom: 10px;">
+              UPI ID: <span id="displayUpiId" style="font-family: monospace; background: #EAE5D9; padding: 2px 6px; border-radius: 4px;">sohamprajapati08@okicici</span>
+              <button type="button" onclick="navigator.clipboard.writeText('sohamprajapati08@okicici'); alert('UPI ID Copied!');" style="background: var(--primary-color); color: #FFF; border: none; border-radius: 4px; padding: 2px 8px; font-size: 10.5px; margin-left: 6px; cursor: pointer;">Copy</button>
+            </div>
+            <div>
+              <label style="display: block; font-size: 11px; font-weight: 700; color: var(--primary-color); margin-bottom: 4px;">Enter 12-Digit UPI UTR / Transaction ID *</label>
+              <input type="text" id="upiUtrNumber" placeholder="e.g. 423589123456" maxlength="22" style="width: 100%; max-width: 280px; padding: 8px 12px; border: 1.5px solid var(--accent-gold); border-radius: 6px; font-size: 12.5px; text-align: center;">
+            </div>
+          </div>
+
+          <!-- Razorpay Prompt -->
+          <div id="razorpayPromptSection" style="display: none; background: #F0F7FF; border: 1.5px solid #0C75EB; border-radius: 8px; padding: 14px; margin-bottom: 20px; text-align: left;">
+            <div style="display: flex; align-items: center; gap: 8px; font-size: 12.5px; font-weight: 700; color: #0C2340;">
+              <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#0C75EB" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+              <span>Instant 100% Bank Verified Checkout</span>
+            </div>
+            <p style="font-size: 11.5px; color: #4A5568; margin: 6px 0 0; line-height: 1.5;">
+              Clicking the button below opens the official Razorpay Bank Gateway supporting UPI Apps (GPay, PhonePe, Paytm), Debit/Credit Cards, and NetBanking.
+            </p>
+          </div>
+
+          <!-- Payable Amount & Submit -->
+          <div style="background: #FAF7F2; padding: 14px 16px; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+            <span style="font-weight: 700; font-size: 13px; color: var(--primary-color);">Total Payable Amount</span>
+            <span id="checkoutPayableTotal" style="font-size: 20px; font-weight: 900; color: var(--primary-color);">₹0</span>
+          </div>
+
+          <button type="submit" class="checkout-btn" id="btnPlaceOrderFinal" style="margin-top: 0; padding: 16px; font-size: 15px; font-weight: 800;">
+            Confirm &amp; Place Farm Order &rarr;
+          </button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- CUSTOMER QUICK FARM LOGIN MODAL -->
+  <div class="modal-overlay" id="authModal">
+    <div class="modal-content" style="max-width: 420px; text-align: center;">
+      <button class="modal-close-btn" onclick="closeAuthModal()">&times;</button>
+      <img src="/images/meshwo_logo.jpg" alt="MESHWO" style="width: 52px; height: 52px; border-radius: 50%; border: 2px solid var(--accent-gold); margin: 0 auto 10px; display: block;">
+      <h3 style="font-family: var(--font-heading); color: var(--primary-color); font-size: 20px; margin-bottom: 4px;">
+        MESHWO FARMERS
+      </h3>
+      <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 20px;">
+        Quick Farm Access &bull; Track orders &amp; dispatch
+      </p>
+
+      <div id="authModalBody">
+        <form id="customerQuickLoginForm" onsubmit="handleCustomerQuickLogin(event)">
+          <div style="margin-bottom: 12px; text-align: left;">
+            <label style="display: block; font-size: 12px; font-weight: 700; color: var(--primary-color); margin-bottom: 4px;">Full Name *</label>
+            <input type="text" id="custLoginName" placeholder="e.g. Ramesh Patel" style="width: 100%; padding: 11px 14px; border: 1.5px solid var(--border-color); border-radius: 6px; font-size: 13.5px;" required>
+          </div>
+          <div style="margin-bottom: 16px; text-align: left;">
+            <label style="display: block; font-size: 12px; font-weight: 700; color: var(--primary-color); margin-bottom: 4px;">Mobile / WhatsApp Number *</label>
+            <input type="tel" id="custLoginPhone" placeholder="10-digit mobile number" maxlength="10" style="width: 100%; padding: 11px 14px; border: 1.5px solid var(--border-color); border-radius: 6px; font-size: 13.5px;" required>
+          </div>
+          <button type="submit" class="checkout-btn" style="margin-top: 0; padding: 13px; font-size: 14px; font-weight: 800;">
+            Verify &amp; Continue &rarr;
+          </button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- RAZORPAY GATEWAY MODAL -->
+  <div class="modal-overlay" id="razorpayGatewayModal">
+    <div class="modal-content" style="max-width: 440px; padding: 0; overflow: hidden; border-radius: 12px;">
+      <div style="background: #0C2340; color: #FFF; padding: 18px 20px; display: flex; align-items: center; justify-content: space-between;">
+        <div style="display: flex; align-items: center; gap: 10px;">
+          <div style="width: 34px; height: 34px; background: #0C75EB; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-weight: 900; font-size: 16px;">R</div>
+          <div>
+            <div style="font-weight: 800; font-size: 14px; letter-spacing: 0.5px;">Razorpay Secure</div>
+            <div style="font-size: 11px; color: #A0B3C6;">Meshwo Farmers Cooperative</div>
+          </div>
+        </div>
+        <div style="text-align: right;">
+          <div style="font-size: 10px; color: #A0B3C6; text-transform: uppercase; font-weight: 600;">Payable</div>
+          <div id="razorpayAmountDisplay" style="font-size: 19px; font-weight: 900; color: #00E676;">₹0</div>
+        </div>
+      </div>
+
+      <div style="padding: 20px; text-align: left; background: #FFFFFF;">
+        <div id="razorpayFlowInitial">
+          <div style="display: flex; gap: 6px; border-bottom: 2px solid #EEE; padding-bottom: 10px; margin-bottom: 16px;">
+            <button type="button" class="rzp-tab-btn active" id="rzpTabUpi" onclick="switchRazorpayTab('upi')" style="flex: 1; padding: 8px 4px; border: none; background: #EBF3FC; color: #0C75EB; font-weight: 800; font-size: 12px; border-radius: 6px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 5px;">
+              <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><rect x="5" y="2" width="14" height="20" rx="2"></rect><line x1="12" y1="18" x2="12.01" y2="18"></line></svg>
+              <span>UPI Apps</span>
+            </button>
+            <button type="button" class="rzp-tab-btn" id="rzpTabCard" onclick="switchRazorpayTab('card')" style="flex: 1; padding: 8px 4px; border: none; background: #F5F5F5; color: #666; font-weight: 700; font-size: 12px; border-radius: 6px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 5px;">
+              <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="4" width="22" height="16" rx="2"></rect><line x1="1" y1="10" x2="23" y2="10"></line></svg>
+              <span>Cards</span>
+            </button>
+            <button type="button" class="rzp-tab-btn" id="rzpTabNet" onclick="switchRazorpayTab('net')" style="flex: 1; padding: 8px 4px; border: none; background: #F5F5F5; color: #666; font-weight: 700; font-size: 12px; border-radius: 6px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 5px;">
+              <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 21h18M3 10h18M5 10v11M19 10v11M9 10v11M15 10v11M12 2L2 7h20L12 2z"></path></svg>
+              <span>NetBanking</span>
+            </button>
+          </div>
+
+          <div id="rzpContentUpi">
+            <label style="display: block; font-size: 11.5px; font-weight: 700; color: #444; margin-bottom: 8px;">Select Instant UPI App</label>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 14px;">
+              <div class="rzp-upi-app selected" id="rzpAppGpay" onclick="selectRzpUpiApp('gpay', this)" style="border: 1.5px solid #0C75EB; background: #F0F7FF; padding: 10px 12px; border-radius: 8px; cursor: pointer; display: flex; align-items: center; gap: 8px; font-size: 12px; font-weight: 700; color: #0C2340;">
+                <span style="display: inline-flex; width: 18px; height: 18px; border-radius: 50%; background: #34A853; color: #FFF; font-size: 11px; align-items: center; justify-content: center; font-weight: 900;">G</span> <span>Google Pay</span>
+              </div>
+              <div class="rzp-upi-app" id="rzpAppPhonepe" onclick="selectRzpUpiApp('phonepe', this)" style="border: 1px solid #DDD; background: #FFF; padding: 10px 12px; border-radius: 8px; cursor: pointer; display: flex; align-items: center; gap: 8px; font-size: 12px; font-weight: 600; color: #444;">
+                <span style="display: inline-flex; width: 18px; height: 18px; border-radius: 50%; background: #5f259f; color: #FFF; font-size: 11px; align-items: center; justify-content: center; font-weight: 900;">Pe</span> <span>PhonePe</span>
+              </div>
+              <div class="rzp-upi-app" id="rzpAppPaytm" onclick="selectRzpUpiApp('paytm', this)" style="border: 1px solid #DDD; background: #FFF; padding: 10px 12px; border-radius: 8px; cursor: pointer; display: flex; align-items: center; gap: 8px; font-size: 12px; font-weight: 600; color: #444;">
+                <span style="display: inline-flex; width: 18px; height: 18px; border-radius: 50%; background: #00BAF2; color: #FFF; font-size: 10px; align-items: center; justify-content: center; font-weight: 900;">Py</span> <span>Paytm UPI</span>
+              </div>
+              <div class="rzp-upi-app" id="rzpAppBhim" onclick="selectRzpUpiApp('bhim', this)" style="border: 1px solid #DDD; background: #FFF; padding: 10px 12px; border-radius: 8px; cursor: pointer; display: flex; align-items: center; gap: 8px; font-size: 12px; font-weight: 600; color: #444;">
+                <span style="display: inline-flex; width: 18px; height: 18px; border-radius: 50%; background: #00796B; color: #FFF; font-size: 10px; align-items: center; justify-content: center; font-weight: 900;">B</span> <span>BHIM UPI</span>
+              </div>
+            </div>
+            <div style="margin-bottom: 16px;">
+              <label style="display: block; font-size: 11px; font-weight: 700; color: #555; margin-bottom: 4px;">Or Enter Any UPI ID (VPA)</label>
+              <input type="text" id="rzpCustomUpiId" placeholder="e.g. yourname@okhdfcbank" style="width: 100%; padding: 10px 12px; border: 1px solid #CCC; border-radius: 6px; font-size: 13px; outline: none;">
+            </div>
+          </div>
+
+          <div id="rzpContentCard" style="display: none;">
+            <div style="margin-bottom: 12px;">
+              <label style="display: block; font-size: 11px; font-weight: 700; color: #555; margin-bottom: 4px;">Card Number</label>
+              <input type="text" id="rzpCardNumber" placeholder="4532 •••• •••• ••••" maxlength="19" style="width: 100%; padding: 10px 12px; border: 1px solid #CCC; border-radius: 6px; font-size: 13px;">
+            </div>
+            <div style="display: flex; gap: 10px; margin-bottom: 16px;">
+              <div style="flex: 1;">
+                <label style="display: block; font-size: 11px; font-weight: 700; color: #555; margin-bottom: 4px;">Expiry (MM/YY)</label>
+                <input type="text" id="rzpCardExpiry" placeholder="MM/YY" maxlength="5" style="width: 100%; padding: 10px; border: 1px solid #CCC; border-radius: 6px; font-size: 13px;">
+              </div>
+              <div style="flex: 1;">
+                <label style="display: block; font-size: 11px; font-weight: 700; color: #555; margin-bottom: 4px;">CVV</label>
+                <input type="password" id="rzpCardCvv" placeholder="•••" maxlength="4" style="width: 100%; padding: 10px; border: 1px solid #CCC; border-radius: 6px; font-size: 13px;">
+              </div>
+            </div>
+          </div>
+
+          <div id="rzpContentNet" style="display: none;">
+            <label style="display: block; font-size: 11.5px; font-weight: 700; color: #444; margin-bottom: 8px;">Select Popular Bank</label>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 16px;">
+              <div class="rzp-bank-item selected" onclick="selectRzpBank('HDFC', this)" style="border: 1.5px solid #0C75EB; background: #F0F7FF; padding: 9px 12px; border-radius: 6px; cursor: pointer; font-size: 12px; font-weight: 700; color: #0C2340; display: flex; align-items: center; gap: 6px;">
+                <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 21h18M3 10h18M5 10v11M19 10v11M9 10v11M15 10v11M12 2L2 7h20L12 2z"></path></svg>
+                <span>HDFC Bank</span>
+              </div>
+              <div class="rzp-bank-item" onclick="selectRzpBank('SBI', this)" style="border: 1px solid #DDD; background: #FFF; padding: 9px 12px; border-radius: 6px; cursor: pointer; font-size: 12px; font-weight: 600; color: #444; display: flex; align-items: center; gap: 6px;">
+                <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 21h18M3 10h18M5 10v11M19 10v11M9 10v11M15 10v11M12 2L2 7h20L12 2z"></path></svg>
+                <span>State Bank of India</span>
+              </div>
+              <div class="rzp-bank-item" onclick="selectRzpBank('ICICI', this)" style="border: 1px solid #DDD; background: #FFF; padding: 9px 12px; border-radius: 6px; cursor: pointer; font-size: 12px; font-weight: 600; color: #444; display: flex; align-items: center; gap: 6px;">
+                <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 21h18M3 10h18M5 10v11M19 10v11M9 10v11M15 10v11M12 2L2 7h20L12 2z"></path></svg>
+                <span>ICICI Bank</span>
+              </div>
+              <div class="rzp-bank-item" onclick="selectRzpBank('Axis', this)" style="border: 1px solid #DDD; background: #FFF; padding: 9px 12px; border-radius: 6px; cursor: pointer; font-size: 12px; font-weight: 600; color: #444; display: flex; align-items: center; gap: 6px;">
+                <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 21h18M3 10h18M5 10v11M19 10v11M9 10v11M15 10v11M12 2L2 7h20L12 2z"></path></svg>
+                <span>Axis Bank</span>
+              </div>
+            </div>
+          </div>
+
+          <button type="button" onclick="processRazorpayPayment()" id="btnRzpSubmitPay" style="width: 100%; background: #0C75EB; color: #FFF; border: none; border-radius: 8px; padding: 14px; font-weight: 800; font-size: 14.5px; cursor: pointer; box-shadow: 0 4px 14px rgba(12,117,235,0.35); display: flex; align-items: center; justify-content: center; gap: 8px; transition: 0.2s;">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+            <span>Pay Securely via Razorpay</span>
+          </button>
+
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 14px; font-size: 11px; color: #777;">
+            <span style="display: inline-flex; align-items: center; gap: 5px;">
+              <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="#2E7D32" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+              <span>256-Bit Bank Encryption</span>
+            </span>
+            <button type="button" onclick="closeRazorpayGatewayModal()" style="background: none; border: none; color: #999; font-size: 12px; cursor: pointer; text-decoration: underline;">Cancel</button>
+          </div>
+        </div>
+
+        <div id="razorpayFlowProcessing" style="display: none; text-align: center; padding: 32px 14px;">
+          <div style="width: 44px; height: 44px; margin: 0 auto 14px; color: #0C75EB;">
+            <svg viewBox="0 0 24 24" width="44" height="44" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>
+          </div>
+          <h4 style="color: #0C2340; font-size: 16px; margin-bottom: 6px;" id="rzpStatusText">Connecting to Bank Gateway...</h4>
+          <p style="font-size: 12.5px; color: #666; line-height: 1.5;" id="rzpSubStatusText">Authenticating 3D Secure OTP &amp; Bank Authorisation...</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Javascript Logic -->
+  <script src="/js/app.js?v=13.0"></script>
+  <script>
+    // Dedicated Page-Level Cart Renderer
+    function renderCartPage() {
+      const itemsList = document.getElementById('cartPageItemsList');
+      const itemsCard = document.getElementById('cartPageItemsCard');
+      const emptyState = document.getElementById('cartPageEmptyState');
+      const summaryCol = document.getElementById('cartSummaryCol');
+      const countBadge = document.getElementById('cartPageCountBadge');
+      const subtotalEl = document.getElementById('cartPageSubtotal');
+      const discountRow = document.getElementById('cartPageDiscountRow');
+      const discountEl = document.getElementById('cartPageDiscount');
+      const shippingEl = document.getElementById('cartPageShipping');
+      const totalEl = document.getElementById('cartPageTotal');
+      const shippingNotice = document.getElementById('cartPageShippingNotice');
+      const shippingMsg = document.getElementById('cartShippingNoticeMsg');
+      const shippingBar = document.getElementById('cartPageShippingBar');
+
+      const cart = (window.state && window.state.cart) ? window.state.cart : (JSON.parse(localStorage.getItem('dwarkesh_cart') || '[]'));
+      const totalCount = cart.reduce((sum, item) => sum + (item.quantity || 1), 0);
+      
+      if (countBadge) countBadge.textContent = `${totalCount} item${totalCount !== 1 ? 's' : ''}`;
+
+      const threshold = 999;
+      const standardFee = 99;
+
+      if (!cart || cart.length === 0) {
+        if (itemsCard) itemsCard.style.display = 'none';
+        if (summaryCol) summaryCol.style.display = 'none';
+        if (emptyState) emptyState.style.display = 'block';
+        if (shippingNotice) shippingNotice.style.display = 'none';
+        return;
+      }
+
+      if (itemsCard) itemsCard.style.display = 'block';
+      if (summaryCol) summaryCol.style.display = 'block';
+      if (emptyState) emptyState.style.display = 'none';
+      if (shippingNotice) shippingNotice.style.display = 'block';
+
+      const subtotal = cart.reduce((sum, item) => sum + (Number(item.price) * Number(item.quantity)), 0);
+      const remaining = Math.max(0, threshold - subtotal);
+      const progressPercent = Math.min(100, (subtotal / threshold) * 100);
+
+      if (shippingBar) shippingBar.style.width = `${progressPercent}%`;
+      if (shippingMsg) {
+        if (remaining === 0) {
+          shippingMsg.innerHTML = '<span style="color: #2E7D32; font-weight: 800;">🎉 You unlocked FREE Delivery across India!</span>';
+        } else {
+          shippingMsg.innerHTML = `Add <strong>₹${remaining.toLocaleString('en-IN')}</strong> more for FREE Delivery!`;
+        }
+      }
+
+      const shippingFee = remaining === 0 ? 0 : standardFee;
+      if (shippingEl) {
+        shippingEl.textContent = remaining === 0 ? 'FREE' : `₹${shippingFee}`;
+      }
+
+      let discount = 0;
+      if (window.state && window.state.appliedCoupon) {
+        discount = Math.round((subtotal * 10) / 100);
+        if (discountRow) discountRow.style.display = 'flex';
+        if (discountEl) discountEl.textContent = `-₹${discount.toLocaleString('en-IN')}`;
+      } else {
+        if (discountRow) discountRow.style.display = 'none';
+      }
+
+      const grandTotal = Math.max(0, subtotal - discount + shippingFee);
+      if (subtotalEl) subtotalEl.textContent = `₹${subtotal.toLocaleString('en-IN')}`;
+      if (totalEl) totalEl.textContent = `₹${grandTotal.toLocaleString('en-IN')}`;
+
+      if (itemsList) {
+        itemsList.innerHTML = cart.map((item, index) => {
+          const itemImg = (typeof getProductImageUrl === 'function') ? getProductImageUrl(item) : (item.image_url || '/images/products/wild_forest_honey.jpg');
+          const packLabel = item.variantLabel || item.selectedVariant || 'Standard';
+          const lineTotal = Number(item.price) * Number(item.quantity);
+
+          return `
+            <div class="cart-page-item">
+              <img src="${itemImg}" alt="${item.title}" class="cart-page-item-img" onerror="this.onerror=null; this.src='/images/products/wild_forest_honey.jpg'">
+              
+              <div class="cart-page-item-details">
+                <div class="cart-page-item-title">${item.title}</div>
+                <div class="cart-page-item-variant">Pack: <strong>${packLabel}</strong></div>
+                
+                <div class="cart-page-item-actions">
+                  <div class="cart-stepper">
+                    <button type="button" class="cart-stepper-btn" onclick="modifyCartPageItem(${index}, -1)" aria-label="Decrease">&minus;</button>
+                    <span class="cart-stepper-qty">${item.quantity}</span>
+                    <button type="button" class="cart-stepper-btn" onclick="modifyCartPageItem(${index}, 1)" aria-label="Increase">&plus;</button>
+                  </div>
+
+                  <button type="button" class="cart-item-remove-link" onclick="removeCartPageItem(${index})">
+                    <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                    <span>Remove</span>
+                  </button>
+                </div>
+              </div>
+
+              <div class="cart-item-price-block">
+                <div class="cart-item-total-price">₹${lineTotal.toLocaleString('en-IN')}</div>
+                <div style="font-size: 11.5px; color: #888;">₹${Number(item.price).toLocaleString('en-IN')} each</div>
+              </div>
+            </div>
+          `;
+        }).join('');
+      }
+    }
+
+    function modifyCartPageItem(index, delta) {
+      if (typeof updateItemQuantity === 'function') {
+        updateItemQuantity(index, delta);
+      } else if (window.state && window.state.cart) {
+        window.state.cart[index].quantity += delta;
+        if (window.state.cart[index].quantity <= 0) {
+          window.state.cart.splice(index, 1);
+        }
+        localStorage.setItem('dwarkesh_cart', JSON.stringify(window.state.cart));
+      }
+      renderCartPage();
+    }
+
+    function removeCartPageItem(index) {
+      if (typeof removeCartItem === 'function') {
+        removeCartItem(index);
+      } else if (window.state && window.state.cart) {
+        window.state.cart.splice(index, 1);
+        localStorage.setItem('dwarkesh_cart', JSON.stringify(window.state.cart));
+      }
+      renderCartPage();
+    }
+
+    function applyCartPageCoupon() {
+      const input = document.getElementById('cartPageCouponInput');
+      const msg = document.getElementById('cartPageCouponMsg');
+      if (!input || !msg) return;
+
+      const code = (input.value || '').trim().toUpperCase();
+      if (!code) {
+        msg.textContent = 'Please enter a coupon code.';
+        msg.style.color = '#D32F2F';
+        msg.style.display = 'block';
+        return;
+      }
+
+      if (code === 'DWARKESH10' || code === 'MESHWO10' || code === 'TRIBAL10') {
+        if (window.state) window.state.appliedCoupon = code;
+        msg.textContent = `Coupon ${code} applied! 10% instant discount.`;
+        msg.style.color = '#2E7D32';
+        msg.style.display = 'block';
+        renderCartPage();
+      } else {
+        msg.textContent = 'Invalid coupon code. Try DWARKESH10';
+        msg.style.color = '#D32F2F';
+        msg.style.display = 'block';
+      }
+    }
+
+    // Auto load on ready
+    window.addEventListener('DOMContentLoaded', () => {
+      setTimeout(renderCartPage, 100);
+      setTimeout(renderCartPage, 600); // Re-sync after products fetch
+    });
+  </script>
+</body>
+
+</html>

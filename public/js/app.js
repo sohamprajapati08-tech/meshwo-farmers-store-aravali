@@ -402,7 +402,59 @@ function handleAddToCart(productId) {
   saveCart();
   updateCartBadge();
   renderCartDrawer();
-  openCartDrawer();
+  if (typeof renderCartPage === 'function') renderCartPage();
+
+  if (window.innerWidth <= 960) {
+    showMobileCartToast(product.title);
+  } else {
+    openCartDrawer();
+  }
+}
+
+function showMobileCartToast(productTitle) {
+  let toast = document.getElementById('mobileCartToast');
+  if (!toast) {
+    toast = document.createElement('div');
+    toast.id = 'mobileCartToast';
+    toast.style.cssText = `
+      position: fixed;
+      bottom: 16px;
+      left: 14px;
+      right: 14px;
+      background: #1C2B18;
+      color: #FFFFFF;
+      padding: 12px 16px;
+      border-radius: 10px;
+      box-shadow: 0 8px 28px rgba(0,0,0,0.35);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      z-index: 99999;
+      transform: translateY(140%);
+      transition: transform 0.28s ease;
+      font-size: 13px;
+      font-weight: 600;
+    `;
+    document.body.appendChild(toast);
+  }
+
+  const shortTitle = productTitle ? (productTitle.length > 22 ? productTitle.slice(0, 20) + '...' : productTitle) : 'Harvest';
+  toast.innerHTML = `
+    <div style="display: flex; align-items: center; gap: 8px;">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#00E676" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>
+      <span>Added <strong>${shortTitle}</strong></span>
+    </div>
+    <a href="/cart.html" style="background: var(--accent-gold); color: #351F0E; padding: 7px 14px; border-radius: 6px; text-decoration: none; font-weight: 800; font-size: 11.5px; white-space: nowrap; display: inline-flex; align-items: center; gap: 4px;">
+      <span>VIEW CART</span> &rarr;
+    </a>
+  `;
+
+  toast.style.transform = 'translateY(0)';
+  clearTimeout(window._mobileCartToastTimer);
+  window._mobileCartToastTimer = setTimeout(() => {
+    toast.style.transform = 'translateY(140%)';
+  }, 4000);
 }
 
 function saveCart() {
@@ -441,6 +493,10 @@ function toggleMobileDrawer() {
 
 // Open / Close Cart Drawer
 function openCartDrawer() {
+  if (window.innerWidth <= 960) {
+    window.location.href = '/cart.html';
+    return;
+  }
   if (typeof syncCartWithLiveProducts === 'function') {
     try { syncCartWithLiveProducts(); } catch (e) { console.warn('Sync error:', e); }
   }
@@ -575,6 +631,7 @@ function updateItemQuantity(index, delta) {
   saveCart();
   updateCartBadge();
   renderCartDrawer();
+  if (typeof renderCartPage === 'function') renderCartPage();
 }
 
 function removeCartItem(index) {
@@ -582,6 +639,7 @@ function removeCartItem(index) {
   saveCart();
   updateCartBadge();
   renderCartDrawer();
+  if (typeof renderCartPage === 'function') renderCartPage();
 }
 
 function applyCoupon() {
