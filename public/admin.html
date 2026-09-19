@@ -1,0 +1,873 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MESHWO FARMERS Admin Console | Products, Orders & Settings</title>
+  <link rel="icon" href="/images/meshwo_logo.jpg">
+  <link rel="stylesheet" href="/css/admin.css?v=2.5">
+</head>
+<body>
+
+  <!-- Admin Login Overlay (Default: admin001 / admin@001) -->
+  <div id="adminLoginOverlay" style="position: fixed; inset: 0; background: linear-gradient(135deg, #351F0E 0%, #4A2E18 100%); z-index: 9999; display: flex; align-items: center; justify-content: center; padding: 20px;">
+    <div style="background: #FFFFFF; border-radius: 12px; padding: 36px 30px; max-width: 400px; width: 100%; box-shadow: 0 20px 50px rgba(0,0,0,0.3); text-align: center;">
+      <img src="/images/meshwo_logo.jpg" alt="MESHWO FARMERS" style="width: 60px; height: 60px; border-radius: 50%; margin: 0 auto 10px; object-fit: cover;">
+      <h2 style="font-family: 'Montserrat', sans-serif; color: #4A2E18; margin-bottom: 4px;">MESHWO FARMERS</h2>
+      <p style="font-size: 11.5px; color: #666; margin-bottom: 24px;">Tribal Women Farmers Aravalli &bull; Admin Console</p>
+
+      <form onsubmit="handleAdminLogin(event)">
+        <div style="text-align: left; margin-bottom: 16px;">
+          <label style="display: block; font-size: 12px; font-weight: 700; color: #4A2E18; margin-bottom: 6px;">Admin Username</label>
+          <input type="text" id="adminLoginUser" class="admin-form-input" placeholder="admin001" required autofocus>
+        </div>
+        <div style="text-align: left; margin-bottom: 20px;">
+          <label style="display: block; font-size: 12px; font-weight: 700; color: #4A2E18; margin-bottom: 6px;">Password</label>
+          <input type="password" id="adminLoginPass" class="admin-form-input" placeholder="admin@001" required>
+        </div>
+        <button type="submit" class="btn-admin" style="width: 100%; justify-content: center; padding: 12px; background: #4A2E18;">
+          Sign In to Portal
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Admin Sidebar -->
+  <aside class="admin-sidebar">
+    <div class="admin-brand">
+      <img src="/images/meshwo_logo.jpg" alt="MESHWO FARMERS" style="width: 38px; height: 38px; border-radius: 50%; object-fit: cover;">
+      <div>
+        <div class="brand-text">MESHWO</div>
+        <div class="brand-sub">FARMERS ADMIN</div>
+      </div>
+    </div>
+
+    <ul class="admin-nav">
+      <li>
+        <a class="admin-nav-link active" onclick="switchAdminTab('dashboard', this)">
+          <span class="admin-nav-icon">📊</span>
+          <span>Dashboard</span>
+        </a>
+      </li>
+      <li>
+        <a class="admin-nav-link" onclick="switchAdminTab('products', this)">
+          <span class="admin-nav-icon">📦</span>
+          <span>Products (CRUD)</span>
+        </a>
+      </li>
+      <li>
+        <a class="admin-nav-link" onclick="switchAdminTab('categories', this)">
+          <span class="admin-nav-icon">🏷️</span>
+          <span>Categories (CRUD)</span>
+        </a>
+      </li>
+      <li>
+        <a class="admin-nav-link" onclick="switchAdminTab('labreports', this)">
+          <span class="admin-nav-icon">🔬</span>
+          <span>Lab Reports (CRUD)</span>
+        </a>
+      </li>
+      <li>
+        <a class="admin-nav-link" onclick="switchAdminTab('orders', this)">
+          <span class="admin-nav-icon">📋</span>
+          <span>Orders & Dispatch</span>
+        </a>
+      </li>
+      <li>
+        <a class="admin-nav-link" onclick="switchAdminTab('hero', this)">
+          <span class="admin-nav-icon">🖼️</span>
+          <span>Hero Banner Poster</span>
+        </a>
+      </li>
+      <li>
+        <a class="admin-nav-link" onclick="switchAdminTab('payments', this)">
+          <span class="admin-nav-icon">💳</span>
+          <span>Payment Gateways</span>
+        </a>
+      </li>
+      <li>
+        <a class="admin-nav-link" onclick="switchAdminTab('sheets', this)">
+          <span class="admin-nav-icon">📊</span>
+          <span>Google Sheets Sync</span>
+        </a>
+      </li>
+      <li>
+        <a class="admin-nav-link" onclick="switchAdminTab('settings', this)">
+          <span class="admin-nav-icon">⚙️</span>
+          <span>Store & Security</span>
+        </a>
+      </li>
+    </ul>
+
+    <div style="margin-top: auto; display: flex; flex-direction: column; gap: 8px;">
+      <a href="/" class="back-to-store-btn" target="_blank">
+        <span>🏪</span>
+        <span>View Live Storefront &rarr;</span>
+      </a>
+      <button onclick="handleAdminLogout()" class="back-to-store-btn" style="background: rgba(211, 47, 47, 0.2); color: #FFCDD2; border: none; cursor: pointer;">
+        <span>🚪</span>
+        <span>Sign Out</span>
+      </button>
+    </div>
+  </aside>
+
+  <!-- Main Content -->
+  <main class="admin-main">
+    <header class="admin-topbar">
+      <h1 class="page-title" id="pageTitle">Dashboard Overview</h1>
+      <div class="admin-user-pill">
+        <span>👨‍🌾</span>
+        <span id="adminUsernameDisplay">admin001</span>
+      </div>
+    </header>
+
+    <div class="admin-container">
+
+      <!-- ========================================================
+           TAB 1: DASHBOARD OVERVIEW
+           ======================================================== -->
+      <section id="tab-dashboard" class="tab-content active">
+        <div class="kpi-grid">
+          <div class="kpi-card">
+            <div class="kpi-icon-box kpi-revenue">₹</div>
+            <div>
+              <div class="kpi-value" id="kpiRevenue">₹0</div>
+              <div class="kpi-label">Total Gross Sales</div>
+            </div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-icon-box kpi-orders">📦</div>
+            <div>
+              <div class="kpi-value" id="kpiOrders">0</div>
+              <div class="kpi-label">Total Customer Orders</div>
+            </div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-icon-box kpi-products">🌾</div>
+            <div>
+              <div class="kpi-value" id="kpiProducts">0</div>
+              <div class="kpi-label">Active Products in Catalog</div>
+            </div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-icon-box kpi-alerts">⚠️</div>
+            <div>
+              <div class="kpi-value" id="kpiAlerts">0</div>
+              <div class="kpi-label">Low Stock Notifications</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="admin-card">
+          <div class="card-header-flex">
+            <h2 class="card-heading">Recent Customer Orders</h2>
+            <button class="btn-admin btn-admin-secondary" onclick="switchAdminTab('orders')">
+              View All Orders &rarr;
+            </button>
+          </div>
+          <div class="table-responsive">
+            <table class="admin-table">
+              <thead>
+                <tr>
+                  <th>Order #</th>
+                  <th>Customer</th>
+                  <th>Amount</th>
+                  <th>Status</th>
+                  <th>Date & Time</th>
+                </tr>
+              </thead>
+              <tbody id="recentOrdersTbody">
+                <tr><td colspan="5" style="text-align: center;">Loading orders...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- ========================================================
+           TAB 2: MANAGE PRODUCTS (FULL CRUD + RELIABLE DELETE)
+           ======================================================== -->
+      <section id="tab-products" class="tab-content">
+        <div class="admin-card">
+          <div class="card-header-flex">
+            <div>
+              <h2 class="card-heading">Farm Product Catalog (CRUD)</h2>
+              <p style="font-size: 13px; color: var(--admin-text-muted); margin-top: 4px;">
+                Add new products, edit price/stock/information, or permanently delete items. Changes sync immediately with the database.
+              </p>
+            </div>
+            <button class="btn-admin" onclick="openAddProductModal()">
+              <span>➕</span>
+              <span>Add New Product</span>
+            </button>
+          </div>
+
+          <div style="display: flex; gap: 12px; margin-bottom: 20px; flex-wrap: wrap;">
+            <input type="text" id="adminProductSearch" class="admin-form-input" style="max-width: 300px;" placeholder="Search products by title..." oninput="handleAdminProductSearch(this.value)">
+            <select id="adminCategoryFilter" class="admin-form-select" style="max-width: 220px;" onchange="handleAdminCategoryFilter(this.value)">
+              <option value="all">All Categories</option>
+              <option value="a2-ghee">A2 Ghee & Bilona Dairy</option>
+              <option value="wood-pressed-oils">Wood Pressed Oils</option>
+              <option value="atta-grains">Ancient Atta & Grains</option>
+              <option value="sweeteners">Raw Honey & Jaggery</option>
+              <option value="immunity">Ayurveda & Immunity</option>
+              <option value="snacks">Healthy Farm Snacks</option>
+            </select>
+          </div>
+
+          <div class="table-responsive">
+            <table class="admin-table">
+              <thead>
+                <tr>
+                  <th>Image</th>
+                  <th>Title</th>
+                  <th>Category</th>
+                  <th>Price</th>
+                  <th>MRP</th>
+                  <th>Stock</th>
+                  <th>Badge</th>
+                  <th>Rating</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="adminProductsTbody">
+                <tr><td colspan="9" style="text-align: center;">Loading catalog...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- ========================================================
+           TAB 3: CUSTOMER ORDERS MANAGEMENT
+           ======================================================== -->
+      <section id="tab-orders" class="tab-content">
+        <div class="admin-card">
+          <div class="card-header-flex">
+            <div>
+              <h2 class="card-heading">Customer Orders & Dispatch</h2>
+              <p style="font-size: 13px; color: var(--admin-text-muted); margin-top: 4px;">
+                Update order delivery status live (Pending, Processing, Shipped, Delivered, Cancelled).
+              </p>
+            </div>
+            <select id="adminOrderStatusFilter" class="admin-form-select" style="max-width: 200px;" onchange="fetchAdminOrders(this.value)">
+              <option value="all">All Statuses</option>
+              <option value="Pending">Pending</option>
+              <option value="Processing">Processing</option>
+              <option value="Shipped">Shipped</option>
+              <option value="Delivered">Delivered</option>
+              <option value="Cancelled">Cancelled</option>
+            </select>
+          </div>
+
+          <div class="table-responsive">
+            <table class="admin-table">
+              <thead>
+                <tr>
+                  <th>Order #</th>
+                  <th>Date</th>
+                  <th>Customer Info</th>
+                  <th>Shipping Address</th>
+                  <th>Items Ordered</th>
+                  <th>Total Amount</th>
+                  <th>Payment</th>
+                  <th>Status (Change Live)</th>
+                </tr>
+              </thead>
+              <tbody id="adminOrdersTbody">
+                <tr><td colspan="8" style="text-align: center;">Loading orders...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- ========================================================
+           TAB 3: CATEGORIES MANAGEMENT (ADD & DELETE)
+           ======================================================== -->
+      <section id="tab-categories" class="tab-content">
+        <div class="admin-card" style="max-width: 960px;">
+          <div class="card-header-flex">
+            <div>
+              <h2 class="card-heading">Store Categories Management</h2>
+              <p style="font-size: 13px; color: var(--admin-text-muted); margin-top: 4px;">
+                Add new categories or delete unused categories. Categories control the mega-menu and storefront filters.
+              </p>
+            </div>
+          </div>
+
+          <!-- Add Category Form -->
+          <div style="background: #F8FAF6; border: 1.5px solid var(--admin-border); border-radius: 8px; padding: 20px; margin-bottom: 24px;">
+            <h3 style="font-size: 15px; color: var(--admin-primary); margin-bottom: 14px;">+ Add New Category</h3>
+            <form onsubmit="handleCreateCategory(event)">
+              <div class="admin-grid-2">
+                <div class="admin-form-group">
+                  <label class="admin-form-label">Category Name *</label>
+                  <input type="text" id="newCatName" class="admin-form-input" placeholder="e.g. Cold Pressed Oils" required>
+                </div>
+                <div class="admin-form-group">
+                  <label class="admin-form-label">Slug (URL identifier) *</label>
+                  <input type="text" id="newCatSlug" class="admin-form-input" placeholder="e.g. wood-pressed-oils" required>
+                </div>
+              </div>
+              <div class="admin-grid-2">
+                <div class="admin-form-group">
+                  <label class="admin-form-label">Icon / Symbol</label>
+                  <input type="text" id="newCatIcon" class="admin-form-input" placeholder="e.g. 🫒" value="🌾">
+                </div>
+                <div class="admin-form-group">
+                  <label class="admin-form-label">Tagline Description</label>
+                  <input type="text" id="newCatTagline" class="admin-form-input" placeholder="e.g. Traditional Wood Pressed Lakdi Ghani">
+                </div>
+              </div>
+              <button type="submit" class="btn-admin" style="margin-top: 4px;">
+                <span>+</span>
+                <span>Create Category</span>
+              </button>
+            </form>
+          </div>
+
+          <!-- Categories List Table -->
+          <div class="table-responsive">
+            <table class="admin-table">
+              <thead>
+                <tr>
+                  <th>ID</th>
+                  <th>Icon</th>
+                  <th>Category Name</th>
+                  <th>Slug</th>
+                  <th>Tagline</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="adminCategoriesTbody">
+                <tr><td colspan="6" style="text-align: center;">Loading categories...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- ========================================================
+           TAB 4: LAB REPORTS MANAGEMENT (ADD & DELETE)
+           ======================================================== -->
+      <section id="tab-labreports" class="tab-content">
+        <div class="admin-card" style="max-width: 1060px;">
+          <div class="card-header-flex">
+            <div>
+              <h2 class="card-heading">Farm Lab Reports & Purity Certificates</h2>
+              <p style="font-size: 13px; color: var(--admin-text-muted); margin-top: 4px;">
+                Publish accredited laboratory test reports for farm batches or delete obsolete reports. Users can view and download official NABL certificates on the storefront under Farm Life.
+              </p>
+            </div>
+          </div>
+
+          <!-- Add Lab Report Form -->
+          <div style="background: #F8FAF6; border: 1.5px solid var(--admin-border); border-radius: 8px; padding: 20px; margin-bottom: 24px;">
+            <h3 style="font-size: 15px; color: var(--admin-primary); margin-bottom: 14px;">+ Add New Lab Report</h3>
+            <form onsubmit="handleCreateLabReport(event)">
+              <div class="admin-grid-2">
+                <div class="admin-form-group">
+                  <label class="admin-form-label">Harvest Product Title *</label>
+                  <input type="text" id="newReportTitle" class="admin-form-input" placeholder="e.g. A2 Gir Cow Cultured Bilona Ghee" required>
+                </div>
+                <div class="admin-form-group">
+                  <label class="admin-form-label">Batch Code / Number *</label>
+                  <input type="text" id="newReportBatch" class="admin-form-input" placeholder="e.g. DF-GIR-2026-B9" required>
+                </div>
+              </div>
+              <div class="admin-grid-2">
+                <div class="admin-form-group">
+                  <label class="admin-form-label">Harvest & Testing Date</label>
+                  <input type="text" id="newReportDate" class="admin-form-input" placeholder="e.g. August 2026 Harvest" value="Current Harvest 2026">
+                </div>
+                <div class="admin-form-group">
+                  <label class="admin-form-label">Testing Laboratory Name</label>
+                  <input type="text" id="newReportLab" class="admin-form-input" placeholder="e.g. NABL Accredited Food Safety Lab #941" value="NABL Accredited Food Safety Laboratory #941">
+                </div>
+              </div>
+              <div class="admin-grid-2">
+                <div class="admin-form-group">
+                  <label class="admin-form-label">Test Parameters (Tested For)</label>
+                  <input type="text" id="newReportParams" class="admin-form-input" placeholder="e.g. A2 Beta-Casein, 0% Palm Oil, RM Value > 28, Zero Pesticides" value="A2 Beta-Casein, 0% Palm Oil, RM Value > 28, Zero Glyphosate">
+                </div>
+                <div class="admin-form-group">
+                  <label class="admin-form-label">Result Status</label>
+                  <input type="text" id="newReportStatus" class="admin-form-input" placeholder="e.g. PASS (100% Pure)" value="PASS (100% Pure & Vedic)">
+                </div>
+              </div>
+              <button type="submit" class="btn-admin" style="margin-top: 4px;">
+                <span>+</span>
+                <span>Publish Lab Report</span>
+              </button>
+            </form>
+          </div>
+
+          <!-- Lab Reports List Table -->
+          <div class="table-responsive">
+            <table class="admin-table">
+              <thead>
+                <tr>
+                  <th>ID</th>
+                  <th>Product Title</th>
+                  <th>Batch Code</th>
+                  <th>Testing Lab</th>
+                  <th>Test Parameters</th>
+                  <th>Status</th>
+                  <th>Official Certificate</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="adminLabReportsTbody">
+                <tr><td colspan="8" style="text-align: center;">Loading lab reports...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- ========================================================
+           TAB 4: HERO SECTION POSTER BANNER MANAGEMENT
+           ======================================================== -->
+      <section id="tab-hero" class="tab-content">
+        <div class="admin-card" style="max-width: 860px;">
+          <h2 class="card-heading" style="margin-bottom: 6px;">Hero Section Promotional Poster Management</h2>
+          <p style="font-size: 13px; color: var(--admin-text-muted); margin-bottom: 20px;">
+            Customize the main banner image, headline, and promotional text shown at the top of the storefront.
+          </p>
+
+          <form onsubmit="handleSaveHeroPoster(event)">
+            <div class="admin-form-group">
+              <label class="admin-form-label">Poster Image (Choose File from Computer or Enter URL) *</label>
+              <div style="display: flex; gap: 8px;">
+                <input type="text" id="heroPosterUrl" class="admin-form-input" required placeholder="/images/dwarkesh-farm-poster.jpg" oninput="document.getElementById('posterLivePreview').src = this.value">
+                <label class="btn-admin btn-admin-secondary" style="white-space: nowrap; cursor: pointer; display: flex; align-items: center; gap: 6px;">
+                  📁 Choose File
+                  <input type="file" accept="image/*" style="display: none;" onchange="uploadImageFromFile(this, 'heroPosterUrl', 'posterLivePreview')">
+                </label>
+              </div>
+            </div>
+
+            <div class="admin-grid-2">
+              <div class="admin-form-group">
+                <label class="admin-form-label">Badge Tag (e.g. PERMANENT PRICE DROP)</label>
+                <input type="text" id="heroPosterBadge" class="admin-form-input">
+              </div>
+              <div class="admin-form-group">
+                <label class="admin-form-label">Button Text</label>
+                <input type="text" id="heroPosterButtonText" class="admin-form-input" placeholder="Explore Farm Harvest">
+              </div>
+            </div>
+
+            <div class="admin-form-group">
+              <label class="admin-form-label">Headline / Title *</label>
+              <input type="text" id="heroPosterTitle" class="admin-form-input" required>
+            </div>
+
+            <div class="admin-form-group">
+              <label class="admin-form-label">Subtitle Description *</label>
+              <textarea id="heroPosterSubtitle" class="admin-form-textarea" rows="3" required></textarea>
+            </div>
+
+            <!-- Live Preview -->
+            <div style="margin-top: 14px; margin-bottom: 20px;">
+              <label class="admin-form-label">Poster Image Preview:</label>
+              <img id="posterLivePreview" src="" alt="Preview" style="width: 100%; max-height: 220px; object-fit: cover; border-radius: 8px; border: 1px solid var(--admin-border);">
+            </div>
+
+            <button type="submit" class="btn-admin">
+              <span>💾</span>
+              <span>Save & Update Hero Poster</span>
+            </button>
+          </form>
+        </div>
+      </section>
+
+      <!-- ========================================================
+           TAB 5: PAYMENT GATEWAYS MANAGEMENT (UPI, RAZORPAY, PAYPAL, COD)
+           ======================================================== -->
+      <section id="tab-payments" class="tab-content">
+        <div class="admin-card" style="max-width: 860px;">
+          <h2 class="card-heading" style="margin-bottom: 6px;">Payment Gateways Configuration</h2>
+          <p style="font-size: 13px; color: var(--admin-text-muted); margin-bottom: 20px;">
+            Configure your UPI ID, QR code image, Razorpay credentials, and PayPal merchant email. These details are used live in checkout.
+          </p>
+
+          <form onsubmit="handleSavePaymentSettings(event)">
+            <!-- UPI Settings -->
+            <div style="background: #F8FAF6; border: 1px solid var(--admin-border); border-radius: 8px; padding: 18px; margin-bottom: 18px;">
+              <h3 style="font-size: 15px; color: var(--admin-primary); margin-bottom: 12px;">📱 UPI / QR Code Settings</h3>
+              <div class="admin-grid-2">
+                <div class="admin-form-group">
+                  <label class="admin-form-label">UPI ID (e.g. yourname@okaxis)</label>
+                  <input type="text" id="adminUpiId" class="admin-form-input" placeholder="sohamprajapati08@okicici">
+                </div>
+                <div class="admin-form-group">
+                  <label class="admin-form-label">UPI QR Code Image (Upload or URL)</label>
+                  <div style="display: flex; gap: 8px;">
+                    <input type="text" id="adminUpiQr" class="admin-form-input" placeholder="/uploads/upi_qr.jpeg" oninput="document.getElementById('adminUpiQrPreview').src = this.value">
+                    <label class="btn-admin btn-admin-secondary" style="white-space: nowrap; cursor: pointer; display: flex; align-items: center; gap: 6px;">
+                      📁 Choose File
+                      <input type="file" accept="image/*" style="display: none;" onchange="uploadImageFromFile(this, 'adminUpiQr', 'adminUpiQrPreview')">
+                    </label>
+                  </div>
+                  <div style="margin-top: 8px; display: flex; align-items: center; gap: 10px;">
+                    <img id="adminUpiQrPreview" src="/uploads/upi_qr.jpeg" alt="QR Preview" style="width: 75px; height: 75px; object-fit: contain; border: 1px solid var(--admin-border); border-radius: 4px; background: #FFF;" onerror="this.onerror=null; this.src='/images/dwarkesh_upi_qr.png';">
+                    <span style="font-size: 11.5px; color: var(--admin-text-muted);">Current QR code customers scan during checkout.</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Razorpay Settings (100% Automated Bank Verified) -->
+            <div style="background: #F8FAF6; border: 1.5px solid #0C75EB; border-radius: 8px; padding: 18px; margin-bottom: 18px;">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; flex-wrap: wrap; gap: 8px;">
+                <h3 style="font-size: 15px; color: #0C2340; margin: 0; display: flex; align-items: center; gap: 8px;">
+                  <span>⚡ Razorpay Real-Time Bank Gateway</span>
+                  <span style="font-size: 11px; background: #E8F5E9; color: #2E7D32; padding: 3px 8px; border-radius: 12px; font-weight: 800;">100% Anti-Fraud Verified</span>
+                </h3>
+                <label style="font-size: 12.5px; display: flex; align-items: center; gap: 6px; cursor: pointer; font-weight: 700; color: #0C2340;">
+                  <input type="checkbox" id="adminRazorpayActive" checked style="width: 16px; height: 16px; accent-color: #0C75EB;">
+                  <span>Enable Razorpay on Checkout</span>
+                </label>
+              </div>
+
+              <div class="admin-grid-2">
+                <div class="admin-form-group">
+                  <label class="admin-form-label">Razorpay Key ID (rzp_live_... / rzp_test_...)</label>
+                  <input type="text" id="adminRazorpayKeyId" class="admin-form-input" placeholder="rzp_live_xxxxxxxxxxxxx">
+                  <!-- Hidden sync input for backwards compatibility -->
+                  <input type="hidden" id="adminRazorpayKey">
+                </div>
+                <div class="admin-form-group">
+                  <label class="admin-form-label">Razorpay Key Secret (Private HMAC Secret)</label>
+                  <div style="display: flex; gap: 6px;">
+                    <input type="password" id="adminRazorpayKeySecret" class="admin-form-input" placeholder="••••••••••••••••••••••••">
+                    <button type="button" onclick="toggleSecretVisibility('adminRazorpayKeySecret', this)" class="btn-admin btn-admin-secondary" style="padding: 0 12px; font-size: 12px; white-space: nowrap;">👁️</button>
+                  </div>
+                </div>
+              </div>
+
+              <div style="display: flex; gap: 12px; align-items: center; margin-top: 14px; flex-wrap: wrap;">
+                <button type="button" onclick="testRazorpayCredentials()" id="btnTestRazorpay" class="btn-admin" style="background: #0C2340; color: #FFF; font-size: 12px; padding: 9px 18px; border-radius: 6px; font-weight: 700;">
+                  <span>⚡ Test Razorpay Connection</span>
+                </button>
+                <div id="razorpayTestStatus" style="font-size: 12.5px; font-weight: 700; display: inline-block;"></div>
+              </div>
+
+              <div style="margin-top: 14px; font-size: 12px; color: #444; line-height: 1.6; background: #FFFFFF; padding: 12px 16px; border-radius: 6px; border: 1px dashed #B0C4DE;">
+                ℹ️ <strong>How to get your Razorpay Keys:</strong><br>
+                1. Log in to <a href="https://dashboard.razorpay.com/app/keys" target="_blank" style="color: #0C75EB; font-weight: 700; text-decoration: underline;">Razorpay Dashboard (dashboard.razorpay.com)</a>.<br>
+                2. In the left sidebar, click <strong>Settings &rarr; API Keys</strong>.<br>
+                3. Click <strong>Generate Key</strong> (or Regenerate Key) to get your <strong>Key ID</strong> and <strong>Key Secret</strong>.<br>
+                4. Paste both keys above and click <strong>Test Razorpay Connection</strong>, then click <strong>Save Payment Gateways</strong> below.<br>
+                🛡️ <em>When active, customer orders are verified by Razorpay's bank servers using HMAC SHA256 cryptographic signatures. Fake orders or unverified payments are blocked 100%.</em>
+              </div>
+            </div>
+
+            <!-- PayPal Settings -->
+            <div style="background: #F8FAF6; border: 1px solid var(--admin-border); border-radius: 8px; padding: 18px; margin-bottom: 18px;">
+              <h3 style="font-size: 15px; color: var(--admin-primary); margin-bottom: 12px;">🌐 PayPal Payment Gateway</h3>
+              <div class="admin-form-group">
+                <label class="admin-form-label">PayPal Merchant Email / Client ID</label>
+                <input type="email" id="adminPaypalEmail" class="admin-form-input" placeholder="payments@dwarkeshorganic.com">
+              </div>
+            </div>
+
+            <button type="submit" class="btn-admin">
+              <span>💾</span>
+              <span>Save Payment Gateways</span>
+            </button>
+          </form>
+        </div>
+      </section>
+
+      <!-- ========================================================
+           TAB 7: GOOGLE SHEETS AUTOMATED SYNC
+           ======================================================== -->
+      <section id="tab-sheets" class="tab-content">
+        <div class="admin-card" style="max-width: 960px;">
+          <div class="card-header-flex">
+            <div>
+              <h2 class="card-heading">📊 Google Sheets Automatic Data Sync</h2>
+              <p style="font-size: 13px; color: var(--admin-text-muted); margin-top: 4px;">
+                ઓર્ડર્સ અને કસ્ટમર ડેટા ઓટોમેટિક તમારી Google Sheet માં સેવ થશે. કોઈએ મેન્યુઅલી લખવાની જરૂર નથી!
+              </p>
+            </div>
+            <span id="sheetStatusBadge" class="order-badge" style="background: #E8F5E9; color: #2E7D32; font-size: 12px; padding: 6px 14px; font-weight: 700;">
+              ⚡ Ready for Webhook
+            </span>
+          </div>
+
+          <!-- Webhook Settings Form -->
+          <div style="background: #F8FAF6; border: 1.5px solid var(--admin-border); border-radius: 8px; padding: 22px; margin-bottom: 24px;">
+            <h3 style="font-size: 15px; color: var(--admin-primary); margin-bottom: 8px;">🔗 Google Apps Script Webhook URL</h3>
+            <p style="font-size: 12.5px; color: #555; margin-bottom: 16px; line-height: 1.5;">
+              તમારી Google Sheet નું Web App URL અહીં પેસ્ટ કરો. જ્યારે પણ કોઈ નવો ઓર્ડર આવશે ત્યારે તરત જ ઓટોમેટિક Google Sheet માં નવી રો ઉમેરાઈ જશે.
+            </p>
+
+            <form onsubmit="handleSaveGoogleSheetsWebhook(event)">
+              <div class="admin-form-group">
+                <label class="admin-form-label">Google Sheets Webhook URL *</label>
+                <div style="display: flex; gap: 8px;">
+                  <input type="url" id="googleSheetsWebhookUrl" class="admin-form-input" placeholder="https://script.google.com/macros/s/.../exec" required style="font-family: monospace;">
+                  <button type="submit" class="btn-admin" style="white-space: nowrap;">
+                    💾 Save Webhook
+                  </button>
+                </div>
+              </div>
+            </form>
+
+            <div style="display: flex; gap: 12px; margin-top: 14px; flex-wrap: wrap;">
+              <button type="button" class="btn-admin btn-admin-secondary" onclick="handleTestGoogleSheets()" id="testSheetBtn">
+                🧪 Send Test Row (ટેસ્ટિંગ કરો)
+              </button>
+              <button type="button" class="btn-admin" style="background-color: #2E7D32;" onclick="handleSyncAllGoogleSheets()" id="syncAllSheetBtn">
+                🔄 Sync All Existing Orders (બધા જૂના ઓર્ડર સીંક કરો)
+              </button>
+            </div>
+            <div id="sheetTestFeedback" style="margin-top: 12px; font-size: 13px; font-weight: 600; display: none;"></div>
+          </div>
+
+          <!-- Step-by-Step Instructions & Ready-to-use Google Apps Script -->
+          <div style="background: #FFFFFF; border: 1px solid var(--admin-border); border-radius: 8px; padding: 22px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; flex-wrap: wrap; gap: 10px;">
+              <h3 style="font-size: 15px; color: var(--admin-primary);">📋 Google Sheets Setup Guide (ફક્ત ૨ મિનિટમાં સેટઅપ)</h3>
+              <button type="button" class="btn-admin btn-admin-secondary" onclick="copyGoogleAppsScriptCode()" id="copyScriptBtn" style="font-size: 12px;">
+                📋 Copy Apps Script Code
+              </button>
+            </div>
+
+            <ol style="font-size: 13px; line-height: 1.8; color: #444; padding-left: 20px; margin-bottom: 20px;">
+              <li>નવી Google Sheet ખોલો (<a href="https://sheets.new" target="_blank" style="color: #2E7D32; font-weight: bold; text-decoration: underline;">sheets.new</a>).</li>
+              <li>ઉપર મેનુમાં <strong>Extensions &rarr; Apps Script</strong> પર ક્લિક કરો.</li>
+              <li>ત્યાં જે જૂનો કોડ હોય તેને ડિલીટ કરી નીચે આપેલો કોડ પેસ્ટ કરો અને <strong>Save (💾)</strong> દબાવો.</li>
+              <li>ઉપર જમણી બાજુ <strong>Deploy &rarr; New deployment</strong> પર ક્લિક કરો.</li>
+              <li>ડાબી બાજુ ગિયર (⚙️) આઈકોન પર ક્લિક કરી <strong>Web app</strong> પસંદ કરો.</li>
+              <li><strong>Who has access</strong> માં <strong>"Anyone"</strong> સિલેક્ટ કરો અને <strong>Deploy</strong> દબાવો.</li>
+              <li>તમને મળેલું <strong>Web app URL</strong> કોપી કરી ઉપરના બોક્સમાં પેસ્ટ કરીને <strong>Save Webhook</strong> દબાવો!</li>
+            </ol>
+
+            <details open style="background: #F8FAF6; border: 1px solid var(--admin-border); border-radius: 6px; padding: 12px;">
+              <summary style="font-size: 12.5px; font-weight: 700; color: var(--admin-primary); cursor: pointer; margin-bottom: 8px;">
+                📄 Ready-to-use Google Apps Script Code (આ કોડ Google Sheet માં પેસ્ટ કરવાનો છે)
+              </summary>
+              <pre id="appsScriptTemplate" style="background: #1E293B; color: #E2E8F0; padding: 16px; border-radius: 6px; font-size: 11.5px; font-family: monospace; overflow-x: auto; max-height: 340px; line-height: 1.5;"></pre>
+            </details>
+          </div>
+        </div>
+      </section>
+
+      <!-- ========================================================
+           TAB 6: STORE SETTINGS & ADMIN PASSWORD CHANGE
+           ======================================================== -->
+      <section id="tab-settings" class="tab-content">
+        <div class="admin-card" style="max-width: 860px;">
+          <h2 class="card-heading" style="margin-bottom: 18px;">Store General Settings</h2>
+          <form onsubmit="handleSaveGeneralSettings(event)">
+            <div class="admin-form-group">
+              <label class="admin-form-label">Store Brand Name *</label>
+              <input type="text" id="settingShopName" class="admin-form-input" required>
+            </div>
+
+            <div class="admin-form-group">
+              <label class="admin-form-label">Top Running Announcement Marquee Text *</label>
+              <textarea id="settingTicker" class="admin-form-textarea" rows="3" required></textarea>
+            </div>
+
+            <div class="admin-grid-2">
+              <div class="admin-form-group">
+                <label class="admin-form-label">Standard Delivery Charge (₹) *</label>
+                <input type="number" id="settingStandardShipping" class="admin-form-input" placeholder="e.g. 99 or 70" required>
+                <small style="color: var(--admin-text-muted); font-size: 11px;">Cart delivery charge when total is below Free Shipping Threshold.</small>
+              </div>
+              <div class="admin-form-group">
+                <label class="admin-form-label">Free Shipping Threshold (₹) *</label>
+                <input type="number" id="settingFreeShipping" class="admin-form-input" placeholder="e.g. 999" required>
+                <small style="color: var(--admin-text-muted); font-size: 11px;">Free pan-India delivery if cart subtotal reaches this amount.</small>
+              </div>
+            </div>
+
+            <div class="admin-form-group">
+              <label class="admin-form-label">Customer Support Phone / Helpline</label>
+              <input type="text" id="settingPhone" class="admin-form-input" placeholder="6356785785 / 9033785785">
+            </div>
+
+            <button type="submit" class="btn-admin">Save General Settings</button>
+          </form>
+        </div>
+
+        <!-- Change Password / Security Box -->
+        <div class="admin-card" style="max-width: 860px; margin-top: 24px;">
+          <h2 class="card-heading" style="margin-bottom: 6px; color: #D32F2F;">🔒 Admin Security & Password Change</h2>
+          <p style="font-size: 13px; color: var(--admin-text-muted); margin-bottom: 18px;">
+            Update your admin portal username and login password.
+          </p>
+
+          <form onsubmit="handleChangeAdminCredentials(event)">
+            <div class="admin-form-group">
+              <label class="admin-form-label">Current Password *</label>
+              <input type="password" id="currAdminPass" class="admin-form-input" placeholder="Current password" required>
+            </div>
+
+            <div class="admin-grid-2">
+              <div class="admin-form-group">
+                <label class="admin-form-label">New Admin Username *</label>
+                <input type="text" id="newAdminUser" class="admin-form-input" placeholder="admin001" required>
+              </div>
+              <div class="admin-form-group">
+                <label class="admin-form-label">New Password *</label>
+                <input type="password" id="newAdminPass" class="admin-form-input" placeholder="New secure password" required>
+              </div>
+            </div>
+
+            <button type="submit" class="btn-admin" style="background-color: #D32F2F;">
+              Update Admin Username & Password
+            </button>
+          </form>
+        </div>
+      </section>
+
+    </div>
+  </main>
+
+  <!-- ========================================================
+       MODAL: ADD / EDIT PRODUCT
+       ======================================================== -->
+  <div class="admin-modal-overlay" id="productModal">
+    <div class="admin-modal">
+      <button class="modal-close" onclick="closeProductModal()">&times;</button>
+      <h2 id="modalTitle" style="font-family: 'Montserrat', sans-serif; color: var(--admin-primary); margin-bottom: 18px;">
+        Add New Farm Product
+      </h2>
+
+      <form id="productForm" onsubmit="handleSaveProduct(event)">
+        <input type="hidden" id="editProductId">
+
+        <div class="admin-form-group">
+          <label class="admin-form-label">Product Title *</label>
+          <input type="text" id="prodTitle" class="admin-form-input" placeholder="e.g. A2 Cultured Desi Gir Cow Ghee (Bilona Churned)" required>
+        </div>
+
+        <div class="admin-grid-2">
+          <div class="admin-form-group">
+            <label class="admin-form-label">Category *</label>
+            <select id="prodCategory" class="admin-form-select" required>
+              <option value="a2-ghee">A2 Ghee & Bilona Dairy</option>
+              <option value="wood-pressed-oils">Wood Pressed Oils</option>
+              <option value="atta-grains">Ancient Atta & Grains</option>
+              <option value="sweeteners">Raw Honey & Jaggery</option>
+              <option value="immunity">Ayurveda & Immunity</option>
+              <option value="snacks">Healthy Farm Snacks</option>
+            </select>
+          </div>
+          <div class="admin-form-group">
+            <label class="admin-form-label">Badge Tag</label>
+            <input type="text" id="prodBadge" class="admin-form-input" placeholder="e.g. Trending |, New Launch |">
+          </div>
+        </div>
+
+        <div class="admin-grid-3">
+          <div class="admin-form-group">
+            <label class="admin-form-label">Selling Price (₹) *</label>
+            <input type="number" id="prodPrice" class="admin-form-input" placeholder="1450" required>
+          </div>
+          <div class="admin-form-group">
+            <label class="admin-form-label">Original MRP (₹)</label>
+            <input type="number" id="prodOriginalPrice" class="admin-form-input" placeholder="1699">
+          </div>
+          <div class="admin-form-group">
+            <label class="admin-form-label">Stock Units *</label>
+            <input type="number" id="prodStock" class="admin-form-input" value="50" required>
+          </div>
+        </div>
+
+        <div class="admin-form-group">
+          <label class="admin-form-label">Product Image (Choose File or Enter URL) *</label>
+          <div style="display: flex; gap: 8px;">
+            <input type="text" id="prodImageUrl" class="admin-form-input" placeholder="https://... or /uploads/..." required oninput="const p = document.getElementById('prodImagePreview'); if (this.value) { p.src = this.value; p.style.display = 'block'; } else { p.style.display = 'none'; }">
+            <label class="btn-admin btn-admin-secondary" style="white-space: nowrap; cursor: pointer; display: flex; align-items: center; gap: 6px;">
+              📁 Choose File
+              <input type="file" accept="image/*" style="display: none;" onchange="uploadImageFromFile(this, 'prodImageUrl', 'prodImagePreview')">
+            </label>
+          </div>
+          <div style="margin-top: 8px;">
+            <img id="prodImagePreview" src="" alt="Product Preview" style="width: 80px; height: 80px; object-fit: cover; border-radius: 6px; border: 1px solid var(--admin-border); display: none;">
+          </div>
+        </div>
+
+        <div class="admin-form-group">
+          <label class="admin-form-label">Short Claim Subtitle *</label>
+          <input type="text" id="prodShortDesc" class="admin-form-input" placeholder="e.g. Low GI | Certified Glyphosate-Free" required>
+        </div>
+
+        <div class="admin-form-group">
+          <label class="admin-form-label">Detailed Description</label>
+          <textarea id="prodDescription" class="admin-form-textarea" rows="3"></textarea>
+        </div>
+
+        <div class="admin-form-group">
+          <label class="admin-form-label">Size / Weight Variants (JSON Format)</label>
+          <textarea id="prodVariants" class="admin-form-textarea" rows="3" placeholder='[{"label":"500 ml","price":1450,"original_price":1699},{"label":"1 Litre","price":2790,"original_price":3250}]'></textarea>
+        </div>
+
+        <div style="display: flex; justify-content: flex-end; gap: 12px; margin-top: 20px;">
+          <button type="button" class="btn-admin btn-admin-secondary" onclick="closeProductModal()">Cancel</button>
+          <button type="submit" class="btn-admin" id="saveProductSubmitBtn">Save Product</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ========================================================
+       MODAL: CUSTOM DELETE CONFIRMATION (100% RELIABLE)
+       ======================================================== -->
+  <div class="admin-modal-overlay" id="deleteConfirmModal">
+    <div class="admin-modal" style="max-width: 440px; text-align: center;">
+      <div style="font-size: 44px; margin-bottom: 12px;">🗑️</div>
+      <h3 style="font-family: 'Montserrat', sans-serif; color: #D32F2F; margin-bottom: 8px;">Delete Product?</h3>
+      <p style="font-size: 13px; color: #555; margin-bottom: 20px;">
+        Are you sure you want to permanently delete <strong id="deleteProductTitleName">this product</strong>? This action cannot be undone.
+      </p>
+      <div style="display: flex; justify-content: center; gap: 12px;">
+        <button class="btn-admin btn-admin-secondary" onclick="closeDeleteConfirmModal()">Cancel</button>
+        <button class="btn-admin btn-admin-danger" id="confirmDeleteButton" onclick="executeDeleteProduct()">Yes, Delete Permanently</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================================================
+       MODAL: CUSTOM CATEGORY DELETE CONFIRMATION
+       ======================================================== -->
+  <div class="admin-modal-overlay" id="deleteCategoryConfirmModal">
+    <div class="admin-modal" style="max-width: 440px; text-align: center;">
+      <div style="font-size: 44px; margin-bottom: 12px;">🏷️</div>
+      <h3 style="font-family: 'Montserrat', sans-serif; color: #D32F2F; margin-bottom: 8px;">Delete Category?</h3>
+      <p style="font-size: 13px; color: #555; margin-bottom: 20px;">
+        Are you sure you want to delete category <strong id="deleteCategoryNameText">this category</strong>? Note: Categories containing products cannot be deleted.
+      </p>
+      <div style="display: flex; justify-content: center; gap: 12px;">
+        <button class="btn-admin btn-admin-secondary" onclick="closeDeleteCategoryConfirmModal()">Cancel</button>
+        <button class="btn-admin btn-admin-danger" id="confirmDeleteCategoryButton" onclick="executeDeleteCategory()">Yes, Delete</button>
+      </div>
+    </div>
+  <!-- ========================================================
+       MODAL: CUSTOM LAB REPORT DELETE CONFIRMATION
+       ======================================================== -->
+  <div class="admin-modal-overlay" id="deleteLabReportConfirmModal">
+    <div class="admin-modal" style="max-width: 440px; text-align: center;">
+      <div style="font-size: 44px; margin-bottom: 12px;">🔬</div>
+      <h3 style="font-family: 'Montserrat', sans-serif; color: #D32F2F; margin-bottom: 8px;">Delete Lab Report?</h3>
+      <p style="font-size: 13px; color: #555; margin-bottom: 20px;">
+        Are you sure you want to permanently delete lab report <strong id="deleteLabReportTitleText">this report</strong>?
+      </p>
+      <div style="display: flex; justify-content: center; gap: 12px;">
+        <button class="btn-admin btn-admin-secondary" onclick="closeDeleteLabReportConfirmModal()">Cancel</button>
+        <button class="btn-admin btn-admin-danger" id="confirmDeleteLabReportButton" onclick="executeDeleteLabReport()">Yes, Delete</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="/js/admin.js?v=2.5"></script>
+</body>
+</html>

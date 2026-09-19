@@ -1,0 +1,24 @@
+{
+  "name": "organic-prodect-seliing-website",
+  "version": "1.0.0",
+  "description": "",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "dependencies": {
+    "better-sqlite3": "^13.0.3",
+    "cors": "^2.8.6",
+    "express": "^5.2.1",
+    "multer": "^2.4.0",
+    "pdf-export-images": "^1.2.0",
+    "pdf-parse": "^2.4.5",
+    "razorpay": "^2.9.8"
+  }
+}

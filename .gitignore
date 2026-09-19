@@ -1,0 +1,9 @@
+node_modules/
+*.log
+scratch_*
+extracted_pdf_text.txt
+meshwo_docs.pdf
+dwarkesh_store.db-shm
+dwarkesh_store.db-wal
+.DS_Store
+.env

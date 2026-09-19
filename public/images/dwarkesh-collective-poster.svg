@@ -1,0 +1,149 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 520" width="100%" height="100%">
+  <defs>
+    <linearGradient id="photoOverlay2" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#12240E" stop-opacity="0.95" />
+      <stop offset="42%" stop-color="#183313" stop-opacity="0.82" />
+      <stop offset="70%" stop-color="#1F4019" stop-opacity="0.3" />
+      <stop offset="100%" stop-color="#183313" stop-opacity="0.8" />
+    </linearGradient>
+
+    <linearGradient id="goldGradient2" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FFF2B2" />
+      <stop offset="50%" stop-color="#F2D06B" />
+      <stop offset="100%" stop-color="#C79F32" />
+    </linearGradient>
+
+    <filter id="photoShadow2" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="0" dy="8" stdDeviation="12" flood-color="#000000" flood-opacity="0.35" />
+    </filter>
+
+    <clipPath id="farmBannerClip2">
+      <rect width="1440" height="520" rx="0" />
+    </clipPath>
+
+    <clipPath id="photoCardClip21">
+      <rect width="210" height="270" rx="10" />
+    </clipPath>
+    <clipPath id="photoCardClip22">
+      <rect width="210" height="270" rx="10" />
+    </clipPath>
+    <clipPath id="photoCardClip23">
+      <rect width="210" height="270" rx="10" />
+    </clipPath>
+  </defs>
+
+  <g clip-path="url(#farmBannerClip2)">
+    <!-- 1. Background Farm Landscape Photograph -->
+    <image href="https://images.unsplash.com/photo-1500937386664-56d1dfef3854?w=1600&amp;auto=format&amp;fit=crop&amp;q=85"
+           x="0" y="-80" width="1440" height="680" preserveAspectRatio="xMidYMid slice" />
+
+    <!-- 2. Rich Dark Forest Gradient Scrim for Contrast & Elegance -->
+    <rect width="1440" height="520" fill="url(#photoOverlay2)" />
+
+    <!-- 3. Left Brand & Headline Content -->
+    <g transform="translate(80, 70)">
+      <!-- Mini Badge -->
+      <g>
+        <rect x="0" y="0" width="280" height="32" rx="16" fill="rgba(255,255,255,0.12)" stroke="#E5C158" stroke-width="1.2" />
+        <circle cx="16" cy="16" r="4" fill="#00E676" />
+        <text x="30" y="21" font-family="'Montserrat', sans-serif" font-size="11" font-weight="800" fill="#FFF2B2" letter-spacing="1.5">100% REGENERATIVE VEDIC FARMING</text>
+      </g>
+
+      <!-- Main Headline -->
+      <text x="0" y="90" font-family="'Playfair Display', Georgia, serif" font-size="46" font-weight="700" fill="#FFFFFF" letter-spacing="-0.5">
+        Living Soil. Sacred Gir Cows.
+      </text>
+      <text x="0" y="145" font-family="'Playfair Display', Georgia, serif" font-size="46" font-style="italic" font-weight="400" fill="url(#goldGradient2)">
+        Pure Unadulterated Vedic Harvest.
+      </text>
+
+      <!-- Subtitle Description -->
+      <text x="0" y="195" font-family="'Inter', sans-serif" font-size="15" font-weight="400" fill="#E2EDDC" letter-spacing="0.2">
+        Handcrafted on our 140-acre regenerative family estate along the Somnath coastal belt.
+      </text>
+      <text x="0" y="222" font-family="'Inter', sans-serif" font-size="15" font-weight="400" fill="#E2EDDC" letter-spacing="0.2">
+        Fermented curd clay-pot bilona ghee, wood-pressed lakdi ghani oils &amp; heirloom grains.
+      </text>
+
+      <!-- 4 Farm Quality Badges -->
+      <g transform="translate(0, 260)">
+        <!-- Badge 1 -->
+        <g transform="translate(0, 0)">
+          <rect width="135" height="68" rx="8" fill="rgba(20,40,16,0.75)" stroke="rgba(255,255,255,0.2)" stroke-width="1" />
+          <text x="67" y="28" font-family="'Inter', sans-serif" font-size="18" text-anchor="middle">🐄</text>
+          <text x="67" y="46" font-family="'Montserrat', sans-serif" font-size="11" font-weight="800" fill="#FFFFFF" text-anchor="middle">A2 DESI GIR</text>
+          <text x="67" y="58" font-family="'Inter', sans-serif" font-size="9" fill="#B3D1AA" text-anchor="middle">Free-Grazed Herd</text>
+        </g>
+
+        <!-- Badge 2 -->
+        <g transform="translate(145, 0)">
+          <rect width="135" height="68" rx="8" fill="rgba(20,40,16,0.75)" stroke="rgba(255,255,255,0.2)" stroke-width="1" />
+          <text x="67" y="28" font-family="'Inter', sans-serif" font-size="18" text-anchor="middle">🪵</text>
+          <text x="67" y="46" font-family="'Montserrat', sans-serif" font-size="11" font-weight="800" fill="#FFFFFF" text-anchor="middle">LAKDI GHANI</text>
+          <text x="67" y="58" font-family="'Inter', sans-serif" font-size="9" fill="#B3D1AA" text-anchor="middle">Slow Cold Wood-Press</text>
+        </g>
+
+        <!-- Badge 3 -->
+        <g transform="translate(290, 0)">
+          <rect width="135" height="68" rx="8" fill="rgba(20,40,16,0.75)" stroke="rgba(255,255,255,0.2)" stroke-width="1" />
+          <text x="67" y="28" font-family="'Inter', sans-serif" font-size="18" text-anchor="middle">🌱</text>
+          <text x="67" y="46" font-family="'Montserrat', sans-serif" font-size="11" font-weight="800" fill="#FFFFFF" text-anchor="middle">0% CHEMICALS</text>
+          <text x="67" y="58" font-family="'Inter', sans-serif" font-size="9" fill="#B3D1AA" text-anchor="middle">Certified Zero Residues</text>
+        </g>
+
+        <!-- Badge 4 -->
+        <g transform="translate(435, 0)">
+          <rect width="135" height="68" rx="8" fill="rgba(20,40,16,0.75)" stroke="rgba(255,255,255,0.2)" stroke-width="1" />
+          <text x="67" y="28" font-family="'Inter', sans-serif" font-size="18" text-anchor="middle">🔬</text>
+          <text x="67" y="46" font-family="'Montserrat', sans-serif" font-size="11" font-weight="800" fill="#FFFFFF" text-anchor="middle">NABL TESTED</text>
+          <text x="67" y="58" font-family="'Inter', sans-serif" font-size="9" fill="#B3D1AA" text-anchor="middle">Every Single Batch</text>
+        </g>
+      </g>
+
+      <!-- CTA Button Pill -->
+      <g transform="translate(0, 355)">
+        <rect width="260" height="46" rx="23" fill="#DFB858" />
+        <text x="130" y="28" font-family="'Montserrat', sans-serif" font-size="13" font-weight="900" fill="#183313" text-anchor="middle" letter-spacing="1">EXPLORE FARM HARVEST &rarr;</text>
+      </g>
+    </g>
+
+    <!-- 4. Right Visual: 3 Tilted Real Photographic Cards -->
+    <g transform="translate(830, 95)">
+      <!-- Card 1 -->
+      <g transform="translate(0, 25) rotate(-5)" filter="url(#photoShadow2)">
+        <g clip-path="url(#photoCardClip21)">
+          <image href="https://images.unsplash.com/photo-1546445317-29f4545e9d53?w=500&amp;auto=format&amp;fit=crop&amp;q=80"
+                 x="-10" y="0" width="230" height="270" preserveAspectRatio="xMidYMid slice" />
+          <rect y="210" width="210" height="60" fill="linear-gradient(to top, rgba(0,0,0,0.85), transparent)" />
+          <text x="16" y="248" font-family="'Montserrat', sans-serif" font-size="12" font-weight="800" fill="#FFFFFF">Gir Cow Grazing</text>
+          <text x="16" y="260" font-family="'Inter', sans-serif" font-size="9.5" fill="#D2DFCB">Indigenous Saurashtra Herd</text>
+        </g>
+        <rect width="210" height="270" rx="10" fill="none" stroke="#DFB858" stroke-width="2.5" />
+      </g>
+
+      <!-- Card 2 -->
+      <g transform="translate(165, 0) rotate(2)" filter="url(#photoShadow2)">
+        <g clip-path="url(#photoCardClip22)">
+          <image href="https://images.unsplash.com/photo-1589985270826-4b7bb135bc9d?w=500&amp;auto=format&amp;fit=crop&amp;q=80"
+                 x="-10" y="0" width="230" height="270" preserveAspectRatio="xMidYMid slice" />
+          <rect y="210" width="210" height="60" fill="linear-gradient(to top, rgba(0,0,0,0.85), transparent)" />
+          <text x="16" y="248" font-family="'Montserrat', sans-serif" font-size="12" font-weight="800" fill="#FFFFFF">Cultured Vedic Ghee</text>
+          <text x="16" y="260" font-family="'Inter', sans-serif" font-size="9.5" fill="#D2DFCB">Hand-Churned in Dahi</text>
+        </g>
+        <rect width="210" height="270" rx="10" fill="none" stroke="#FFFFFF" stroke-width="2.5" />
+      </g>
+
+      <!-- Card 3 -->
+      <g transform="translate(330, 35) rotate(7)" filter="url(#photoShadow2)">
+        <g clip-path="url(#photoCardClip23)">
+          <image href="https://images.unsplash.com/photo-1628088062854-d1870b4553da?w=500&amp;auto=format&amp;fit=crop&amp;q=80"
+                 x="-10" y="0" width="230" height="270" preserveAspectRatio="xMidYMid slice" />
+          <rect y="210" width="210" height="60" fill="linear-gradient(to top, rgba(0,0,0,0.85), transparent)" />
+          <text x="16" y="248" font-family="'Montserrat', sans-serif" font-size="12" font-weight="800" fill="#FFFFFF">Wood-Pressed Oils</text>
+          <text x="16" y="260" font-family="'Inter', sans-serif" font-size="9.5" fill="#D2DFCB">Unrefined &amp; Cold Extracted</text>
+        </g>
+        <rect width="210" height="270" rx="10" fill="none" stroke="#DFB858" stroke-width="2.5" />
+      </g>
+    </g>
+  </g>
+</svg>
