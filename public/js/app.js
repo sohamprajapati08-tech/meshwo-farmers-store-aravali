@@ -482,7 +482,13 @@ function renderCartDrawer() {
     if (itemsContainer) {
       itemsContainer.innerHTML = `
         <div class="cart-empty-state">
-          <div class="cart-empty-icon">🧺</div>
+          <div class="cart-empty-icon" style="width: 44px; height: 44px; margin: 0 auto 12px; color: var(--accent-gold);">
+            <svg viewBox="0 0 24 24" width="44" height="44" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path>
+              <line x1="3" y1="6" x2="21" y2="6"></line>
+              <path d="M16 10a4 4 0 0 1-8 0"></path>
+            </svg>
+          </div>
           <p style="font-weight: 700; color: var(--primary-color);">Your farm cart is empty</p>
           <p style="font-size: 13px; margin-top: 6px;">Add wild honey, Mahuva superfood, and pure herbal harvest.</p>
           <button class="checkout-btn" style="margin-top: 18px; max-width: 200px; margin-left: auto; margin-right: auto;" onclick="closeCartDrawer()">
@@ -496,7 +502,7 @@ function renderCartDrawer() {
     if (totalEl) totalEl.textContent = '₹0';
     if (discountRow) discountRow.style.display = 'none';
     if (progressBar) progressBar.style.width = '0%';
-    if (progressText) progressText.innerHTML = `<span>🚚</span> Add ₹${threshold} more for FREE Delivery!`;
+    if (progressText) progressText.innerHTML = `<svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: -2px; margin-right: 4px;"><rect x="1" y="3" width="15" height="13"></rect><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"></polygon><circle cx="5.5" cy="18.5" r="2.5"></circle><circle cx="18.5" cy="18.5" r="2.5"></circle></svg> Add ₹${threshold} more for FREE Delivery!`;
     return;
   }
 
@@ -507,9 +513,9 @@ function renderCartDrawer() {
   if (progressBar) progressBar.style.width = `${progressPercent}%`;
   if (progressText) {
     if (remaining === 0) {
-      progressText.innerHTML = `<span>🎉</span> <strong>You unlocked FREE Delivery!</strong>`;
+      progressText.innerHTML = `<svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="#2E7D32" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: -2px; margin-right: 4px;"><polyline points="20 6 9 17 4 12"></polyline></svg> <strong>You unlocked FREE Delivery!</strong>`;
     } else {
-      progressText.innerHTML = `<span>🚚</span> Add <strong>₹${remaining}</strong> more for FREE Delivery!`;
+      progressText.innerHTML = `<svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: -2px; margin-right: 4px;"><rect x="1" y="3" width="15" height="13"></rect><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"></polygon><circle cx="5.5" cy="18.5" r="2.5"></circle><circle cx="18.5" cy="18.5" r="2.5"></circle></svg> Add <strong>₹${remaining}</strong> more for FREE Delivery!`;
     }
   }
   const shippingFee = remaining === 0 ? 0 : standardFee;
