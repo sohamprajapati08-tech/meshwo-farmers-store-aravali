@@ -7,4 +7,4 @@ services:
     startCommand: node server.js
     envVars:
       - key: NODE_VERSION
-        value: 20
+        value: 22
