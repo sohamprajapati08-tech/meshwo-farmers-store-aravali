@@ -415,9 +415,28 @@ function updateCartBadge() {
   const total = state.cart.reduce((sum, it) => sum + it.quantity, 0);
   const headerBadge = document.getElementById('cartCount');
   const mobileBadge = document.getElementById('mobileCartCount');
+  const bottomBadge = document.getElementById('bottomNavCartBadge');
 
   if (headerBadge) headerBadge.textContent = total;
   if (mobileBadge) mobileBadge.textContent = total;
+  if (bottomBadge) bottomBadge.textContent = total;
+}
+
+// Mobile Slide-Out Drawer Toggle (Pic 2 Hamburger Menu)
+function toggleMobileDrawer() {
+  const drawer = document.getElementById('mobileNavDrawer');
+  const backdrop = document.getElementById('mobileDrawerBackdrop');
+  if (!drawer || !backdrop) return;
+  const isOpen = drawer.classList.contains('open');
+  if (isOpen) {
+    drawer.classList.remove('open');
+    backdrop.classList.remove('open');
+    document.body.style.overflow = '';
+  } else {
+    drawer.classList.add('open');
+    backdrop.classList.add('open');
+    document.body.style.overflow = 'hidden';
+  }
 }
 
 // Open / Close Cart Drawer

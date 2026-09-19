@@ -58,39 +58,27 @@
   <!-- 2. MAIN HEADER -->
   <header class="header-main">
     <div class="header-container">
-      <!-- Left: Search Box -->
-      <div class="header-search-wrap">
-        <span class="header-search-icon">
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
-            <circle cx="11" cy="11" r="8"></circle>
-            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
-          </svg>
-        </span>
-        <input type="text" id="searchInput" class="header-search-input"
-          placeholder="Search wild honey, mahuva laddu, kesuda soap..." autocomplete="off">
-        <div id="searchResultsDropdown" class="header-search-dropdown"></div>
-      </div>
+      <!-- Mobile Hamburger Button -->
+      <button class="mobile-menu-btn" onclick="toggleMobileDrawer()" aria-label="Open menu">
+        <svg viewBox="0 0 24 24" width="23" height="23" stroke="currentColor" stroke-width="2.2" fill="none">
+          <line x1="3" y1="6" x2="21" y2="6"></line>
+          <line x1="3" y1="12" x2="21" y2="12"></line>
+          <line x1="3" y1="18" x2="21" y2="18"></line>
+        </svg>
+      </button>
 
       <!-- Center: Logo -->
-      <a href="/" class="header-logo-center"
-        style="display: flex; align-items: center; gap: 11px; text-decoration: none;">
-        <img src="/images/meshwo_logo.jpg" alt="SHAMLAJI MESHWO FARMERS"
-          style="width: 46px; height: 46px; border-radius: 50%; object-fit: cover; border: 2px solid var(--accent-gold); box-shadow: 0 3px 8px rgba(0,0,0,0.15);">
-        <div style="text-align: left;">
-          <div class="logo-main-text"
-            style="font-family: var(--font-heading); font-size: 20px; font-weight: 900; letter-spacing: 0.5px; color: var(--primary-color); line-height: 1.1;">
-            MESHWO FARMERS
-          </div>
-          <div class="logo-sub-text"
-            style="font-size: 9.5px; font-weight: 800; letter-spacing: 1.5px; color: var(--accent-gold); text-transform: uppercase;">
-            TRIBAL WOMEN COLLECTIVE &bull; ARAVALLI
-          </div>
+      <a href="/" class="header-logo-center">
+        <img src="/images/meshwo_logo.jpg" alt="SHAMLAJI MESHWO FARMERS" class="header-logo-img">
+        <div style="display: flex; flex-direction: column; text-align: left;">
+          <span class="logo-main-text">MESHWO<sup>&reg;</sup></span>
+          <span class="logo-sub-text">FARMERS</span>
         </div>
       </a>
 
       <!-- Right: User, Wishlist, Cart -->
       <div class="header-right-actions">
-        <button class="header-icon-btn" onclick="openAuthModal()" title="Login / Account" aria-label="Account">
+        <button class="header-icon-btn desktop-only-btn" onclick="openAuthModal()" title="Login / Account" aria-label="Account">
           <svg viewBox="0 0 24 24">
             <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
             <circle cx="12" cy="7" r="4"></circle>
@@ -115,6 +103,21 @@
           </svg>
           <span class="badge-number" id="cartCount">0</span>
         </button>
+      </div>
+    </div>
+
+    <!-- Search Row -->
+    <div class="header-search-row">
+      <div class="header-search-wrap">
+        <span class="header-search-icon">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+            <circle cx="11" cy="11" r="8"></circle>
+            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+          </svg>
+        </span>
+        <input type="text" id="searchInput" class="header-search-input"
+          placeholder="Search wild honey, mahuva laddu, kesuda soap..." autocomplete="off">
+        <div id="searchResultsDropdown" class="header-search-dropdown"></div>
       </div>
     </div>
   </header>
@@ -774,8 +777,80 @@
     </div>
   </footer>
 
+  <!-- MOBILE SLIDE-OUT NAVIGATION DRAWER (Pic 2 Hamburger Menu) -->
+  <div class="mobile-drawer-backdrop" id="mobileDrawerBackdrop" onclick="toggleMobileDrawer()"></div>
+  <aside class="mobile-nav-drawer" id="mobileNavDrawer">
+    <div class="mobile-drawer-header">
+      <div style="display: flex; align-items: center; gap: 10px;">
+        <img src="/images/meshwo_logo.jpg" alt="MESHWO" style="width: 36px; height: 36px; border-radius: 50%; border: 1.5px solid var(--accent-gold);">
+        <div>
+          <div style="font-family: var(--font-heading); font-weight: 800; font-size: 16px; color: var(--primary-color); line-height: 1.1;">MESHWO FARMERS</div>
+          <div style="font-size: 9px; color: var(--accent-gold); font-weight: 700; letter-spacing: 1px;">ARAVALLI TRIBAL HARVEST</div>
+        </div>
+      </div>
+      <button class="mobile-drawer-close" onclick="toggleMobileDrawer()" aria-label="Close menu">&times;</button>
+    </div>
+
+    <div class="mobile-drawer-content">
+      <div class="mobile-menu-section-title">HARVEST CATEGORIES</div>
+      <a href="/?cat=all" class="mobile-nav-item">🌾 Shop All Products</a>
+      <a href="/?cat=wild-honey" class="mobile-nav-item">🍯 Wild Forest Honey</a>
+      <a href="/?cat=tribal-foods" class="mobile-nav-item">🌰 Traditional Mahuva Foods</a>
+      <a href="/?cat=forest-oils" class="mobile-nav-item">🪵 Wood Pressed Mahuva Oil</a>
+      <a href="/?cat=herbal-soaps" class="mobile-nav-item">🧼 Herbal Kesuda &amp; Neem Soaps</a>
+      <a href="/?cat=hair-care" class="mobile-nav-item">🧴 Amla, Shikakai &amp; Aloe Shampoo</a>
+      <a href="/?cat=spices-herbs" class="mobile-nav-item">🌿 Moringa &amp; Curcumin Turmeric</a>
+
+      <div class="mobile-menu-section-title" style="margin-top: 18px;">OUR FARM &amp; TRIBAL LIFE</div>
+      <a href="/our-farm.html" class="mobile-nav-item highlight">🌾 Our Farm &amp; Community &rarr;</a>
+      <a href="javascript:void(0)" onclick="openFarmLifePage('founders'); toggleMobileDrawer();" class="mobile-nav-item">👩‍🌾 Tribal Women Farmers Collective</a>
+      <a href="javascript:void(0)" onclick="openFarmLifePage('farm'); toggleMobileDrawer();" class="mobile-nav-item">🌲 Polo Forest Wild Harvesting</a>
+      <a href="javascript:void(0)" onclick="openFarmLifePage('lab-reports'); toggleMobileDrawer();" class="mobile-nav-item">📋 NABL Purity Lab Reports</a>
+      <a href="javascript:void(0)" onclick="openFarmLifePage('farm-visit'); toggleMobileDrawer();" class="mobile-nav-item">📍 Visit Shamlaji Center</a>
+
+      <div class="mobile-menu-section-title" style="margin-top: 18px;">ACCOUNT &amp; SUPPORT</div>
+      <a href="javascript:void(0)" onclick="openAuthModal(); toggleMobileDrawer();" class="mobile-nav-item">👤 Login / My Account</a>
+      <a href="https://wa.me/916356785785" target="_blank" class="mobile-nav-item" style="color: #25D366; font-weight: 700;">💬 WhatsApp Support (6356785785)</a>
+    </div>
+  </aside>
+
+  <!-- FIXED MOBILE BOTTOM NAVIGATION BAR (Exact Pic 2 Replica) -->
+  <nav class="mobile-bottom-nav">
+    <a href="/" class="bottom-nav-item">
+      <svg viewBox="0 0 24 24" width="22" height="22" stroke="currentColor" stroke-width="2" fill="none">
+        <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+        <polyline points="9 22 9 12 15 12 15 22"></polyline>
+      </svg>
+      <span>Home</span>
+    </a>
+    <a href="/#productsCatalog" class="bottom-nav-item">
+      <svg viewBox="0 0 24 24" width="22" height="22" stroke="currentColor" stroke-width="2" fill="none">
+        <rect x="3" y="3" width="7" height="7"></rect>
+        <rect x="14" y="3" width="7" height="7"></rect>
+        <rect x="14" y="14" width="7" height="7"></rect>
+        <rect x="3" y="14" width="7" height="7"></rect>
+      </svg>
+      <span>Shop</span>
+    </a>
+    <a href="/our-farm.html" class="bottom-nav-item active">
+      <span style="font-size: 20px; line-height: 1;">🌾</span>
+      <span>Our Farm</span>
+    </a>
+    <a href="javascript:void(0)" onclick="openCartDrawer()" class="bottom-nav-item">
+      <div style="position: relative; display: inline-flex;">
+        <svg viewBox="0 0 24 24" width="22" height="22" stroke="currentColor" stroke-width="2" fill="none">
+          <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path>
+          <line x1="3" y1="6" x2="21" y2="6"></line>
+          <path d="M16 10a4 4 0 0 1-8 0"></path>
+        </svg>
+        <span class="badge-number bottom-cart-badge" id="bottomNavCartBadge">0</span>
+      </div>
+      <span>Cart</span>
+    </a>
+  </nav>
+
   <!-- Javascript Logic -->
-  <script src="/js/app.js?v=11.0"></script>
+  <script src="/js/app.js?v=12.0"></script>
 </body>
 
 </html>
