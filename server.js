@@ -45,6 +45,14 @@ app.get('/account', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'login.html'));
 });
 
+// Clean URL route for Privacy Policy (Google Play Store & Compliance)
+app.get('/privacy', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'privacy.html'));
+});
+app.get('/privacy-policy', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'privacy.html'));
+});
+
 // Health check endpoint for monitoring & keep-alive
 app.get('/health', (req, res) => {
   res.status(200).send('OK');
