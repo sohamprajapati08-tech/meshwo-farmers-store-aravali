@@ -115,6 +115,10 @@
 
         <!-- Right: User, Wishlist, Cart (Pic 2 Right) -->
         <div class="header-right-actions">
+          <button class="header-icon-btn desktop-only-btn" id="installAppHeaderBtn" onclick="triggerPwaInstall()" title="Install Mobile App" aria-label="Install App" style="width: auto; padding: 5px 12px; gap: 5px; border-radius: 20px; background: #EAF5E7; color: #1A3E1B; font-weight: 800; font-size: 11.5px; border: 1.2px solid #C7DEC4; cursor: pointer;">
+            <span>📲 Install App</span>
+          </button>
+
           <a href="/login.html" class="header-icon-btn desktop-only-btn" id="headerUserBtn" title="Login / Account"
             aria-label="Account">
             <svg viewBox="0 0 24 24">
@@ -1548,6 +1552,18 @@
     </div>
 
     <div class="mobile-drawer-content">
+      <!-- App Install Box in Mobile Menu -->
+      <div style="background: #F4F8F3; border: 1.5px solid #D6E8D3; border-radius: 10px; padding: 12px 14px; margin: 12px 14px 16px; text-align: left;">
+        <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 5px;">
+          <img src="/images/icon-192.png" style="width: 26px; height: 26px; border-radius: 6px;" alt="App">
+          <strong style="font-size: 12.5px; color: #1A3E1B;">MESHWO FARMERS App</strong>
+        </div>
+        <p style="font-size: 11px; color: #555; margin: 0 0 8px; line-height: 1.35;">Install our 100% free app on your phone for faster 1-click orders.</p>
+        <button onclick="triggerPwaInstall(); toggleMobileDrawer();" style="width: 100%; background: #1A3E1B; color: #FFF; border: none; padding: 8px; border-radius: 6px; font-weight: 800; font-size: 11.5px; cursor: pointer;">
+          📲 Install Free App (0 MB)
+        </button>
+      </div>
+
       <div class="mobile-menu-section-title">HARVEST CATEGORIES</div>
       <a href="javascript:void(0)" onclick="filterByCategory('all'); toggleMobileDrawer();" class="mobile-nav-item">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
@@ -1659,6 +1675,61 @@
       <span class="tb-tab-label">Cart</span>
     </a>
   </nav>
+
+  <!-- Smart Floating PWA Install Banner (Mobile Only) -->
+  <div id="pwaFloatingBanner" style="display: none; position: fixed; bottom: 74px; left: 14px; right: 14px; background: #1A3E1B; color: #FFF; border-radius: 14px; padding: 12px 14px; align-items: center; justify-content: space-between; box-shadow: 0 10px 30px rgba(0,0,0,0.3); z-index: 1000; border: 1.5px solid var(--accent-gold);">
+    <div style="display: flex; align-items: center; gap: 10px;">
+      <img src="/images/icon-192.png" style="width: 36px; height: 36px; border-radius: 8px; object-fit: cover;" alt="App">
+      <div>
+        <div style="font-weight: 800; font-size: 13px; line-height: 1.2;">MESHWO FARMERS</div>
+        <div style="font-size: 11px; opacity: 0.85; margin-top: 2px;">Install Free App for 1-Click Orders</div>
+      </div>
+    </div>
+    <div style="display: flex; align-items: center; gap: 8px;">
+      <button onclick="triggerPwaInstall()" style="background: var(--accent-gold); color: #351F0E; font-weight: 800; font-size: 12px; border: none; padding: 7px 14px; border-radius: 20px; cursor: pointer; white-space: nowrap;">Install</button>
+      <button onclick="dismissPwaBanner()" style="background: none; border: none; color: #FFF; font-size: 20px; line-height: 1; opacity: 0.7; cursor: pointer; padding: 0 4px;">&times;</button>
+    </div>
+  </div>
+
+  <!-- PWA Install Handling Script -->
+  <script>
+    let pwaDeferredPrompt = null;
+    window.addEventListener('beforeinstallprompt', (e) => {
+      e.preventDefault();
+      pwaDeferredPrompt = e;
+      if (!sessionStorage.getItem('dismissed_pwa_banner')) {
+        const banner = document.getElementById('pwaFloatingBanner');
+        if (banner) banner.style.display = 'flex';
+      }
+      const headerBtn = document.getElementById('installAppHeaderBtn');
+      if (headerBtn) headerBtn.style.display = 'inline-flex';
+    });
+
+    function triggerPwaInstall() {
+      if (pwaDeferredPrompt) {
+        pwaDeferredPrompt.prompt();
+        pwaDeferredPrompt.userChoice.then((choiceResult) => {
+          if (choiceResult.outcome === 'accepted') {
+            dismissPwaBanner();
+          }
+          pwaDeferredPrompt = null;
+        });
+      } else {
+        const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+        if (isIOS) {
+          alert('📲 To install on iPhone/iPad:\n1. Tap the Share button (⎋) at the bottom\n2. Scroll down and tap "Add to Home Screen"');
+        } else {
+          alert('📲 To install on Android:\n1. Tap the 3 dots (⋮) in Chrome (top-right)\n2. Tap "Install app" or "Add to Home screen"\n\nEnjoy pure Vedic forest harvest shopping!');
+        }
+      }
+    }
+
+    function dismissPwaBanner() {
+      const banner = document.getElementById('pwaFloatingBanner');
+      if (banner) banner.style.display = 'none';
+      sessionStorage.setItem('dismissed_pwa_banner', 'true');
+    }
+  </script>
 
   <!-- Javascript Logic -->
   <script src="/js/app.js?v=13.0"></script>
