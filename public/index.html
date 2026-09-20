@@ -8,9 +8,20 @@
   <meta name="description"
     content="MESHWO FARMERS (MESHWO FARMER PRODUCER CO. LTD) - Empowering tribal women farmers of Aravalli & Polo Forest. Pure wild forest honey, Mahuva laddu, Mahuva oil, Kesuda soap, Amla shampoo, Moringa and high-curcumin turmeric.">
   <link rel="icon" href="/images/meshwo_logo.jpg">
+  <link rel="manifest" href="/manifest.json">
+  <meta name="theme-color" content="#1A3E1B">
+  <link rel="apple-touch-icon" href="/images/icon-192.png">
   <link rel="stylesheet" href="/css/theme.css?v=11.0">
   <!-- Razorpay Official Checkout SDK -->
   <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+  <!-- PWA Service Worker Registration -->
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/sw.js').catch(e => console.warn('SW registration:', e));
+      });
+    }
+  </script>
 </head>
 
 <body>
