@@ -15,7 +15,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Playfair+Display:ital,wght@0,600;0,700;0,800;1,600&display=swap" rel="stylesheet">
 
-  <link rel="stylesheet" href="/css/theme.css?v=14.0">
+  <link rel="stylesheet" href="/css/theme.css?v=15.0">
   <!-- Razorpay Checkout SDK -->
   <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
 </head>
@@ -61,12 +61,12 @@
       <span class="step-sep">&rsaquo;</span>
       <div class="checkout-step-pill step-current">
         <span class="step-circle">2</span>
-        <span class="step-label">2. Delivery Info</span>
+        <span class="step-label">2. Delivery</span>
       </div>
       <span class="step-sep">&rsaquo;</span>
       <div class="checkout-step-pill step-next">
         <span class="step-circle">3</span>
-        <span class="step-label">3. Complete</span>
+        <span class="step-label">3. Pay</span>
       </div>
     </div>
 
@@ -80,14 +80,73 @@
             ⚠️ <strong>Payment Was Not Completed:</strong> You cancelled or interrupted the online payment. Your cart items are preserved below. You can re-attempt online payment or choose Cash on Delivery.
           </div>
 
-          <!-- STEP 1: CONTACT INFORMATION -->
-          <div class="checkout-section-box">
+          <!-- STEP 1: FLIPKART STYLE LOGIN / ACCOUNT -->
+          <!-- 1A: LOGGED IN STATE -->
+          <div class="checkout-section-box" id="step1LoggedInBox" style="display: none;">
+            <div class="flipkart-step-header">
+              <div class="flipkart-step-left">
+                <span class="flipkart-step-num done">✓</span>
+                <div>
+                  <div class="flipkart-step-sub">1. LOGIN / ACCOUNT</div>
+                  <div class="flipkart-step-title">
+                    <strong id="chkDisplayUserName">Customer</strong>
+                    <span id="chkDisplayUserPhone" style="color: #444; font-weight: 500; font-size: 13px;"></span>
+                  </div>
+                </div>
+              </div>
+              <a href="/login.html?redirect=/checkout.html" class="flipkart-change-link">CHANGE</a>
+            </div>
+          </div>
+
+          <!-- 1B: LOGIN REQUIRED STATE (Mandatory Login - No order without login!) -->
+          <div class="checkout-section-box" id="step1LoginPromptBox" style="display: none; border: 2px solid #1A3E1B; background: #FAF7F0;">
+            <div class="flipkart-step-header" style="margin-bottom: 8px;">
+              <div class="flipkart-step-left">
+                <span class="flipkart-step-num active">1</span>
+                <div>
+                  <div class="flipkart-step-title" style="font-size: 16px; color: #1A3E1B; font-weight: 800;">LOGIN OR SIGNUP</div>
+                  <div style="font-size: 12px; color: #666;">Login is mandatory to place and track your order</div>
+                </div>
+              </div>
+              <span class="flipkart-required-tag">Mandatory</span>
+            </div>
+            <p style="font-size: 13px; color: #444; line-height: 1.5; margin: 8px 0 12px;">
+              Please enter your 10-digit mobile number to verify your account and proceed to delivery.
+            </p>
+            <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+              <input type="tel" id="chkQuickLoginInput" class="checkout-input" style="flex: 1; min-width: 170px;" placeholder="Enter 10-digit mobile number" maxlength="10">
+              <button type="button" id="chkQuickLoginBtn" onclick="handleCheckoutLoginDirect()" class="flipkart-login-action-btn">
+                CONTINUE &rarr;
+              </button>
+            </div>
+            <div id="chkQuickLoginError" style="color: #D32F2F; font-size: 12px; margin-top: 6px; display: none;"></div>
+            <div style="margin-top: 10px; font-size: 12px; color: #666;">
+              Prefer password login? <a href="/login.html?redirect=/checkout.html" style="color: #1A3E1B; font-weight: 800; text-decoration: underline;">Sign In with Password &rarr;</a>
+            </div>
+          </div>
+
+          <!-- STEP 2: SHIPPING ADDRESS -->
+          <div class="checkout-section-box" id="step2DeliveryBox">
             <div class="checkout-section-header">
               <h2 class="checkout-section-title">
-                <span class="checkout-step-badge">1</span>
-                <span>Contact &amp; Customer Details</span>
+                <span class="checkout-step-badge">2</span>
+                <span>Delivery Address</span>
               </h2>
-              <div id="checkoutUserStatusBadge" class="checkout-user-badge"></div>
+              <span class="checkout-delivery-tag">🇮🇳 Pan-India Express</span>
+            </div>
+
+            <!-- Flipkart Style Dynamic Delivery Time Banner -->
+            <div class="flipkart-delivery-banner" id="flipkartDeliveryBanner">
+              <div class="f-delivery-icon">⚡</div>
+              <div class="f-delivery-info">
+                <div class="f-delivery-title">
+                  Delivery by <span id="fEstimatedDateText" style="color: #1B5E20; font-weight: 800;">Thursday, 25 Sep</span>
+                  <span class="f-free-tag">FREE</span>
+                </div>
+                <div class="f-delivery-desc" id="fDeliveryDescText">
+                  Dispatched from Shamlaji Farm, Gujarat &bull; Delivered in 2-3 business days
+                </div>
+              </div>
             </div>
 
             <div class="checkout-form-row-2">
@@ -101,20 +160,9 @@
               </div>
             </div>
 
-            <div class="checkout-form-group" style="margin-top: 14px; margin-bottom: 0;">
+            <div class="checkout-form-group" style="margin-top: 14px;">
               <label class="checkout-label">Email Address (Optional, for digital receipt)</label>
               <input type="email" id="chkCustEmail" class="checkout-input" placeholder="e.g. ramesh@gmail.com">
-            </div>
-          </div>
-
-          <!-- STEP 2: SHIPPING ADDRESS -->
-          <div class="checkout-section-box">
-            <div class="checkout-section-header">
-              <h2 class="checkout-section-title">
-                <span class="checkout-step-badge">2</span>
-                <span>Delivery Address</span>
-              </h2>
-              <span class="checkout-delivery-tag">🚚 Free Pan-India Delivery (3-5 Days)</span>
             </div>
 
             <div class="checkout-form-group">
@@ -136,7 +184,7 @@
             <div class="checkout-form-row-2" style="margin-top: 14px; margin-bottom: 0;">
               <div class="checkout-form-group" style="margin-bottom: 0;">
                 <label class="checkout-label">State *</label>
-                <select id="chkCustState" class="checkout-select" required>
+                <select id="chkCustState" class="checkout-select" onchange="updateFlipkartDeliveryEstimate()" required>
                   <option value="Gujarat" selected>Gujarat</option>
                   <option value="Maharashtra">Maharashtra</option>
                   <option value="Rajasthan">Rajasthan</option>
@@ -152,7 +200,7 @@
               </div>
               <div class="checkout-form-group" style="margin-bottom: 0;">
                 <label class="checkout-label">Pincode *</label>
-                <input type="text" id="chkCustPincode" class="checkout-input" placeholder="6-digit Pincode" maxlength="6" required>
+                <input type="text" id="chkCustPincode" class="checkout-input" placeholder="6-digit Pincode" maxlength="6" oninput="updateFlipkartDeliveryEstimate()" required>
               </div>
             </div>
           </div>
@@ -283,11 +331,17 @@
               <strong style="color: #1A3E1B;">Grand Total:</strong>
               <strong id="chkSummaryTotal" style="font-size: 20px; color: #1A3E1B;">₹0</strong>
             </div>
+
+            <!-- Flipkart Delivery Summary Line -->
+            <div class="f-summary-delivery-line">
+              <span>🚚 Guaranteed Delivery:</span>
+              <strong id="chkSummaryDeliveryDate" style="color: #2E7D32;">Calculating...</strong>
+            </div>
           </div>
 
           <!-- Delivery Notice -->
           <div style="margin-top: 16px; background: #F6FAF4; border: 1px solid #D6EAD2; border-radius: 8px; padding: 12px; font-size: 12px; color: #1A3E1B; line-height: 1.5;">
-            🚚 <strong>Dispatched from Shamlaji Farm:</strong> Expected delivery in 3-5 business days across India. Fresh batches guaranteed.
+            🚚 <strong>Guaranteed Farm Direct Delivery:</strong> Expected delivery by <span id="chkNoticeDeliveryDate" style="font-weight: 800; color: #1B5E20;">Thursday, 25 Sep</span>. 100% pure Vedic harvest dispatched from Shamlaji Farm.
           </div>
         </div>
       </div>
@@ -440,28 +494,50 @@
         return;
       }
 
-      // 3. Pre-fill user data
-      if (user) {
-        if (document.getElementById('chkCustName') && user.name) document.getElementById('chkCustName').value = user.name;
-        if (document.getElementById('chkCustPhone') && user.phone) document.getElementById('chkCustPhone').value = user.phone;
-        if (document.getElementById('chkCustEmail') && user.email) document.getElementById('chkCustEmail').value = user.email;
-        if (document.getElementById('chkCustAddress') && user.address) document.getElementById('chkCustAddress').value = user.address;
-        if (document.getElementById('chkCustCity') && user.city) document.getElementById('chkCustCity').value = user.city;
-        if (document.getElementById('chkCustPincode') && user.pincode) document.getElementById('chkCustPincode').value = user.pincode;
-        
-        const badge = document.getElementById('checkoutUserStatusBadge');
-        if (badge) {
-          badge.innerHTML = `
-            <span style="color: #2E7D32; font-weight: 700;">✓ Logged In: <strong>${user.name || user.phone}</strong></span>
-            <a href="/login.html" style="color: #1A3E1B; font-weight: 800; text-decoration: underline; margin-left: auto;">Change Account</a>
-          `;
+      // 3. Flipkart-style Mandatory Account Step
+      const step1LoggedInBox = document.getElementById('step1LoggedInBox');
+      const step1LoginPromptBox = document.getElementById('step1LoginPromptBox');
+      const isLoggedIn = !!(user && (user.phone || user.email));
+
+      if (isLoggedIn) {
+        if (step1LoggedInBox) step1LoggedInBox.style.display = 'block';
+        if (step1LoginPromptBox) step1LoginPromptBox.style.display = 'none';
+
+        if (document.getElementById('chkDisplayUserName')) {
+          document.getElementById('chkDisplayUserName').textContent = user.name || 'Customer';
+        }
+        if (document.getElementById('chkDisplayUserPhone')) {
+          document.getElementById('chkDisplayUserPhone').textContent = user.phone ? ` • +91 ${user.phone}` : '';
+        }
+
+        if (document.getElementById('chkCustName') && user.name && !document.getElementById('chkCustName').value) {
+          document.getElementById('chkCustName').value = user.name.startsWith('Customer ') ? '' : user.name;
+        }
+        if (document.getElementById('chkCustPhone') && user.phone && !document.getElementById('chkCustPhone').value) {
+          document.getElementById('chkCustPhone').value = user.phone;
+        }
+        if (document.getElementById('chkCustEmail') && user.email && !document.getElementById('chkCustEmail').value) {
+          document.getElementById('chkCustEmail').value = user.email.includes('@meshwofarmers.in') ? '' : user.email;
+        }
+        if (document.getElementById('chkCustAddress') && user.address && !document.getElementById('chkCustAddress').value) {
+          document.getElementById('chkCustAddress').value = user.address;
+        }
+        if (document.getElementById('chkCustCity') && user.city && !document.getElementById('chkCustCity').value) {
+          document.getElementById('chkCustCity').value = user.city;
+        }
+        if (document.getElementById('chkCustPincode') && user.pincode && !document.getElementById('chkCustPincode').value) {
+          document.getElementById('chkCustPincode').value = user.pincode;
+        }
+        if (document.getElementById('chkCustState') && user.state) {
+          document.getElementById('chkCustState').value = user.state;
         }
       } else {
-        const badge = document.getElementById('checkoutUserStatusBadge');
-        if (badge) {
-          badge.innerHTML = `<a href="/login.html?redirect=/checkout.html" style="color: #1A3E1B; text-decoration: underline; font-weight: 700;">Have an account? Login &rarr;</a>`;
-        }
+        if (step1LoggedInBox) step1LoggedInBox.style.display = 'none';
+        if (step1LoginPromptBox) step1LoginPromptBox.style.display = 'block';
       }
+
+      // Initialize Dynamic Delivery Calculation
+      updateFlipkartDeliveryEstimate();
 
       // Check coupon
       const savedCoupon = sessionStorage.getItem('dwarkesh_checkout_coupon');
@@ -617,11 +693,157 @@
       }
     }
 
+    // ---------------------------------------------------------
+    // FLIPKART STYLE DIRECT MOBILE LOGIN IN STEP 1
+    // ---------------------------------------------------------
+    async function handleCheckoutLoginDirect() {
+      const input = document.getElementById('chkQuickLoginInput');
+      const btn = document.getElementById('chkQuickLoginBtn');
+      const errBox = document.getElementById('chkQuickLoginError');
+      const phone = (input ? input.value : '').trim().replace(/\D/g, '').slice(-10);
+
+      if (!phone || phone.length !== 10) {
+        if (errBox) {
+          errBox.style.display = 'block';
+          errBox.textContent = 'Please enter a valid 10-digit mobile number.';
+        }
+        if (input) input.focus();
+        return;
+      }
+
+      if (errBox) errBox.style.display = 'none';
+      if (btn) {
+        btn.disabled = true;
+        btn.textContent = 'Verifying...';
+      }
+
+      try {
+        const res = await fetch('/api/customer/quick-login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ phone })
+        });
+        const data = await res.json();
+
+        if (data.success && data.user) {
+          localStorage.setItem('dwarkesh_user', JSON.stringify(data.user));
+          localStorage.setItem('dwarkesh_cart_owner', data.user.phone);
+
+          const oldCart = localStorage.getItem('dwarkesh_cart');
+          if (oldCart) {
+            localStorage.setItem(`dwarkesh_cart_${data.user.phone}`, oldCart);
+          }
+
+          if (document.getElementById('chkCustPhone')) document.getElementById('chkCustPhone').value = data.user.phone;
+          if (document.getElementById('chkCustName') && data.user.name && !data.user.name.startsWith('Customer ')) {
+            document.getElementById('chkCustName').value = data.user.name;
+          }
+
+          initDedicatedCheckout();
+
+          // Smooth scroll to Delivery Address
+          const deliveryBox = document.getElementById('step2DeliveryBox');
+          if (deliveryBox) deliveryBox.scrollIntoView({ behavior: 'smooth' });
+        } else {
+          if (errBox) {
+            errBox.style.display = 'block';
+            errBox.textContent = data.message || 'Login failed. Please try again.';
+          }
+        }
+      } catch (err) {
+        console.error(err);
+        if (errBox) {
+          errBox.style.display = 'block';
+          errBox.textContent = 'Connection error. Please try again.';
+        }
+      } finally {
+        if (btn) {
+          btn.disabled = false;
+          btn.innerHTML = 'CONTINUE &rarr;';
+        }
+      }
+    }
+
+    // ---------------------------------------------------------
+    // FLIPKART STYLE DYNAMIC LOCATION DELIVERY DATE CALCULATION
+    // ---------------------------------------------------------
+    function updateFlipkartDeliveryEstimate() {
+      const state = document.getElementById('chkCustState') ? document.getElementById('chkCustState').value : 'Gujarat';
+      const pincode = document.getElementById('chkCustPincode') ? document.getElementById('chkCustPincode').value : '';
+
+      const cleanState = (state || 'Gujarat').toLowerCase();
+      const cleanPin = String(pincode || '').trim();
+
+      let days = 3;
+      let locationLabel = 'Gujarat (Local Farm Express)';
+
+      if (
+        cleanState.includes('gujarat') ||
+        cleanPin.startsWith('38') ||
+        cleanPin.startsWith('36') ||
+        cleanPin.startsWith('39') ||
+        cleanPin.startsWith('37')
+      ) {
+        days = 2; // Gujarat express delivery
+        locationLabel = 'Gujarat & Surrounding Hubs';
+      } else if (
+        cleanState.includes('rajasthan') ||
+        cleanState.includes('maharashtra') ||
+        cleanState.includes('madhya') ||
+        cleanState.includes('delhi') ||
+        cleanState.includes('haryana')
+      ) {
+        days = 3;
+        locationLabel = 'Western & Northern States';
+      } else {
+        days = 5;
+        locationLabel = 'Pan-India Express Air Cargo';
+      }
+
+      const d = new Date();
+      d.setDate(d.getDate() + days);
+
+      const daysOfWeek = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+      const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+
+      const formatted = `${daysOfWeek[d.getDay()]}, ${d.getDate()} ${months[d.getMonth()]}`;
+      checkoutState.estimatedDeliveryDate = formatted;
+
+      // Update banner
+      const bannerDate = document.getElementById('fEstimatedDateText');
+      if (bannerDate) bannerDate.textContent = formatted;
+
+      const bannerDesc = document.getElementById('fDeliveryDescText');
+      if (bannerDesc) {
+        bannerDesc.textContent = `Dispatched from Shamlaji Farm, Gujarat • Expected in ${days} business days (${locationLabel})`;
+      }
+
+      // Update order summary
+      const summaryDate = document.getElementById('chkSummaryDeliveryDate');
+      if (summaryDate) summaryDate.textContent = `${formatted} (FREE)`;
+
+      // Update notice
+      const noticeDate = document.getElementById('chkNoticeDeliveryDate');
+      if (noticeDate) noticeDate.textContent = formatted;
+    }
+
     async function submitDedicatedCheckout(event) {
       event.preventDefault();
 
       if (checkoutState.cart.length === 0) {
         alert('Your cart is empty.');
+        return;
+      }
+
+      // MANDATORY LOGIN CHECK (Flipkart Style - No order without login!)
+      const user = JSON.parse(localStorage.getItem('dwarkesh_user') || 'null');
+      if (!user || (!user.phone && !user.email)) {
+        alert('⚠️ Login Required: Please enter your 10-digit mobile number in Step 1 to place your order.');
+        const loginBox = document.getElementById('step1LoginPromptBox');
+        if (loginBox) {
+          loginBox.scrollIntoView({ behavior: 'smooth' });
+          document.getElementById('chkQuickLoginInput')?.focus();
+        }
         return;
       }
 
@@ -640,7 +862,7 @@
       }
 
       // Save user session in localStorage
-      const userObj = { name, phone, email, address, city, state, pincode };
+      const userObj = { ...user, name, phone, email, address, city, state, pincode };
       localStorage.setItem('dwarkesh_user', JSON.stringify(userObj));
 
       const subtotal = checkoutState.cart.reduce((sum, it) => sum + ((it.price || 0) * (it.quantity || 1)), 0);

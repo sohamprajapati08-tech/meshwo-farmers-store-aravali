@@ -3742,5 +3742,224 @@ button, input, select, textarea {
   }
 }
 
+/* ========================================================
+   STRICT MOBILE HORIZONTAL OVERFLOW PREVENTION (NO CARD CUT-OFF)
+   ======================================================== */
+html, body {
+  width: 100% !important;
+  max-width: 100vw !important;
+  overflow-x: hidden !important;
+}
+
+.checkout-page-body {
+  width: 100% !important;
+  max-width: 100vw !important;
+  overflow-x: hidden !important;
+}
+
+.checkout-header-bar {
+  width: 100% !important;
+  max-width: 100% !important;
+  box-sizing: border-box !important;
+}
+
+.checkout-header-inner {
+  width: 100% !important;
+  max-width: 100% !important;
+  box-sizing: border-box !important;
+  overflow: hidden !important;
+}
+
+.checkout-main-wrap {
+  width: 100% !important;
+  max-width: 100% !important;
+  box-sizing: border-box !important;
+  overflow-x: hidden !important;
+}
+
+.checkout-grid,
+.checkout-form-column,
+.checkout-summary-column {
+  width: 100% !important;
+  max-width: 100% !important;
+  min-width: 0 !important;
+  box-sizing: border-box !important;
+}
+
+.checkout-section-box,
+.checkout-summary-card {
+  width: 100% !important;
+  max-width: 100% !important;
+  min-width: 0 !important;
+  box-sizing: border-box !important;
+  overflow: hidden !important;
+}
+
+/* ========================================================
+   FLIPKART STYLE CHECKOUT STEP 1 & DELIVERY ESTIMATE
+   ======================================================== */
+.flipkart-step-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.flipkart-step-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.flipkart-step-num {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11.5px;
+  font-weight: 800;
+  flex-shrink: 0;
+}
+
+.flipkart-step-num.done {
+  background: #2E7D32;
+  color: #FFFFFF;
+}
+
+.flipkart-step-num.active {
+  background: #1A3E1B;
+  color: #FFFFFF;
+}
+
+.flipkart-step-sub {
+  font-size: 11px;
+  font-weight: 800;
+  color: #777;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.flipkart-step-title {
+  font-size: 14.5px;
+  font-weight: 700;
+  color: #1A3E1B;
+  word-break: break-word;
+}
+
+.flipkart-change-link {
+  font-size: 12px;
+  font-weight: 800;
+  color: #1A3E1B;
+  border: 1.5px solid #1A3E1B;
+  padding: 5px 14px;
+  border-radius: 6px;
+  text-decoration: none;
+  background: #FFFFFF;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.flipkart-change-link:hover {
+  background: #1A3E1B;
+  color: #FFFFFF;
+}
+
+.flipkart-login-action-btn {
+  background: #1A3E1B;
+  color: #FFFFFF;
+  border: none;
+  padding: 11px 20px;
+  border-radius: 8px;
+  font-weight: 800;
+  font-size: 13px;
+  cursor: pointer;
+  letter-spacing: 0.5px;
+  white-space: nowrap;
+  transition: background 0.2s ease;
+}
+
+.flipkart-login-action-btn:hover {
+  background: #2A5A2B;
+}
+
+.flipkart-required-tag {
+  font-size: 11px;
+  font-weight: 700;
+  color: #C2410C;
+  background: #FFF7ED;
+  padding: 3px 8px;
+  border-radius: 12px;
+  border: 1px solid #FFEDD5;
+}
+
+/* Flipkart Style Delivery Calculation Banner */
+.flipkart-delivery-banner {
+  background: #F1F8E9;
+  border: 1.5px solid #A5D6A7;
+  border-radius: 8px;
+  padding: 10px 14px;
+  margin-bottom: 16px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  box-sizing: border-box;
+}
+
+.f-delivery-icon {
+  font-size: 22px;
+  line-height: 1;
+  flex-shrink: 0;
+}
+
+.f-delivery-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.f-delivery-title {
+  font-size: 13.5px;
+  font-weight: 700;
+  color: #1B5E20;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.f-free-tag {
+  background: #2E7D32;
+  color: #FFFFFF;
+  font-size: 10px;
+  font-weight: 800;
+  padding: 2px 6px;
+  border-radius: 4px;
+  letter-spacing: 0.5px;
+}
+
+.f-delivery-desc {
+  font-size: 11.5px;
+  color: #388E3C;
+  margin-top: 2px;
+  line-height: 1.3;
+}
+
+.f-summary-delivery-line {
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px dashed #E0DACB;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 12.5px;
+  color: #2E7D32;
+  font-weight: 700;
+}
+
+
 
 

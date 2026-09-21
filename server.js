@@ -1323,6 +1323,25 @@ app.post('/api/orders', (req, res) => {
       });
     }
 
+    const cleanPhone = String(customer_phone).trim().replace(/\D/g, '').slice(-10);
+    if (!cleanPhone || cleanPhone.length !== 10) {
+      return res.status(400).json({
+        success: false,
+        message: 'Valid 10-digit mobile number required for login and dispatch verification.'
+      });
+    }
+
+    // Auto-record user in customers table if not already present
+    try {
+      const existingCust = db.prepare('SELECT id FROM customers WHERE phone = ?').get(cleanPhone);
+      if (!existingCust) {
+        db.prepare('INSERT INTO customers (name, email, phone, password) VALUES (?, ?, ?, ?)')
+          .run(customer_name, customer_email || `${cleanPhone}@meshwofarmers.in`, cleanPhone, 'mobile_verified');
+      }
+    } catch (e) {
+      console.warn('Customer auto-link warning:', e.message);
+    }
+
     // If payment method is Razorpay, enforce using the verify-payment endpoint
     if (payment_method === 'RAZORPAY') {
       return res.status(400).json({
