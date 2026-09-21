@@ -762,12 +762,12 @@
           <!-- Real-Time Auto-Verification Status -->
           <div class="realtime-detection-box">
             <div class="pulse-dot"></div>
-            <span>Auto-detecting payment from bank...</span>
+            <span id="detectionStatusText">Waiting for bank transaction confirmation...</span>
           </div>
 
-          <!-- Manual Verification Button -->
-          <button type="button" class="verify-now-btn" id="btnManualVerify" onclick="triggerManualVerification()">
-            ⚡ I Have Paid &bull; Verify Instantly &rarr;
+          <!-- Razorpay / Bank Verified Payment Button -->
+          <button type="button" class="verify-now-btn" id="btnRazorpayLaunch" onclick="launchRazorpayRealPayment()">
+            💳 Pay via Razorpay (UPI, Cards &amp; NetBanking) &rarr;
           </button>
         </section>
 
@@ -1028,39 +1028,113 @@
       }, 2500);
     }
 
-    async function triggerManualVerification() {
-      const btn = document.getElementById('btnManualVerify');
-      btn.disabled = true;
-      btn.innerHTML = '<span>⏳ Verifying Bank Transfer with UPI Server...</span>';
+    let razorpayKeyId = '';
+
+    async function fetchStoreSettings() {
+      try {
+        const res = await fetch('/api/settings');
+        const data = await res.json();
+        if (data.success && data.settings) {
+          if (data.settings.payment_upi_id) merchantUpiId = data.settings.payment_upi_id;
+          if (data.settings.business_merchant_name) merchantName = data.settings.business_merchant_name;
+          if (data.settings.payment_razorpay_key_id) razorpayKeyId = data.settings.payment_razorpay_key_id;
+        }
+      } catch (e) {
+        console.warn('Settings load error:', e);
+      }
+    }
+
+    async function launchRazorpayRealPayment() {
+      const btn = document.getElementById('btnRazorpayLaunch');
+      if (btn) {
+        btn.disabled = true;
+        btn.innerHTML = '<span>⏳ Connecting to Bank Gateway...</span>';
+      }
 
       try {
-        const res = await fetch('/api/checkout/confirm-payment', {
+        // Request order from backend
+        const res = await fetch('/api/payment/razorpay-order', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            order_number: orderNumber,
-            method: 'UPI_QR_AUTO',
-            amount: orderAmount
+            amount: orderAmount,
+            order_number: orderNumber
           })
         });
 
         const data = await res.json();
-        if (data.success) {
-          handleSuccessfulPayment(orderAmount);
-        } else {
-          alert('Verification pending. Please complete the transfer in your UPI app.');
-          btn.disabled = false;
-          btn.innerHTML = '⚡ I Have Paid &bull; Verify Instantly &rarr;';
+
+        if (!data.success || !data.order) {
+          alert('⚠️ Payment Gateway Error: ' + (data.message || 'Could not initiate bank gateway. Please check Admin settings.'));
+          if (btn) { btn.disabled = false; btn.innerHTML = '💳 Pay via Razorpay (UPI, Cards &amp; NetBanking) &rarr;'; }
+          return;
         }
+
+        const activeKey = data.key_id || razorpayKeyId;
+
+        // Check if Razorpay key is still the dummy one
+        if (!activeKey || activeKey.includes('DwarkeshFarms2026') || activeKey.includes('rzp_test_Dwarkesh')) {
+          alert('⚠️ Razorpay Live API Key ખૂટે છે:\n\nતમારા બેંક ખાતામાં સાચા પૈસા ઓટોમેટિક જમા કરવા માટે:\n૧. dashboard.razorpay.com પરથી તમારી Live Key ID અને Key Secret મેળવો.\n૨. Admin Panel -> Tab 5: Payment Gateways માં પેસ્ટ કરીને Save કરો.\n\nજ્યાં સુધી Live Key નહિ હોય ત્યાં સુધી બેંકમાંથી સાચા પૈસા કપાશે નહિ!');
+          if (btn) { btn.disabled = false; btn.innerHTML = '💳 Pay via Razorpay (UPI, Cards &amp; NetBanking) &rarr;'; }
+          return;
+        }
+
+        const options = {
+          key: activeKey,
+          amount: data.order.amount,
+          currency: 'INR',
+          name: merchantName || 'Meshwo Farmers Aravalli',
+          description: `Order #${orderNumber}`,
+          image: '/images/meshwo_logo.jpg',
+          order_id: data.order.id,
+          handler: async function (response) {
+            // Verify HMAC signature on server
+            try {
+              const verifyRes = await fetch('/api/razorpay/verify-payment', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                  order_number: orderNumber,
+                  razorpay_payment_id: response.razorpay_payment_id,
+                  razorpay_order_id: response.razorpay_order_id,
+                  razorpay_signature: response.razorpay_signature
+                })
+              });
+              const verifyData = await verifyRes.json();
+              if (verifyData.success) {
+                handleSuccessfulPayment(orderAmount);
+              } else {
+                alert('Payment verification failed: ' + (verifyData.message || 'Signature mismatch'));
+              }
+            } catch (err) {
+              alert('Network error verifying payment.');
+            }
+          },
+          prefill: {
+            contact: urlParams.get('phone') || ''
+          },
+          theme: {
+            color: '#2874F0'
+          },
+          modal: {
+            ondismiss: function () {
+              if (btn) { btn.disabled = false; btn.innerHTML = '💳 Pay via Razorpay (UPI, Cards &amp; NetBanking) &rarr;'; }
+            }
+          }
+        };
+
+        const rzpModal = new Razorpay(options);
+        rzpModal.open();
+
       } catch (err) {
-        console.error('Manual verify error:', err);
-        btn.disabled = false;
-        btn.innerHTML = '⚡ I Have Paid &bull; Verify Instantly &rarr;';
+        console.error('Razorpay launch error:', err);
+        alert('Could not open payment gateway. Please check your network or try again.');
+        if (btn) { btn.disabled = false; btn.innerHTML = '💳 Pay via Razorpay (UPI, Cards &amp; NetBanking) &rarr;'; }
       }
     }
 
     function triggerCardPayment() {
-      handleSuccessfulPayment(orderAmount);
+      launchRazorpayRealPayment();
     }
 
     async function confirmCodOrder() {

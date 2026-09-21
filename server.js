@@ -1396,17 +1396,24 @@ app.post('/api/checkout/verify-session', async (req, res) => {
         return res.json({ success: true, message: 'Payment already verified', order, is_paid: true });
       }
 
-      const txId = payment_id || `UPI_AUTO_${Date.now()}_${Math.random().toString(36).substring(2, 7).toUpperCase()}`;
-      const newStatus = 'Paid (100% Bank Verified)';
-      const newOrderState = 'Processing';
+      // If method is COD, mark as Pending (Cash on Delivery)
+      if (method === 'COD') {
+        const codTxId = payment_id || `COD_${Date.now()}`;
+        db.prepare(`
+          UPDATE orders 
+          SET payment_method = 'COD', payment_status = 'Pending (Cash on Delivery)', order_status = 'Pending', transaction_id = ?
+          WHERE order_number = ?
+        `).run(codTxId, order_number);
 
-      db.prepare(`
-        UPDATE orders 
-        SET payment_status = ?, order_status = ?, transaction_id = ?
-        WHERE order_number = ?
-      `).run(newStatus, newOrderState, txId, order_number);
+        const updated = db.prepare('SELECT * FROM orders WHERE order_number = ?').get(order_number);
+        return res.json({ success: true, order: updated, is_paid: false });
+      }
 
-      const updated = db.prepare('SELECT * FROM orders WHERE order_number = ?').get(order_number);
+      // Strict security: Online orders MUST be verified via Razorpay HMAC signature or Webhook
+      return res.status(400).json({
+        success: false,
+        message: 'Online payments must be verified securely via Razorpay payment gateway.'
+      });
 
       // Trigger Google Sheets Background Sync
       try {
