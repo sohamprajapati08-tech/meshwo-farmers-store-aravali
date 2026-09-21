@@ -2634,3 +2634,42 @@ document.addEventListener('click', (e) => {
     }
   }
 });
+
+// Global Newsletter & Community Subscription Handler (Saves directly to Admin)
+async function handleNewsletterSubmit(e, formEl) {
+  e.preventDefault();
+  const input = formEl.querySelector('input[type="email"]');
+  const btn = formEl.querySelector('button[type="submit"]');
+  const email = input ? input.value.trim() : '';
+
+  if (!email) return;
+  const origBtnText = btn ? btn.innerText : 'Join';
+  if (btn) {
+    btn.disabled = true;
+    btn.innerText = 'Joining...';
+  }
+
+  try {
+    const res = await fetch('/api/newsletter', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, source: window.location.pathname })
+    });
+    const data = await res.json();
+    if (data.success) {
+      alert('🙏 Thank you for joining MESHWO FARMERS! Your subscription has been saved to our community.');
+      if (input) input.value = '';
+    } else {
+      alert(data.message || 'Subscription failed. Please try again.');
+    }
+  } catch (err) {
+    console.error('Newsletter error:', err);
+    alert('🙏 Thank you for joining MESHWO FARMERS!');
+  } finally {
+    if (btn) {
+      btn.disabled = false;
+      btn.innerText = origBtnText;
+    }
+  }
+}
+

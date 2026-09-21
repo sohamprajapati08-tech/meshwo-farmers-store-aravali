@@ -45,6 +45,11 @@ app.get('/account', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'login.html'));
 });
 
+// Clean URL route for Admin Panel
+app.get('/admin', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'admin.html'));
+});
+
 // Clean URL route for Privacy Policy (Google Play Store & Compliance)
 app.get('/privacy', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'privacy.html'));
@@ -1486,6 +1491,9 @@ app.get('/api/stats', (req, res) => {
     const totalOrders = db.prepare('SELECT COUNT(*) as count FROM orders').get().count;
     const totalRevenue = db.prepare("SELECT COALESCE(SUM(total), 0) as revenue FROM orders WHERE order_status != 'Cancelled'").get().revenue;
     const pendingOrders = db.prepare("SELECT COUNT(*) as count FROM orders WHERE order_status = 'Pending'").get().count;
+    const totalCustomers = db.prepare('SELECT COUNT(*) as count FROM customers').get().count;
+    const totalSubscribers = db.prepare('SELECT COUNT(*) as count FROM newsletter_subscribers').get().count;
+    const totalInquiries = db.prepare('SELECT COUNT(*) as count FROM contact_inquiries').get().count;
 
     const recentOrders = db.prepare(`
       SELECT id, order_number, customer_name, total, order_status, created_at
@@ -1501,6 +1509,9 @@ app.get('/api/stats', (req, res) => {
         totalOrders,
         totalRevenue,
         pendingOrders,
+        totalCustomers,
+        totalSubscribers,
+        totalInquiries,
         recentOrders
       }
     });
@@ -1509,6 +1520,112 @@ app.get('/api/stats', (req, res) => {
     res.status(500).json({ success: false, message: 'Error fetching stats' });
   }
 });
+
+// -------------------------------------------------------------
+// REGISTERED CUSTOMERS (Admin Management)
+// -------------------------------------------------------------
+app.get('/api/admin/customers', (req, res) => {
+  try {
+    const customers = db.prepare(`
+      SELECT 
+        c.id, c.name, c.email, c.phone, c.created_at,
+        COUNT(o.id) as orders_count,
+        COALESCE(SUM(CASE WHEN o.order_status != 'Cancelled' THEN o.total ELSE 0 END), 0) as total_spent
+      FROM customers c
+      LEFT JOIN orders o ON (o.customer_phone = c.phone OR o.customer_email = c.email)
+      GROUP BY c.id
+      ORDER BY c.id DESC
+    `).all();
+
+    res.json({ success: true, count: customers.length, customers });
+  } catch (error) {
+    console.error('Error fetching customers:', error);
+    res.status(500).json({ success: false, message: 'Error fetching customers' });
+  }
+});
+
+app.delete('/api/admin/customers/:id', (req, res) => {
+  try {
+    const { id } = req.params;
+    db.prepare('DELETE FROM customers WHERE id = ?').run(id);
+    res.json({ success: true, message: 'Customer account removed' });
+  } catch (error) {
+    console.error('Error deleting customer:', error);
+    res.status(500).json({ success: false, message: 'Error deleting customer' });
+  }
+});
+
+// -------------------------------------------------------------
+// NEWSLETTER & COMMUNITY LEADS
+// -------------------------------------------------------------
+app.post('/api/newsletter', (req, res) => {
+  try {
+    const { email, source } = req.body;
+    if (!email || !email.includes('@')) {
+      return res.status(400).json({ success: false, message: 'Valid email address required.' });
+    }
+    const cleanEmail = email.trim().toLowerCase();
+    const existing = db.prepare('SELECT id FROM newsletter_subscribers WHERE email = ?').get(cleanEmail);
+    if (!existing) {
+      db.prepare('INSERT INTO newsletter_subscribers (email, source) VALUES (?, ?)')
+        .run(cleanEmail, source || 'website_footer');
+    }
+    res.json({ success: true, message: 'Thank you for joining MESHWO FARMERS Community!' });
+  } catch (error) {
+    console.error('Newsletter error:', error);
+    res.status(500).json({ success: false, message: 'Error saving subscription' });
+  }
+});
+
+app.get('/api/admin/subscribers', (req, res) => {
+  try {
+    const subscribers = db.prepare('SELECT * FROM newsletter_subscribers ORDER BY id DESC').all();
+    res.json({ success: true, count: subscribers.length, subscribers });
+  } catch (error) {
+    console.error('Error fetching subscribers:', error);
+    res.status(500).json({ success: false, message: 'Error fetching subscribers' });
+  }
+});
+
+app.delete('/api/admin/subscribers/:id', (req, res) => {
+  try {
+    const { id } = req.params;
+    db.prepare('DELETE FROM newsletter_subscribers WHERE id = ?').run(id);
+    res.json({ success: true, message: 'Subscriber removed' });
+  } catch (error) {
+    console.error('Error deleting subscriber:', error);
+    res.status(500).json({ success: false, message: 'Error deleting subscriber' });
+  }
+});
+
+// -------------------------------------------------------------
+// CONTACT / INQUIRY MESSAGES
+// -------------------------------------------------------------
+app.post('/api/contact', (req, res) => {
+  try {
+    const { name, email, phone, subject, message } = req.body;
+    if (!message || (!email && !phone)) {
+      return res.status(400).json({ success: false, message: 'Contact details and message are required.' });
+    }
+    db.prepare('INSERT INTO contact_inquiries (name, email, phone, subject, message) VALUES (?, ?, ?, ?, ?)')
+      .run(name || '', email || '', phone || '', subject || '', message.trim());
+    res.json({ success: true, message: 'Your message has been received! Our farm team will contact you shortly.' });
+  } catch (error) {
+    console.error('Contact inquiry error:', error);
+    res.status(500).json({ success: false, message: 'Error submitting message' });
+  }
+});
+
+app.get('/api/admin/inquiries', (req, res) => {
+  try {
+    const inquiries = db.prepare('SELECT * FROM contact_inquiries ORDER BY id DESC').all();
+    res.json({ success: true, count: inquiries.length, inquiries });
+  } catch (error) {
+    console.error('Error fetching inquiries:', error);
+    res.status(500).json({ success: false, message: 'Error fetching inquiries' });
+  }
+});
+
 
 // -------------------------------------------------------------
 // STORE SETTINGS & ANNOUNCEMENTS

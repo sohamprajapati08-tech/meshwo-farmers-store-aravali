@@ -74,6 +74,18 @@
         </a>
       </li>
       <li>
+        <a class="admin-nav-link" onclick="switchAdminTab('customers', this)">
+          <span class="admin-nav-icon">👥</span>
+          <span>Customers & Users</span>
+        </a>
+      </li>
+      <li>
+        <a class="admin-nav-link" onclick="switchAdminTab('subscribers', this)">
+          <span class="admin-nav-icon">📩</span>
+          <span>Subscribers & Leads</span>
+        </a>
+      </li>
+      <li>
         <a class="admin-nav-link" onclick="switchAdminTab('hero', this)">
           <span class="admin-nav-icon">🖼️</span>
           <span>Hero Banner Poster</span>
@@ -115,9 +127,18 @@
   <main class="admin-main">
     <header class="admin-topbar">
       <h1 class="page-title" id="pageTitle">Dashboard Overview</h1>
-      <div class="admin-user-pill">
-        <span>👨‍🌾</span>
-        <span id="adminUsernameDisplay">admin001</span>
+      <div style="display: flex; align-items: center; gap: 12px;">
+        <div id="liveSyncBadge" style="display: flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 600; color: #1B5E20; background: #E8F5E9; padding: 5px 12px; border-radius: 20px; border: 1px solid #A5D6A7;">
+          <span style="width: 8px; height: 8px; background: #2E7D32; border-radius: 50%; display: inline-block;"></span>
+          <span id="liveSyncText">Live Auto-Sync (10s)</span>
+        </div>
+        <button type="button" onclick="refreshAllAdminData(true)" class="btn-admin btn-admin-secondary" style="padding: 6px 12px; font-size: 12px; display: inline-flex; align-items: center; gap: 4px; cursor: pointer;">
+          🔄 Refresh Now
+        </button>
+        <div class="admin-user-pill">
+          <span>👨‍🌾</span>
+          <span id="adminUsernameDisplay">admin001</span>
+        </div>
       </div>
     </header>
 
@@ -127,7 +148,7 @@
            TAB 1: DASHBOARD OVERVIEW
            ======================================================== -->
       <section id="tab-dashboard" class="tab-content active">
-        <div class="kpi-grid">
+        <div class="kpi-grid" style="grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));">
           <div class="kpi-card">
             <div class="kpi-icon-box kpi-revenue">₹</div>
             <div>
@@ -140,6 +161,20 @@
             <div>
               <div class="kpi-value" id="kpiOrders">0</div>
               <div class="kpi-label">Total Customer Orders</div>
+            </div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-icon-box" style="background: rgba(33, 150, 243, 0.15); color: #1976D2;">👥</div>
+            <div>
+              <div class="kpi-value" id="kpiCustomers">0</div>
+              <div class="kpi-label">Registered Customers</div>
+            </div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-icon-box" style="background: rgba(156, 39, 176, 0.15); color: #7B1FA2;">📩</div>
+            <div>
+              <div class="kpi-value" id="kpiSubscribers">0</div>
+              <div class="kpi-label">Newsletter Subscribers</div>
             </div>
           </div>
           <div class="kpi-card">
@@ -276,6 +311,104 @@
               </thead>
               <tbody id="adminOrdersTbody">
                 <tr><td colspan="8" style="text-align: center;">Loading orders...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- ========================================================
+           TAB: REGISTERED CUSTOMERS MANAGEMENT
+           ======================================================== -->
+      <section id="tab-customers" class="tab-content">
+        <div class="admin-card">
+          <div class="card-header-flex">
+            <div>
+              <h2 class="card-heading">Registered Customers & App Users</h2>
+              <p style="font-size: 13px; color: var(--admin-text-muted); margin-top: 4px;">
+                Real-time directory of users who sign up, log in with mobile number, or place orders.
+              </p>
+            </div>
+            <input type="text" id="customerSearchInput" class="admin-form-input" style="max-width: 280px;" placeholder="🔍 Search customer name, phone..." oninput="filterAdminCustomers(this.value)">
+          </div>
+
+          <div class="table-responsive">
+            <table class="admin-table">
+              <thead>
+                <tr>
+                  <th>ID</th>
+                  <th>Customer Name</th>
+                  <th>Mobile Number</th>
+                  <th>Email</th>
+                  <th>Registered Date</th>
+                  <th>Orders Placed</th>
+                  <th>Total Spent</th>
+                  <th>Quick Contact</th>
+                  <th>Action</th>
+                </tr>
+              </thead>
+              <tbody id="adminCustomersTbody">
+                <tr><td colspan="9" style="text-align: center;">Loading registered customers...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- ========================================================
+           TAB: SUBSCRIBERS & INQUIRIES
+           ======================================================== -->
+      <section id="tab-subscribers" class="tab-content">
+        <div class="admin-card" style="margin-bottom: 24px;">
+          <div class="card-header-flex">
+            <div>
+              <h2 class="card-heading">Community & Newsletter Subscribers</h2>
+              <p style="font-size: 13px; color: var(--admin-text-muted); margin-top: 4px;">
+                Visitors who subscribed from the storefront to support tribal women farmers and receive harvest updates.
+              </p>
+            </div>
+          </div>
+          <div class="table-responsive">
+            <table class="admin-table">
+              <thead>
+                <tr>
+                  <th>ID</th>
+                  <th>Subscriber Email</th>
+                  <th>Source</th>
+                  <th>Subscribed Date</th>
+                  <th>Action</th>
+                </tr>
+              </thead>
+              <tbody id="adminSubscribersTbody">
+                <tr><td colspan="5" style="text-align: center;">Loading subscribers...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="admin-card">
+          <div class="card-header-flex">
+            <div>
+              <h2 class="card-heading">Customer Contact & Support Inquiries</h2>
+              <p style="font-size: 13px; color: var(--admin-text-muted); margin-top: 4px;">
+                Inquiries and messages submitted by visitors on the website.
+              </p>
+            </div>
+          </div>
+          <div class="table-responsive">
+            <table class="admin-table">
+              <thead>
+                <tr>
+                  <th>ID</th>
+                  <th>Name</th>
+                  <th>Contact Info</th>
+                  <th>Subject</th>
+                  <th>Message</th>
+                  <th>Date</th>
+                </tr>
+              </thead>
+              <tbody id="adminInquiriesTbody">
+                <tr><td colspan="6" style="text-align: center;">Loading inquiries...</td></tr>
               </tbody>
             </table>
           </div>

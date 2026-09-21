@@ -6,10 +6,16 @@
 const adminState = {
   products: [],
   orders: [],
+  customers: [],
+  subscribers: [],
+  inquiries: [],
   currentTab: 'dashboard',
   searchQuery: '',
+  customerSearchQuery: '',
   selectedCategory: 'all',
-  pendingDeleteId: null
+  pendingDeleteId: null,
+  lastOrderCount: null,
+  syncInterval: null
 };
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -60,6 +66,7 @@ async function handleAdminLogin(e) {
 }
 
 function handleAdminLogout() {
+  if (adminState.syncInterval) clearInterval(adminState.syncInterval);
   sessionStorage.removeItem('dwk_admin_token');
   sessionStorage.removeItem('dwk_admin_user');
   window.location.reload();
@@ -71,7 +78,10 @@ function initAdminData() {
   fetchAdminCategories();
   fetchAdminLabReports();
   fetchAdminOrders();
+  fetchAdminCustomers();
+  fetchAdminSubscribers();
   fetchAdminSettings();
+  startAdminLiveSync();
 }
 
 // Switch Admin Tab
@@ -95,6 +105,8 @@ function switchAdminTab(tabName, clickedElement) {
     categories: 'Store Categories (Add & Delete)',
     labreports: 'Farm Lab Reports & Purity Certificates (Add & Delete)',
     orders: 'Customer Orders & Dispatch Management',
+    customers: 'Registered Customers & App Users Directory',
+    subscribers: 'Community Newsletter Subscribers & Customer Inquiries',
     hero: 'Hero Section Promotional Poster',
     payments: 'Payment Gateways Configuration (UPI, Razorpay, PayPal, COD)',
     sheets: 'Google Sheets Automated Data Sync (Real-time Orders & Customers)',
@@ -111,6 +123,8 @@ function switchAdminTab(tabName, clickedElement) {
   if (tabName === 'categories') fetchAdminCategories();
   if (tabName === 'labreports') fetchAdminLabReports();
   if (tabName === 'orders') fetchAdminOrders();
+  if (tabName === 'customers') fetchAdminCustomers();
+  if (tabName === 'subscribers') { fetchAdminSubscribers(); fetchAdminInquiries(); }
   if (tabName === 'hero' || tabName === 'payments' || tabName === 'settings') fetchAdminSettings();
   if (tabName === 'sheets') fetchGoogleSheetsSettings();
 }
@@ -129,6 +143,22 @@ async function fetchDashboardStats() {
       document.getElementById('kpiOrders').textContent = s.totalOrders;
       document.getElementById('kpiProducts').textContent = s.totalProducts;
       document.getElementById('kpiAlerts').textContent = s.lowStockCount;
+
+      if (document.getElementById('kpiCustomers')) {
+        document.getElementById('kpiCustomers').textContent = s.totalCustomers || 0;
+      }
+      if (document.getElementById('kpiSubscribers')) {
+        document.getElementById('kpiSubscribers').textContent = s.totalSubscribers || 0;
+      }
+
+      // Check if new orders arrived to alert admin
+      if (adminState.lastOrderCount !== null && s.totalOrders > adminState.lastOrderCount) {
+        const diff = s.totalOrders - adminState.lastOrderCount;
+        playNotificationSound();
+        showAdminLiveToast(`🔔 ${diff} New Order${diff > 1 ? 's' : ''} Received! (નવો ઓર્ડર આવ્યો છે)`);
+        if (adminState.currentTab === 'orders') fetchAdminOrders();
+      }
+      adminState.lastOrderCount = s.totalOrders;
 
       renderRecentOrders(s.recentOrders || []);
     }
@@ -1254,5 +1284,315 @@ function copyGoogleAppsScriptCode() {
     alert('Please select and copy the code from the box below.');
   });
 }
+
+// -------------------------------------------------------------
+// 10. REGISTERED CUSTOMERS / APP USERS DIRECTORY
+// -------------------------------------------------------------
+async function fetchAdminCustomers() {
+  try {
+    const res = await fetch('/api/admin/customers');
+    const data = await res.json();
+    if (data.success) {
+      adminState.customers = data.customers || [];
+      renderAdminCustomersTable();
+      if (document.getElementById('kpiCustomers')) {
+        document.getElementById('kpiCustomers').textContent = adminState.customers.length;
+      }
+    }
+  } catch (err) {
+    console.error('Error fetching customers:', err);
+  }
+}
+
+function filterAdminCustomers(query) {
+  adminState.customerSearchQuery = (query || '').toLowerCase().trim();
+  renderAdminCustomersTable();
+}
+
+function renderAdminCustomersTable() {
+  const tbody = document.getElementById('adminCustomersTbody');
+  if (!tbody) return;
+
+  let list = adminState.customers || [];
+  if (adminState.customerSearchQuery) {
+    const q = adminState.customerSearchQuery;
+    list = list.filter(c => 
+      (c.name && c.name.toLowerCase().includes(q)) ||
+      (c.phone && c.phone.includes(q)) ||
+      (c.email && c.email.toLowerCase().includes(q))
+    );
+  }
+
+  if (list.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="9" style="text-align: center; color: var(--admin-text-muted); padding: 24px;">No registered customers found.</td></tr>`;
+    return;
+  }
+
+  tbody.innerHTML = list.map(c => {
+    const cleanPhone = (c.phone || '').replace(/\D/g, '').slice(-10);
+    const waLink = cleanPhone ? `https://wa.me/91${cleanPhone}?text=Hello%20${encodeURIComponent(c.name || 'Customer')},%20Greetings%20from%20MESHWO%20FARMERS!` : '#';
+    const telLink = cleanPhone ? `tel:+91${cleanPhone}` : '#';
+
+    return `
+      <tr>
+        <td><strong>#${c.id}</strong></td>
+        <td>
+          <div style="font-weight: 700; color: #351F0E;">${c.name || 'Anonymous User'}</div>
+        </td>
+        <td>
+          ${cleanPhone ? `<code>+91 ${cleanPhone}</code>` : '<span style="color: #999;">-</span>'}
+        </td>
+        <td style="font-size: 12.5px; color: #555;">${c.email || '-'}</td>
+        <td style="font-size: 12px; color: var(--admin-text-muted);">${c.created_at || '-'}</td>
+        <td>
+          <span style="display: inline-block; padding: 3px 9px; background: #E8F5E9; color: #2E7D32; font-weight: 700; border-radius: 12px; font-size: 12px;">
+            ${c.orders_count || 0} Orders
+          </span>
+        </td>
+        <td><strong>₹${Number(c.total_spent || 0).toLocaleString('en-IN')}</strong></td>
+        <td>
+          <div style="display: flex; gap: 6px;">
+            ${cleanPhone ? `
+              <a href="${waLink}" target="_blank" class="btn-admin" style="padding: 4px 8px; font-size: 11px; background: #25D366; color: white;" title="Chat on WhatsApp">
+                💬 WhatsApp
+              </a>
+              <a href="${telLink}" class="btn-admin" style="padding: 4px 8px; font-size: 11px; background: #4A2E18;" title="Call Customer">
+                📞 Call
+              </a>
+            ` : '-'}
+          </div>
+        </td>
+        <td>
+          <button onclick="deleteAdminCustomer(${c.id}, '${(c.name || 'User').replace(/'/g, "\\'")}')" class="btn-admin-danger" style="padding: 4px 8px; font-size: 11px;">
+            🗑️ Delete
+          </button>
+        </td>
+      </tr>
+    `;
+  }).join('');
+}
+
+async function deleteAdminCustomer(id, name) {
+  if (!confirm(`Are you sure you want to remove customer "${name}" (ID #${id})?`)) return;
+  try {
+    const res = await fetch(`/api/admin/customers/${id}`, { method: 'DELETE' });
+    const data = await res.json();
+    if (data.success) {
+      showAdminLiveToast(`Customer #${id} removed successfully.`);
+      fetchAdminCustomers();
+      fetchDashboardStats();
+    } else {
+      alert(data.message || 'Error removing customer');
+    }
+  } catch (err) {
+    console.error(err);
+    alert('Server error deleting customer');
+  }
+}
+
+// -------------------------------------------------------------
+// 11. NEWSLETTER SUBSCRIBERS & INQUIRIES
+// -------------------------------------------------------------
+async function fetchAdminSubscribers() {
+  try {
+    const res = await fetch('/api/admin/subscribers');
+    const data = await res.json();
+    if (data.success) {
+      adminState.subscribers = data.subscribers || [];
+      renderAdminSubscribersTable();
+      if (document.getElementById('kpiSubscribers')) {
+        document.getElementById('kpiSubscribers').textContent = adminState.subscribers.length;
+      }
+    }
+  } catch (err) {
+    console.error('Error fetching subscribers:', err);
+  }
+}
+
+function renderAdminSubscribersTable() {
+  const tbody = document.getElementById('adminSubscribersTbody');
+  if (!tbody) return;
+
+  const list = adminState.subscribers || [];
+  if (list.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="5" style="text-align: center; color: var(--admin-text-muted); padding: 20px;">No community subscribers yet.</td></tr>`;
+    return;
+  }
+
+  tbody.innerHTML = list.map(s => `
+    <tr>
+      <td><strong>#${s.id}</strong></td>
+      <td><strong>${s.email}</strong></td>
+      <td><span style="font-size: 11px; background: #FFF3E0; color: #E65100; padding: 2px 8px; border-radius: 10px;">${s.source || 'Website'}</span></td>
+      <td style="font-size: 12px; color: var(--admin-text-muted);">${s.created_at || '-'}</td>
+      <td>
+        <button onclick="deleteAdminSubscriber(${s.id}, '${s.email}')" class="btn-admin-danger" style="padding: 4px 8px; font-size: 11px;">
+          🗑️ Delete
+        </button>
+      </td>
+    </tr>
+  `).join('');
+}
+
+async function deleteAdminSubscriber(id, email) {
+  if (!confirm(`Remove subscriber ${email}?`)) return;
+  try {
+    const res = await fetch(`/api/admin/subscribers/${id}`, { method: 'DELETE' });
+    const data = await res.json();
+    if (data.success) {
+      showAdminLiveToast('Subscriber removed');
+      fetchAdminSubscribers();
+      fetchDashboardStats();
+    }
+  } catch (err) {
+    console.error(err);
+  }
+}
+
+async function fetchAdminInquiries() {
+  try {
+    const res = await fetch('/api/admin/inquiries');
+    const data = await res.json();
+    if (data.success) {
+      adminState.inquiries = data.inquiries || [];
+      renderAdminInquiriesTable();
+    }
+  } catch (err) {
+    console.error('Error fetching inquiries:', err);
+  }
+}
+
+function renderAdminInquiriesTable() {
+  const tbody = document.getElementById('adminInquiriesTbody');
+  if (!tbody) return;
+
+  const list = adminState.inquiries || [];
+  if (list.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="6" style="text-align: center; color: var(--admin-text-muted); padding: 20px;">No contact inquiries received yet.</td></tr>`;
+    return;
+  }
+
+  tbody.innerHTML = list.map(inq => `
+    <tr>
+      <td><strong>#${inq.id}</strong></td>
+      <td><strong>${inq.name || 'Visitor'}</strong></td>
+      <td>
+        <div>${inq.email ? `<a href="mailto:${inq.email}">${inq.email}</a>` : ''}</div>
+        <div>${inq.phone ? `<a href="tel:${inq.phone}">${inq.phone}</a>` : ''}</div>
+      </td>
+      <td>${inq.subject || 'General Inquiry'}</td>
+      <td style="max-width: 320px; white-space: normal; font-size: 12.5px; line-height: 1.4;">${inq.message}</td>
+      <td style="font-size: 12px; color: var(--admin-text-muted);">${inq.created_at || '-'}</td>
+    </tr>
+  `).join('');
+}
+
+// -------------------------------------------------------------
+// 12. REAL-TIME AUTO-SYNC & NOTIFICATION SYSTEM
+// -------------------------------------------------------------
+function startAdminLiveSync() {
+  if (adminState.syncInterval) clearInterval(adminState.syncInterval);
+
+  // Poll server every 10 seconds for real-time order & user sync
+  adminState.syncInterval = setInterval(() => {
+    fetchDashboardStats();
+    if (adminState.currentTab === 'orders') fetchAdminOrders();
+    if (adminState.currentTab === 'customers') fetchAdminCustomers();
+    if (adminState.currentTab === 'subscribers') {
+      fetchAdminSubscribers();
+      fetchAdminInquiries();
+    }
+  }, 10000);
+}
+
+async function refreshAllAdminData(isManual = false) {
+  const badge = document.getElementById('liveSyncText');
+  if (badge) badge.textContent = 'Syncing...';
+
+  await Promise.all([
+    fetchDashboardStats(),
+    fetchAdminProducts(),
+    fetchAdminOrders(),
+    fetchAdminCustomers(),
+    fetchAdminSubscribers(),
+    fetchAdminInquiries()
+  ]);
+
+  if (badge) {
+    badge.textContent = 'Live Synced Just Now';
+    setTimeout(() => { badge.textContent = 'Live Auto-Sync (10s)'; }, 2500);
+  }
+
+  if (isManual) {
+    showAdminLiveToast('✅ All Admin Data Refreshed Live!');
+  }
+}
+
+// Gentle pleasant sound alert for new orders using Web Audio API
+function playNotificationSound() {
+  try {
+    const ctx = new (window.AudioContext || window.webkitAudioContext)();
+    const now = ctx.currentTime;
+
+    const osc1 = ctx.createOscillator();
+    const gain1 = ctx.createGain();
+    osc1.type = 'sine';
+    osc1.frequency.setValueAtTime(587.33, now); // D5
+    gain1.gain.setValueAtTime(0.2, now);
+    gain1.gain.exponentialRampToValueAtTime(0.01, now + 0.35);
+    osc1.connect(gain1);
+    gain1.connect(ctx.destination);
+    osc1.start(now);
+    osc1.stop(now + 0.35);
+
+    const osc2 = ctx.createOscillator();
+    const gain2 = ctx.createGain();
+    osc2.type = 'sine';
+    osc2.frequency.setValueAtTime(880, now + 0.15); // A5
+    gain2.gain.setValueAtTime(0.2, now + 0.15);
+    gain2.gain.exponentialRampToValueAtTime(0.01, now + 0.55);
+    osc2.connect(gain2);
+    gain2.connect(ctx.destination);
+    osc2.start(now + 0.15);
+    osc2.stop(now + 0.55);
+  } catch (e) {
+    console.warn('Audio alert not supported or user gesture needed:', e);
+  }
+}
+
+function showAdminLiveToast(message) {
+  let toast = document.getElementById('adminLiveToast');
+  if (!toast) {
+    toast = document.createElement('div');
+    toast.id = 'adminLiveToast';
+    toast.style.position = 'fixed';
+    toast.style.bottom = '24px';
+    toast.style.right = '24px';
+    toast.style.background = '#351F0E';
+    toast.style.color = '#FFFFFF';
+    toast.style.padding = '14px 22px';
+    toast.style.borderRadius = '8px';
+    toast.style.boxShadow = '0 10px 25px rgba(0,0,0,0.3)';
+    toast.style.zIndex = '99999';
+    toast.style.fontSize = '13.5px';
+    toast.style.fontWeight = '600';
+    toast.style.display = 'flex';
+    toast.style.alignItems = 'center';
+    toast.style.gap = '10px';
+    toast.style.borderLeft = '4px solid #4CAF50';
+    toast.style.transition = 'all 0.3s ease';
+    document.body.appendChild(toast);
+  }
+  toast.innerHTML = `<span>⚡</span><span>${message}</span>`;
+  toast.style.opacity = '1';
+  toast.style.transform = 'translateY(0)';
+
+  clearTimeout(toast._hideTimeout);
+  toast._hideTimeout = setTimeout(() => {
+    toast.style.opacity = '0';
+    toast.style.transform = 'translateY(20px)';
+  }, 4500);
+}
+
 
 
