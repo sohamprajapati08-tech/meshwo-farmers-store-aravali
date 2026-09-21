@@ -357,11 +357,12 @@ app.post('/api/customer/quick-login', (req, res) => {
       { expiresIn: '30d' }
     );
 
-    // Fetch previous orders placed by this customer phone
+    // Fetch previous orders placed by this customer phone (excluding uncompleted Draft checkouts)
     const orders = db.prepare(`
       SELECT id, order_number, total, payment_method, payment_status, order_status, created_at, items_json
       FROM orders 
-      WHERE customer_phone = ? OR customer_phone LIKE ?
+      WHERE (customer_phone = ? OR customer_phone LIKE ?)
+        AND order_status != 'Draft'
       ORDER BY id DESC LIMIT 15
     `).all(cleanPhone, `%${cleanPhone}%`);
 
@@ -389,9 +390,8 @@ app.get('/api/customer/orders/:phone', (req, res) => {
     const orders = db.prepare(`
       SELECT id, order_number, total, payment_method, payment_status, order_status, created_at, items_json
       FROM orders 
-      WHERE customer_phone = ? 
-         OR customer_phone = ?
-         OR customer_phone LIKE ?
+      WHERE (customer_phone = ? OR customer_phone = ? OR customer_phone LIKE ?)
+        AND order_status != 'Draft'
       ORDER BY id DESC LIMIT 50
     `).all(cleanPhone, rawPhone, `%${cleanPhone}%`);
 
@@ -1222,7 +1222,7 @@ app.post('/api/checkout/create-session', async (req, res) => {
       console.warn('Customer auto-link warning in create-session:', e.message);
     }
 
-    // Insert order into SQLite database with Payment Status: 'Pending'
+    // Insert uncompleted checkout session as Draft (Will ONLY become an actual order when PAID)
     const insert = db.prepare(`
       INSERT INTO orders (
         order_number, customer_name, customer_email, customer_phone,
@@ -1234,7 +1234,7 @@ app.post('/api/checkout/create-session', async (req, res) => {
         ?, ?, ?, ?,
         ?, ?, ?, ?, ?,
         ?, ?, ?, ?, ?,
-        ?, 'Pending', '', 'Pending',
+        ?, 'Draft (Unpaid)', '', 'Draft',
         ?, ?
       )
     `);
@@ -1414,37 +1414,69 @@ app.post('/api/checkout/verify-session', async (req, res) => {
         success: false,
         message: 'Online payments must be verified securely via Razorpay payment gateway.'
       });
-
-      // Trigger Google Sheets Background Sync
-      try {
-        const items = JSON.parse(updated.items_json || '[]');
-        const sheetData = {
-          order_number: updated.order_number,
-          customer_name: updated.customer_name,
-          customer_email: updated.customer_email || '',
-          customer_phone: updated.customer_phone,
-          full_address: `${updated.address}, ${updated.city || ''} ${updated.pincode || ''}`.trim(),
-          items_summary: items.map(it => `${it.title} (${it.selectedVariant || 'Standard'}) x${it.quantity}`).join(' | '),
-          subtotal: updated.subtotal,
-          discount: updated.discount,
-          shipping_fee: updated.shipping_fee,
-          total: updated.total,
-          payment_method: method || updated.payment_method,
-          payment_status: newStatus,
-          transaction_id: txId,
-          order_status: newOrderState
-        };
-        syncToGoogleSheets('NEW_ORDER', sheetData).catch(e => console.error('[Sheets BG Sync]', e.message));
-      } catch (e) {}
-
-      res.json({
-        success: true,
-        message: 'Payment verified successfully and order placed!',
-        order: updated,
-        is_paid: true
-      });
     } catch (err) {
       console.error('Confirm payment error:', err);
+      res.status(500).json({ success: false, message: err.message });
+    }
+  });
+
+  // POST /api/checkout/submit-upi-verification (Customer scanned QR and entered 12-digit UTR)
+  app.post('/api/checkout/submit-upi-verification', async (req, res) => {
+    try {
+      const { order_number, utr } = req.body;
+      const cleanUtr = String(utr || '').trim();
+
+      if (!cleanUtr || cleanUtr.length < 6) {
+        return res.status(400).json({ success: false, message: 'કૃપા કરીને સાચો ૧૨-આંકડાનો UPI UTR નંબર નાખો.' });
+      }
+
+      // Check if this UTR was already used
+      const existing = db.prepare("SELECT order_number FROM orders WHERE transaction_id = ? AND order_number != ?").get(cleanUtr, order_number);
+      if (existing) {
+        return res.status(400).json({ success: false, message: `આ UTR (${cleanUtr}) અગાઉ ઓર્ડર ${existing.order_number} માં વપરાઈ ગયો છે! ડુપ્લિકેટ અમાન્ય છે.` });
+      }
+
+      const order = db.prepare('SELECT * FROM orders WHERE order_number = ?').get(order_number);
+      if (!order) {
+        return res.status(404).json({ success: false, message: 'Order not found' });
+      }
+
+      db.prepare(`
+        UPDATE orders 
+        SET payment_method = 'UPI',
+            payment_status = 'Pending Bank Verification (UPI)',
+            order_status = 'Pending Verification',
+            transaction_id = ?
+        WHERE order_number = ?
+      `).run(cleanUtr, order_number);
+
+      const updated = db.prepare('SELECT * FROM orders WHERE order_number = ?').get(order_number);
+      res.json({
+        success: true,
+        message: 'UPI UTR સબમિટ થઈ ગયું છે. બેંકમાં પૈસા જમા થયાની ચકાસણી પછી ઓર્ડર કન્ફર્મ થશે.',
+        order: updated
+      });
+    } catch (err) {
+      res.status(500).json({ success: false, message: err.message });
+    }
+  });
+
+  // PUT /api/orders/:id/approve-upi - Admin confirms they received the money in their bank
+  app.put('/api/orders/:id/approve-upi', verifyAdminToken, (req, res) => {
+    try {
+      const { id } = req.params;
+      const order = db.prepare('SELECT * FROM orders WHERE id = ?').get(id);
+      if (!order) return res.status(404).json({ success: false, message: 'Order not found' });
+
+      db.prepare(`
+        UPDATE orders 
+        SET payment_status = 'Paid (100% Bank Verified)', order_status = 'Processing'
+        WHERE id = ?
+      `).run(id);
+
+      const updated = db.prepare('SELECT * FROM orders WHERE id = ?').get(id);
+      res.json({ success: true, message: 'ઓર્ડર સફળતાપૂર્વક કન્ફર્મ થઈ ગયો છે!', order: updated });
+    } catch (err) {
       res.status(500).json({ success: false, message: err.message });
     }
   });
@@ -1678,11 +1710,11 @@ app.post('/api/orders', (req, res) => {
 app.get('/api/orders', verifyAdminToken, (req, res) => {
   try {
     const { status } = req.query;
-    let sql = 'SELECT * FROM orders';
+    let sql = "SELECT * FROM orders WHERE order_status != 'Draft'";
     const params = [];
 
     if (status && status !== 'all') {
-      sql += ' WHERE order_status = ?';
+      sql += ' AND order_status = ?';
       params.push(status);
     }
 
@@ -1733,8 +1765,8 @@ app.get('/api/stats', verifyAdminToken, (req, res) => {
   try {
     const totalProducts = db.prepare('SELECT COUNT(*) as count FROM products WHERE is_active = 1').get().count;
     const lowStockCount = db.prepare('SELECT COUNT(*) as count FROM products WHERE stock < 20 AND is_active = 1').get().count;
-    const totalOrders = db.prepare('SELECT COUNT(*) as count FROM orders').get().count;
-    const totalRevenue = db.prepare("SELECT COALESCE(SUM(total), 0) as revenue FROM orders WHERE order_status != 'Cancelled'").get().revenue;
+    const totalOrders = db.prepare("SELECT COUNT(*) as count FROM orders WHERE order_status != 'Draft'").get().count;
+    const totalRevenue = db.prepare("SELECT COALESCE(SUM(total), 0) as revenue FROM orders WHERE order_status != 'Cancelled' AND order_status != 'Draft'").get().revenue;
     const pendingOrders = db.prepare("SELECT COUNT(*) as count FROM orders WHERE order_status = 'Pending'").get().count;
     const totalCustomers = db.prepare('SELECT COUNT(*) as count FROM customers').get().count;
     const totalSubscribers = db.prepare('SELECT COUNT(*) as count FROM newsletter_subscribers').get().count;
@@ -1743,6 +1775,7 @@ app.get('/api/stats', verifyAdminToken, (req, res) => {
     const recentOrders = db.prepare(`
       SELECT id, order_number, customer_name, total, order_status, created_at
       FROM orders
+      WHERE order_status != 'Draft'
       ORDER BY id DESC LIMIT 10
     `).all();
 

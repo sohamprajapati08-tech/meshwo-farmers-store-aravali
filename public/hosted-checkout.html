@@ -759,15 +759,30 @@
             Do not hit back or close this screen until the payment is complete
           </div>
 
-          <!-- Real-Time Auto-Verification Status -->
-          <div class="realtime-detection-box">
-            <div class="pulse-dot"></div>
-            <span id="detectionStatusText">Waiting for bank transaction confirmation...</span>
+          <!-- Direct UPI UTR Input Box (Prevents Unpaid Fake Orders) -->
+          <div style="background: #F0FDF4; border: 1.5px solid #2E7D32; border-radius: 10px; padding: 16px; margin-top: 18px; max-width: 320px; width: 100%; text-align: left;">
+            <div style="font-size: 13px; font-weight: 800; color: #166534; margin-bottom: 6px;">
+              📱 Step 2: Enter 12-Digit UPI Ref / UTR No.
+            </div>
+            <p style="font-size: 11px; color: #374151; line-height: 1.4; margin-bottom: 10px;">
+              QR સ્કેન કરીને PhonePe/GPay માં પેમેન્ટ પૂર્ણ કર્યા પછી, ત્યાં મળેલ <strong>12-આંકડાનો UTR નંબર</strong> અહીં દાખલ કરો:
+            </p>
+            <input type="text" id="customerUtrInput" placeholder="e.g. 425109876543" maxlength="16" class="fk-form-input" style="margin-bottom: 10px; font-weight: 700; letter-spacing: 1px; border: 1.5px solid #2E7D32;">
+            <button type="button" class="verify-now-btn" id="btnSubmitUtr" style="width: 100%; max-width: none; background: #2E7D32;" onclick="submitUpiPaymentProof()">
+              ✓ Submit UTR &amp; Confirm Order &rarr;
+            </button>
+            <div style="font-size: 10.5px; color: #6B7280; text-align: center; margin-top: 8px;">
+              🛡️ એડમિન બેંકમાં પૈસા જમા થયાની ખાતરી કર્યા પછી જ ઓર્ડર આગળ મોકલશે.
+            </div>
+          </div>
+
+          <div style="margin-top: 14px; font-size: 11.5px; color: #878787;">
+            — OR PAY VIA GATEWAY —
           </div>
 
           <!-- Razorpay / Bank Verified Payment Button -->
-          <button type="button" class="verify-now-btn" id="btnRazorpayLaunch" onclick="launchRazorpayRealPayment()">
-            💳 Pay via Razorpay (UPI, Cards &amp; NetBanking) &rarr;
+          <button type="button" class="verify-now-btn" id="btnRazorpayLaunch" style="background: #0C75EB; margin-top: 8px;" onclick="launchRazorpayRealPayment()">
+            💳 Pay via Razorpay Gateway (Cards &amp; NetBanking) &rarr;
           </button>
         </section>
 
@@ -1135,6 +1150,60 @@
 
     function triggerCardPayment() {
       launchRazorpayRealPayment();
+    }
+
+    async function submitUpiPaymentProof() {
+      const utrInput = document.getElementById('customerUtrInput');
+      const utr = (utrInput ? utrInput.value : '').trim();
+      const btn = document.getElementById('btnSubmitUtr');
+
+      if (!utr || utr.length < 6) {
+        alert('⚠️ કૃપા કરીને તમારા PhonePe / GPay માંથી 12-આંકડાનો UPI Transaction UTR / Ref No. અહીં દાખલ કરો.');
+        if (utrInput) utrInput.focus();
+        return;
+      }
+
+      if (btn) {
+        btn.disabled = true;
+        btn.innerHTML = '<span>⏳ Submitting UTR for Verification...</span>';
+      }
+
+      try {
+        const res = await fetch('/api/checkout/submit-upi-verification', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            order_number: orderNumber,
+            utr
+          })
+        });
+
+        const data = await res.json();
+        if (data.success) {
+          // Clear cart
+          const user = JSON.parse(localStorage.getItem('dwarkesh_user') || 'null');
+          if (user && user.phone) {
+            localStorage.removeItem(`dwarkesh_cart_${user.phone}`);
+          }
+          localStorage.removeItem('dwarkesh_cart');
+
+          // Redirect to order success page
+          window.location.href = `/order-success.html?order_number=${encodeURIComponent(orderNumber)}&gateway=upi&status=pending_verification`;
+        } else {
+          alert('⚠️ ' + (data.message || 'UTR verification failed. Please try again.'));
+          if (btn) {
+            btn.disabled = false;
+            btn.innerHTML = '✓ Submit UTR &amp; Confirm Order &rarr;';
+          }
+        }
+      } catch (e) {
+        console.error('Submit UTR error:', e);
+        alert('Connection error. Please try again.');
+        if (btn) {
+          btn.disabled = false;
+          btn.innerHTML = '✓ Submit UTR &amp; Confirm Order &rarr;';
+        }
+      }
     }
 
     async function confirmCodOrder() {

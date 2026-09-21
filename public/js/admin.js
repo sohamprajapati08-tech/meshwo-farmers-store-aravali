@@ -508,10 +508,22 @@ function renderAdminOrdersTable() {
         <td style="font-size: 12px; max-width: 180px;">${order.address}, ${order.city} - ${order.pincode}</td>
         <td style="font-size: 11px;">${itemsSummary}</td>
         <td><strong style="color: var(--admin-primary); font-size: 14px;">₹${order.total.toLocaleString('en-IN')}</strong></td>
-        <td><span style="font-weight: 600; font-size: 12px;">${order.payment_method}</span></td>
+        <td>
+          <div style="font-weight: 700; font-size: 12px;">${order.payment_method}</div>
+          <div style="font-size: 10.5px; margin-top: 3px; font-weight: 600; color: ${order.payment_status && order.payment_status.toLowerCase().includes('paid') ? '#16A34A' : '#D97706'};">
+            ${order.payment_status || 'Pending'}
+          </div>
+          ${order.transaction_id ? `<div style="font-size: 10px; background: #FEF3C7; color: #92400E; padding: 2px 6px; border-radius: 4px; margin-top: 4px; font-weight: 700;">UTR: ${order.transaction_id}</div>` : ''}
+          ${order.payment_method === 'UPI' && (!order.payment_status || !order.payment_status.toLowerCase().includes('paid')) ? `
+            <button type="button" class="btn-admin" style="font-size: 10px; padding: 3px 8px; background: #16A34A; color: #FFF; margin-top: 5px; font-weight: 700; border-radius: 4px;" onclick="handleApproveUpiOrder(${order.id})">
+              ✓ Confirm Money Received
+            </button>
+          ` : ''}
+        </td>
         <td>
           <select class="status-select" onchange="handleUpdateOrderStatus(${order.id}, this.value, this)">
             <option value="Pending" ${order.order_status === 'Pending' ? 'selected' : ''}>Pending</option>
+            <option value="Pending Verification" ${order.order_status === 'Pending Verification' ? 'selected' : ''}>Pending Verification</option>
             <option value="Processing" ${order.order_status === 'Processing' ? 'selected' : ''}>Processing</option>
             <option value="Shipped" ${order.order_status === 'Shipped' ? 'selected' : ''}>Shipped</option>
             <option value="Delivered" ${order.order_status === 'Delivered' ? 'selected' : ''}>Delivered</option>
@@ -521,6 +533,29 @@ function renderAdminOrdersTable() {
       </tr>
     `;
   }).join('');
+}
+
+async function handleApproveUpiOrder(orderId) {
+  if (!confirm('શું તમારા બેંક એકાઉન્ટ / GPay / PhonePe માં આ ગ્રાહકના પૈસા ખરેખર જમા થઈ ગયા છે?\n\nખાતરી કર્યા પછી જ OK દબાવો.')) {
+    return;
+  }
+
+  try {
+    const res = await authFetch(`/api/orders/${orderId}/approve-upi`, {
+      method: 'PUT'
+    });
+    const data = await res.json();
+    if (data.success) {
+      alert('✅ ઓર્ડર સફળતાપૂર્વક કન્ફર્મ થઈ ગયો છે! સ્ટેટસ Paid થઈ ગયું.');
+      fetchAdminOrders();
+      fetchDashboardStats();
+    } else {
+      alert(data.message || 'Approval failed');
+    }
+  } catch (err) {
+    console.error(err);
+    alert('Server error approving payment');
+  }
 }
 
 async function handleUpdateOrderStatus(orderId, newStatus, selectEl) {
