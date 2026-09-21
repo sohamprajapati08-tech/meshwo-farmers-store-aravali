@@ -257,6 +257,7 @@
         <div class="order-history-card">
           <div style="font-weight: 800; font-size: 14px; color: var(--primary-color); margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center;">
             <span>📦 અગાઉના ઓર્ડર્સ (Your Order History)</span>
+            <span id="profileOrderCountBadge" style="font-size: 11px; background: #E8F5E9; color: #2E7D32; padding: 2px 8px; border-radius: 12px; font-weight: 700;"></span>
           </div>
           <div id="pageOrdersList" style="font-size: 12.5px; color: #777;">
             ઓર્ડર હિસ્ટ્રી લોડ થઈ રહી છે...
@@ -341,18 +342,31 @@
           .then(data => {
             const listEl = document.getElementById('pageOrdersList');
             if (data.success && data.orders && data.orders.length > 0) {
-              listEl.innerHTML = data.orders.map(o => `
-                <div style="display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px solid #EAE5D9;">
-                  <div>
-                    <strong style="color: var(--primary-color);">${o.order_number}</strong>
-                    <div style="font-size: 11px; color: #888;">${new Date(o.created_at).toLocaleDateString('en-IN')} &bull; ${o.payment_method || 'COD'}</div>
+              const orderCountBadge = document.getElementById('profileOrderCountBadge');
+              if (orderCountBadge) orderCountBadge.textContent = `${data.orders.length} Orders`;
+              listEl.innerHTML = data.orders.map(o => {
+                let itemsDesc = '';
+                try {
+                  const itList = typeof o.items_json === 'string' ? JSON.parse(o.items_json) : (o.items_json || []);
+                  if (Array.isArray(itList) && itList.length > 0) {
+                    itemsDesc = itList.map(it => `${it.quantity || 1}x ${it.title}`).join(', ');
+                  }
+                } catch(e) {}
+
+                return `
+                  <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid #EAE5D9;">
+                    <div style="max-width: 65%;">
+                      <strong style="color: var(--primary-color); font-size: 13.5px;">#${o.order_number}</strong>
+                      <div style="font-size: 11px; color: #888; margin: 2px 0;">${new Date(o.created_at).toLocaleDateString('en-IN')} &bull; ${o.payment_method || 'COD'}</div>
+                      ${itemsDesc ? `<div style="font-size: 11.5px; color: #555; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${itemsDesc}</div>` : ''}
+                    </div>
+                    <div style="text-align: right;">
+                      <strong style="color: #2E7D32; font-size: 14px;">₹${Number(o.total).toLocaleString('en-IN')}</strong>
+                      <div style="font-size: 10.5px; font-weight: 700; color: #B48448; margin-top: 3px;">${o.order_status || o.payment_status || 'Confirmed'}</div>
+                    </div>
                   </div>
-                  <div style="text-align: right;">
-                    <strong style="color: #2E7D32;">₹${Number(o.total).toLocaleString('en-IN')}</strong>
-                    <div style="font-size: 10.5px; font-weight: 700; color: #B48448;">${o.order_status || o.payment_status || 'Confirmed'}</div>
-                  </div>
-                </div>
-              `).join('');
+                `;
+              }).join('');
             } else {
               listEl.innerHTML = '<span style="color: #999;">હજુ સુધી કોઈ ઓર્ડર નથી નોંધાયો.</span>';
             }

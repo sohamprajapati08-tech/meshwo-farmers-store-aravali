@@ -381,16 +381,19 @@ app.post('/api/customer/quick-login', (req, res) => {
 // GET /api/customer/orders/:phone - Fetch customer order history
 app.get('/api/customer/orders/:phone', (req, res) => {
   try {
-    const cleanPhone = String(req.params.phone).trim().replace(/\D/g, '').slice(-10);
+    const rawPhone = String(req.params.phone || '').trim();
+    const cleanPhone = rawPhone.replace(/\D/g, '').slice(-10);
     if (!cleanPhone || cleanPhone.length < 10) {
       return res.status(400).json({ success: false, message: 'Invalid phone number' });
     }
     const orders = db.prepare(`
       SELECT id, order_number, total, payment_method, payment_status, order_status, created_at, items_json
       FROM orders 
-      WHERE customer_phone = ? OR customer_phone LIKE ?
-      ORDER BY id DESC LIMIT 20
-    `).all(cleanPhone, `%${cleanPhone}%`);
+      WHERE customer_phone = ? 
+         OR customer_phone = ?
+         OR customer_phone LIKE ?
+      ORDER BY id DESC LIMIT 50
+    `).all(cleanPhone, rawPhone, `%${cleanPhone}%`);
 
     res.json({ success: true, orders: orders || [] });
   } catch (error) {
@@ -953,6 +956,20 @@ app.post('/api/razorpay/verify-payment', async (req, res) => {
     const calc = calculateServerCartTotal(items || [], coupon_code);
     const order_number = generateOrderNumber();
     const items_json = JSON.stringify(calc.verifiedItems);
+    const cleanPhone = String(customer_phone || '').trim().replace(/\D/g, '').slice(-10);
+
+    // Auto-record user in customers table if not already present
+    try {
+      if (cleanPhone && cleanPhone.length === 10) {
+        const existingCust = db.prepare('SELECT id FROM customers WHERE phone = ?').get(cleanPhone);
+        if (!existingCust) {
+          db.prepare('INSERT INTO customers (name, email, phone, password) VALUES (?, ?, ?, ?)')
+            .run(customer_name || 'Customer', customer_email || `${cleanPhone}@meshwofarmers.in`, cleanPhone, 'mobile_verified');
+        }
+      }
+    } catch (e) {
+      console.warn('Customer auto-link warning in verify-payment:', e.message);
+    }
 
     const insert = db.prepare(`
       INSERT INTO orders (
@@ -972,7 +989,7 @@ app.post('/api/razorpay/verify-payment', async (req, res) => {
       order_number,
       customer_name || 'Customer',
       customer_email || '',
-      customer_phone,
+      cleanPhone || customer_phone,
       address,
       city || '',
       custState || '',
@@ -991,7 +1008,7 @@ app.post('/api/razorpay/verify-payment', async (req, res) => {
       order_number,
       customer_name: customer_name || 'Customer',
       customer_email: customer_email || '',
-      customer_phone,
+      customer_phone: cleanPhone || customer_phone,
       full_address: `${address}, ${city || ''}, ${custState || ''} - ${pincode || ''}`.trim(),
       items_summary: calc.verifiedItems.map(it => `${it.title} (${it.selectedVariant || 'Standard'}) x${it.quantity}`).join(' | '),
       subtotal: calc.subtotal,
@@ -1190,6 +1207,21 @@ app.post('/api/checkout/create-session', async (req, res) => {
       payment_url = `${baseUrl}/hosted-checkout.html?order_number=${encodeURIComponent(order_number)}&amount=${calc.total}&session_id=${payment_session_id}`;
     }
 
+    const cleanPhone = String(customer_phone || '').trim().replace(/\D/g, '').slice(-10);
+
+    // Auto-record user in customers table if not already present
+    try {
+      if (cleanPhone && cleanPhone.length === 10) {
+        const existingCust = db.prepare('SELECT id FROM customers WHERE phone = ?').get(cleanPhone);
+        if (!existingCust) {
+          db.prepare('INSERT INTO customers (name, email, phone, password) VALUES (?, ?, ?, ?)')
+            .run(customer_name || 'Customer', customer_email || `${cleanPhone}@meshwofarmers.in`, cleanPhone, 'mobile_verified');
+        }
+      }
+    } catch (e) {
+      console.warn('Customer auto-link warning in create-session:', e.message);
+    }
+
     // Insert order into SQLite database with Payment Status: 'Pending'
     const insert = db.prepare(`
       INSERT INTO orders (
@@ -1211,7 +1243,7 @@ app.post('/api/checkout/create-session', async (req, res) => {
       order_number,
       customer_name,
       customer_email || '',
-      customer_phone,
+      cleanPhone || customer_phone,
       address,
       city || '',
       custState || '',
@@ -1487,7 +1519,7 @@ app.post('/api/orders', (req, res) => {
       order_number,
       customer_name,
       customer_email || '',
-      customer_phone,
+      cleanPhone,
       address,
       city || '',
       custState || '',
@@ -1509,7 +1541,7 @@ app.post('/api/orders', (req, res) => {
       order_number,
       customer_name,
       customer_email: customer_email || '',
-      customer_phone,
+      customer_phone: cleanPhone,
       full_address: `${address}, ${city || ''}, ${custState || ''} - ${pincode || ''}`.trim(),
       items_summary: calc.verifiedItems.map(it => `${it.title} (${it.selectedVariant || 'Standard'}) x${it.quantity}`).join(' | '),
       subtotal: calc.subtotal,
@@ -1608,7 +1640,7 @@ app.get('/api/stats', verifyAdminToken, (req, res) => {
     const recentOrders = db.prepare(`
       SELECT id, order_number, customer_name, total, order_status, created_at
       FROM orders
-      ORDER BY id DESC LIMIT 5
+      ORDER BY id DESC LIMIT 10
     `).all();
 
     res.json({
