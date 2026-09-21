@@ -15,7 +15,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Playfair+Display:ital,wght@0,600;0,700;0,800;1,600&display=swap" rel="stylesheet">
 
-  <link rel="stylesheet" href="/css/theme.css?v=13.0">
+  <link rel="stylesheet" href="/css/theme.css?v=14.0">
   <!-- Razorpay Checkout SDK -->
   <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
 </head>
@@ -53,12 +53,21 @@
   <!-- MAIN CHECKOUT CONTAINER -->
   <main class="checkout-main-wrap" id="checkoutMainContainer">
     <!-- Stepper Navigation -->
-    <div style="display: flex; align-items: center; justify-content: center; gap: 10px; margin-bottom: 24px; font-size: 13px; font-weight: 700; color: #737E6F;">
-      <a href="/cart.html" style="color: var(--primary-color); text-decoration: none;">1. Cart</a>
-      <span>&rarr;</span>
-      <span style="color: #1A3E1B; font-weight: 800; border-bottom: 2px solid #1A3E1B; padding-bottom: 2px;">2. Information &amp; Delivery</span>
-      <span>&rarr;</span>
-      <span>3. Order Complete</span>
+    <div class="checkout-stepper">
+      <a href="/cart.html" class="checkout-step-pill step-done" title="Go back to cart">
+        <span class="step-circle">✓</span>
+        <span class="step-label">1. Cart</span>
+      </a>
+      <span class="step-sep">&rsaquo;</span>
+      <div class="checkout-step-pill step-current">
+        <span class="step-circle">2</span>
+        <span class="step-label">2. Delivery Info</span>
+      </div>
+      <span class="step-sep">&rsaquo;</span>
+      <div class="checkout-step-pill step-next">
+        <span class="step-circle">3</span>
+        <span class="step-label">3. Complete</span>
+      </div>
     </div>
 
     <div class="checkout-grid" id="checkoutActiveGrid">
@@ -78,7 +87,7 @@
                 <span class="checkout-step-badge">1</span>
                 <span>Contact &amp; Customer Details</span>
               </h2>
-              <div id="checkoutUserStatusBadge" style="font-size: 12px; color: #1A3E1B; font-weight: 700;"></div>
+              <div id="checkoutUserStatusBadge" class="checkout-user-badge"></div>
             </div>
 
             <div class="checkout-form-row-2">
@@ -105,7 +114,7 @@
                 <span class="checkout-step-badge">2</span>
                 <span>Delivery Address</span>
               </h2>
-              <span style="font-size: 11px; color: #6D7869; font-weight: 600;">Pan-India Delivery</span>
+              <span class="checkout-delivery-tag">🚚 Free Pan-India Delivery (3-5 Days)</span>
             </div>
 
             <div class="checkout-form-group">
@@ -441,10 +450,17 @@
         if (document.getElementById('chkCustPincode') && user.pincode) document.getElementById('chkCustPincode').value = user.pincode;
         
         const badge = document.getElementById('checkoutUserStatusBadge');
-        if (badge) badge.innerHTML = `✓ Logged In as ${user.name || user.phone} &bull; <a href="/login.html" style="color: var(--primary-color); text-decoration: underline;">Change Account</a>`;
+        if (badge) {
+          badge.innerHTML = `
+            <span style="color: #2E7D32; font-weight: 700;">✓ Logged In: <strong>${user.name || user.phone}</strong></span>
+            <a href="/login.html" style="color: #1A3E1B; font-weight: 800; text-decoration: underline; margin-left: auto;">Change Account</a>
+          `;
+        }
       } else {
         const badge = document.getElementById('checkoutUserStatusBadge');
-        if (badge) badge.innerHTML = `<a href="/login.html?redirect=/checkout.html" style="color: var(--primary-color); text-decoration: underline; font-weight: 700;">Have an account? Login &rarr;</a>`;
+        if (badge) {
+          badge.innerHTML = `<a href="/login.html?redirect=/checkout.html" style="color: #1A3E1B; text-decoration: underline; font-weight: 700;">Have an account? Login &rarr;</a>`;
+        }
       }
 
       // Check coupon

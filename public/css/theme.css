@@ -3546,12 +3546,201 @@ button, input, select, textarea {
   }
 
   .checkout-header-inner {
-    padding: 0;
+    padding: 8px 12px;
   }
 
   .checkout-security-badge {
     display: none;
   }
 }
+
+/* ========================================================
+   CHECKOUT MODERN STEPPER & MOBILE PERFECTION
+   ======================================================== */
+.checkout-stepper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin: 12px auto 22px;
+  padding: 6px 14px;
+  background: #FFFFFF;
+  border: 1px solid #EAE5D9;
+  border-radius: 30px;
+  width: fit-content;
+  max-width: 100%;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+}
+
+.checkout-step-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  text-decoration: none;
+  font-size: 12.5px;
+  font-weight: 700;
+  padding: 5px 12px;
+  border-radius: 20px;
+  white-space: nowrap;
+}
+
+.checkout-step-pill.step-done {
+  color: #2E7D32;
+  background: #E8F5E9;
+  transition: background 0.2s ease;
+}
+
+.checkout-step-pill.step-done:hover {
+  background: #C8E6C9;
+}
+
+.checkout-step-pill.step-current {
+  color: #FFFFFF;
+  background: #1A3E1B;
+  box-shadow: 0 2px 6px rgba(26, 62, 27, 0.25);
+}
+
+.checkout-step-pill.step-next {
+  color: #8C9688;
+}
+
+.step-circle {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 10.5px;
+  font-weight: 800;
+  background: rgba(0, 0, 0, 0.08);
+}
+
+.step-current .step-circle {
+  background: var(--accent-gold);
+  color: #1A3E1B;
+}
+
+.step-done .step-circle {
+  background: #2E7D32;
+  color: #FFFFFF;
+}
+
+.step-sep {
+  color: #B8C2B3;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.checkout-user-badge {
+  font-size: 11.5px;
+  background: #F1F8E9;
+  border: 1px solid #C5E1A5;
+  color: #1B5E20;
+  padding: 5px 12px;
+  border-radius: 20px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+.checkout-delivery-tag {
+  font-size: 11.5px;
+  background: #E8F5E9;
+  color: #2E7D32;
+  font-weight: 700;
+  padding: 4px 10px;
+  border-radius: 12px;
+  border: 1px solid #C8E6C9;
+  white-space: nowrap;
+}
+
+@media (max-width: 640px) {
+  .checkout-main-wrap {
+    margin: 10px auto 95px;
+    padding: 0 10px;
+  }
+
+  .checkout-section-box {
+    padding: 16px 13px;
+    border-radius: 12px;
+    margin-bottom: 14px;
+  }
+
+  .checkout-section-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+    margin-bottom: 14px;
+    padding-bottom: 10px;
+  }
+
+  .checkout-section-title {
+    font-size: 15.5px;
+    line-height: 1.25;
+  }
+
+  .checkout-user-badge {
+    width: 100%;
+    justify-content: space-between;
+    font-size: 11.5px;
+    padding: 6px 12px;
+    border-radius: 8px;
+  }
+
+  .checkout-delivery-tag {
+    align-self: flex-start;
+  }
+
+  .checkout-stepper {
+    gap: 4px;
+    padding: 5px 8px;
+    margin: 8px auto 16px;
+  }
+
+  .checkout-step-pill {
+    padding: 4px 8px;
+    font-size: 11px;
+    gap: 4px;
+  }
+
+  .step-circle {
+    width: 17px;
+    height: 17px;
+    font-size: 9px;
+  }
+
+  .checkout-header-inner {
+    padding: 8px 10px;
+  }
+
+  .checkout-back-link {
+    font-size: 12px;
+    gap: 4px;
+  }
+
+  .checkout-brand-title {
+    font-size: 14px;
+  }
+
+  .checkout-brand-sub {
+    font-size: 8.5px;
+  }
+
+  .checkout-brand-logo {
+    width: 32px;
+    height: 32px;
+  }
+
+  .checkout-input,
+  .checkout-select,
+  .checkout-textarea {
+    font-size: 14px;
+    padding: 11px 12px;
+  }
+}
+
 
 
