@@ -457,6 +457,7 @@
         .then(data => {
           if (data && data.settings) {
             checkoutState.settings = Object.assign(checkoutState.settings, data.settings);
+            renderCheckoutOrderSummary();
             updateCheckoutPaymentUi();
           }
         }).catch(e => console.warn(e));
@@ -580,8 +581,10 @@
       }
 
       const subtotal = checkoutState.cart.reduce((sum, it) => sum + ((it.price || 0) * (it.quantity || 1)), 0);
-      const threshold = parseFloat(checkoutState.settings.free_shipping_threshold) || 999;
-      const standardFee = parseFloat(checkoutState.settings.standard_shipping_fee) || 99;
+      const sThresh = parseFloat(checkoutState.settings.free_shipping_threshold);
+      const threshold = !isNaN(sThresh) ? sThresh : 999;
+      const sFee = parseFloat(checkoutState.settings.standard_shipping_fee);
+      const standardFee = !isNaN(sFee) ? sFee : 99;
       const shipping = subtotal >= threshold ? 0 : standardFee;
       const discount = checkoutState.appliedCoupon ? Math.round((subtotal * 10) / 100) : 0;
       const total = Math.max(0, subtotal - discount + shipping);
@@ -626,8 +629,10 @@
     function updateCheckoutPaymentUi(calcTotal) {
       const method = checkoutState.selectedPaymentMethod;
       const subtotal = checkoutState.cart.reduce((sum, it) => sum + ((it.price || 0) * (it.quantity || 1)), 0);
-      const threshold = parseFloat(checkoutState.settings.free_shipping_threshold) || 999;
-      const standardFee = parseFloat(checkoutState.settings.standard_shipping_fee) || 99;
+      const sThresh = parseFloat(checkoutState.settings.free_shipping_threshold);
+      const threshold = !isNaN(sThresh) ? sThresh : 999;
+      const sFee = parseFloat(checkoutState.settings.standard_shipping_fee);
+      const standardFee = !isNaN(sFee) ? sFee : 99;
       const shipping = subtotal >= threshold ? 0 : standardFee;
       const discount = checkoutState.appliedCoupon ? Math.round((subtotal * 10) / 100) : 0;
       const total = calcTotal !== undefined ? calcTotal : Math.max(0, subtotal - discount + shipping);
@@ -879,8 +884,10 @@
       localStorage.setItem('dwarkesh_user', JSON.stringify(userObj));
 
       const subtotal = checkoutState.cart.reduce((sum, it) => sum + ((it.price || 0) * (it.quantity || 1)), 0);
-      const threshold = parseFloat(checkoutState.settings.free_shipping_threshold) || 999;
-      const standardFee = parseFloat(checkoutState.settings.standard_shipping_fee) || 99;
+      const sThresh = parseFloat(checkoutState.settings.free_shipping_threshold);
+      const threshold = !isNaN(sThresh) ? sThresh : 999;
+      const sFee = parseFloat(checkoutState.settings.standard_shipping_fee);
+      const standardFee = !isNaN(sFee) ? sFee : 99;
       const shipping_fee = subtotal >= threshold ? 0 : standardFee;
       const discount = checkoutState.appliedCoupon ? Math.round((subtotal * 10) / 100) : 0;
       const total = Math.max(0, subtotal - discount + shipping_fee);

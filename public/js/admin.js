@@ -730,11 +730,14 @@ async function fetchAdminSettings() {
 async function handleSaveGeneralSettings(e) {
   e.preventDefault();
 
+  const standardShippingVal = document.getElementById('settingStandardShipping') ? document.getElementById('settingStandardShipping').value.trim() : '99';
+  const freeShippingVal = document.getElementById('settingFreeShipping') ? document.getElementById('settingFreeShipping').value.trim() : '999';
+
   const payload = {
     shop_name: document.getElementById('settingShopName').value.trim(),
     announcement_ticker: document.getElementById('settingTicker').value.trim(),
-    standard_shipping_fee: document.getElementById('settingStandardShipping') ? document.getElementById('settingStandardShipping').value.trim() : '99',
-    free_shipping_threshold: document.getElementById('settingFreeShipping').value.trim(),
+    standard_shipping_fee: standardShippingVal,
+    free_shipping_threshold: freeShippingVal,
     phone: document.getElementById('settingPhone').value.trim()
   };
 
@@ -746,11 +749,14 @@ async function handleSaveGeneralSettings(e) {
     });
     const data = await res.json();
     if (data.success) {
-      alert('✅ General store settings updated successfully!');
+      await fetchAdminSettings();
+      alert(`✅ Store settings saved! Standard Delivery Charge is now ₹${standardShippingVal}. Changes are live immediately across cart and checkout!`);
+    } else {
+      alert(`❌ Could not update settings: ${data.message || 'Please check your connection and login.'}`);
     }
   } catch (err) {
     console.error(err);
-    alert('Failed to save settings');
+    alert('Failed to save settings: ' + err.message);
   }
 }
 

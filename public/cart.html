@@ -481,8 +481,11 @@
       
       if (countBadge) countBadge.textContent = `${totalCount} item${totalCount !== 1 ? 's' : ''}`;
 
-      const threshold = 999;
-      const standardFee = 99;
+      const sSettings = (window.state && window.state.settings) || window.cartSettings || {};
+      const sThresh = parseFloat(sSettings.free_shipping_threshold);
+      const threshold = !isNaN(sThresh) ? sThresh : 999;
+      const sFee = parseFloat(sSettings.standard_shipping_fee);
+      const standardFee = !isNaN(sFee) ? sFee : 99;
 
       if (!cart || cart.length === 0) {
         if (itemsCard) itemsCard.style.display = 'none';
@@ -617,6 +620,16 @@
 
     // Auto load on ready
     window.addEventListener('DOMContentLoaded', () => {
+      fetch('/api/settings')
+        .then(r => r.json())
+        .then(d => {
+          if (d && d.settings) {
+            window.cartSettings = d.settings;
+            if (window.state) window.state.settings = d.settings;
+            renderCartPage();
+          }
+        }).catch(e => console.warn(e));
+
       setTimeout(renderCartPage, 100);
       setTimeout(renderCartPage, 600); // Re-sync after products fetch
     });
