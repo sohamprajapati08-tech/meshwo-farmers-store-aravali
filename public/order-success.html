@@ -183,9 +183,28 @@
           </div>
         </div>
 
-        <!-- Trust Note -->
-        <div style="background: #F4F8F3; border: 1px solid #D6E8D3; border-radius: 10px; padding: 12px 16px; font-size: 12px; color: #1A3E1B; margin-bottom: 24px; text-align: left; line-height: 1.5;">
-          🚚 <strong>Despatch Guarantee:</strong> Dispatched from Shamlaji Cooperative directly to your address within 24-48 hours. Tracking details will be shared on WhatsApp.
+        <!-- 10-Day Vedic Dispatch & Guaranteed Delivery Timeline -->
+        <div style="background: #F4F8F3; border: 1.5px solid #2E7D32; border-radius: 12px; padding: 16px 18px; font-size: 13px; color: #1A3E1B; margin-bottom: 24px; text-align: left; line-height: 1.6;">
+          <div style="display: flex; align-items: center; gap: 8px; font-weight: 800; font-size: 14px; color: #1A3E1B; margin-bottom: 6px;">
+            <span>⚡</span>
+            <span>Handcrafted Preparation &amp; Dispatch Timeline</span>
+          </div>
+          <p style="margin: 0 0 8px; color: #354E33;">
+            In accordance with our Vedic organic harvest standards, each batch is freshly cold-processed, packed, and <strong>dispatched strictly 10 days after order confirmation</strong>.
+          </p>
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; background: #FFFFFF; border: 1px solid #D6EAD2; border-radius: 8px; padding: 10px 14px; font-size: 12px;">
+            <div>
+              <span style="color: #666;">Scheduled Farm Dispatch:</span>
+              <div id="succDispatchDate" style="font-weight: 800; color: #1A3E1B;">Calculating...</div>
+            </div>
+            <div>
+              <span style="color: #666;">Guaranteed Delivery By:</span>
+              <div id="succDeliveryDate" style="font-weight: 800; color: #2E7D32;">Calculating...</div>
+            </div>
+          </div>
+          <div style="font-size: 11.5px; color: #555; margin-top: 8px;">
+            📦 Live tracking details will be automatically sent to your WhatsApp mobile number once your parcel leaves Shamlaji Farm.
+          </div>
         </div>
 
         <!-- Action Buttons -->
@@ -303,6 +322,29 @@
             }
             sessionStorage.removeItem('dwarkesh_checkout_coupon');
           } catch (e) {}
+
+          // Calculate 10-day dispatch date and expected delivery date
+          const daysOfWeek = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+          const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+          
+          const orderDate = ord.created_at ? new Date(ord.created_at) : new Date();
+          
+          const dispatchDate = new Date(orderDate);
+          dispatchDate.setDate(dispatchDate.getDate() + 10);
+          const formattedDispatch = `${daysOfWeek[dispatchDate.getDay()]}, ${dispatchDate.getDate()} ${months[dispatchDate.getMonth()]}`;
+          
+          const deliveryDate = new Date(orderDate);
+          const stateStr = (ord.state || '').toLowerCase();
+          const transitDays = stateStr.includes('gujarat') ? 2 : 3;
+          deliveryDate.setDate(deliveryDate.getDate() + 10 + transitDays);
+          const formattedDelivery = `${daysOfWeek[deliveryDate.getDay()]}, ${deliveryDate.getDate()} ${months[deliveryDate.getMonth()]}`;
+          
+          if (document.getElementById('succDispatchDate')) {
+            document.getElementById('succDispatchDate').textContent = formattedDispatch;
+          }
+          if (document.getElementById('succDeliveryDate')) {
+            document.getElementById('succDeliveryDate').textContent = formattedDelivery;
+          }
 
           // Update WhatsApp link with order number
           const waBtn = document.getElementById('succWhatsAppBtn');

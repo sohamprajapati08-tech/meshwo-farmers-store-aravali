@@ -17,6 +17,7 @@
     "cors": "^2.8.6",
     "dotenv": "^18.0.1",
     "express": "^5.2.1",
+    "jsonwebtoken": "^9.0.3",
     "multer": "^2.4.0",
     "pdf-export-images": "^1.2.0",
     "pdf-parse": "^2.4.5",

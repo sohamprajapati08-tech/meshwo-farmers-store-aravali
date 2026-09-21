@@ -22,14 +22,38 @@ document.addEventListener('DOMContentLoaded', () => {
   checkAdminAuth();
 });
 
+// Secure JWT Admin API Helper
+async function authFetch(url, options = {}) {
+  const token = sessionStorage.getItem('dwk_admin_token') || localStorage.getItem('dwk_admin_token');
+  const headers = Object.assign({}, options.headers || {});
+
+  if (token) {
+    headers['Authorization'] = `Bearer ${token}`;
+  }
+
+  const res = await fetch(url, { ...options, headers });
+
+  if (res.status === 401) {
+    console.warn('Admin token rejected (401 Unauthorized). Resetting session.');
+    sessionStorage.removeItem('dwk_admin_token');
+    sessionStorage.removeItem('dwk_admin_user');
+    localStorage.removeItem('dwk_admin_token');
+    localStorage.removeItem('dwk_admin_user');
+    const overlay = document.getElementById('adminLoginOverlay');
+    if (overlay) overlay.style.display = 'flex';
+  }
+
+  return res;
+}
+
 // Admin Authentication Check
 function checkAdminAuth() {
-  const token = sessionStorage.getItem('dwk_admin_token');
+  const token = sessionStorage.getItem('dwk_admin_token') || localStorage.getItem('dwk_admin_token');
   const overlay = document.getElementById('adminLoginOverlay');
 
   if (token) {
     if (overlay) overlay.style.display = 'none';
-    const savedUser = sessionStorage.getItem('dwk_admin_user') || 'admin001';
+    const savedUser = sessionStorage.getItem('dwk_admin_user') || localStorage.getItem('dwk_admin_user') || 'admin001';
     document.getElementById('adminUsernameDisplay').textContent = savedUser;
     initAdminData();
   } else {
@@ -53,6 +77,8 @@ async function handleAdminLogin(e) {
     if (data.success) {
       sessionStorage.setItem('dwk_admin_token', data.token);
       sessionStorage.setItem('dwk_admin_user', data.username);
+      localStorage.setItem('dwk_admin_token', data.token);
+      localStorage.setItem('dwk_admin_user', data.username);
       document.getElementById('adminLoginOverlay').style.display = 'none';
       document.getElementById('adminUsernameDisplay').textContent = data.username;
       initAdminData();
@@ -69,6 +95,8 @@ function handleAdminLogout() {
   if (adminState.syncInterval) clearInterval(adminState.syncInterval);
   sessionStorage.removeItem('dwk_admin_token');
   sessionStorage.removeItem('dwk_admin_user');
+  localStorage.removeItem('dwk_admin_token');
+  localStorage.removeItem('dwk_admin_user');
   window.location.reload();
 }
 
@@ -134,7 +162,7 @@ function switchAdminTab(tabName, clickedElement) {
 // -------------------------------------------------------------
 async function fetchDashboardStats() {
   try {
-    const res = await fetch('/api/stats');
+    const res = await authFetch('/api/stats');
     const data = await res.json();
 
     if (data.success && data.stats) {
@@ -192,7 +220,7 @@ function renderRecentOrders(recentOrders) {
 // -------------------------------------------------------------
 async function fetchAdminProducts() {
   try {
-    const res = await fetch('/api/products');
+    const res = await authFetch('/api/products');
     const data = await res.json();
 
     if (data.success) {
@@ -291,7 +319,7 @@ async function openEditProductModal(productId) {
   document.getElementById('saveProductSubmitBtn').textContent = 'Update Product';
 
   try {
-    const res = await fetch(`/api/products/${productId}`);
+    const res = await authFetch(`/api/products/${productId}`);
     const data = await res.json();
 
     if (data.success && data.product) {
@@ -362,7 +390,7 @@ async function handleSaveProduct(event) {
   const method = isEdit ? 'PUT' : 'POST';
 
   try {
-    const res = await fetch(url, {
+    const res = await authFetch(url, {
       method,
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(payload)
@@ -405,7 +433,7 @@ async function executeDeleteProduct() {
   btn.disabled = true;
 
   try {
-    const res = await fetch(`/api/products/${id}`, { method: 'DELETE' });
+    const res = await authFetch(`/api/products/${id}`, { method: 'DELETE' });
     const data = await res.json();
 
     if (data.success) {
@@ -435,7 +463,7 @@ async function executeDeleteProduct() {
 async function fetchAdminOrders(status = 'all') {
   try {
     const url = status === 'all' ? '/api/orders' : `/api/orders?status=${encodeURIComponent(status)}`;
-    const res = await fetch(url);
+    const res = await authFetch(url);
     const data = await res.json();
 
     if (data.success) {
@@ -459,10 +487,20 @@ function renderAdminOrdersTable() {
     const items = order.items || [];
     const itemsSummary = items.map(it => `<div>&bull; ${it.title} (${it.variantLabel}) &times; <strong>${it.quantity}</strong></div>`).join('');
 
+    const ordDate = order.created_at ? new Date(order.created_at) : new Date();
+    const shipDate = new Date(ordDate);
+    shipDate.setDate(shipDate.getDate() + 10);
+    const shipDateStr = `${shipDate.getDate()}/${shipDate.getMonth() + 1}/${shipDate.getFullYear()}`;
+
     return `
       <tr>
         <td><strong style="color: var(--admin-primary);">#${order.order_number}</strong></td>
-        <td style="font-size: 11px; color: var(--admin-text-muted);">${order.created_at}</td>
+        <td style="font-size: 11px; color: var(--admin-text-muted);">
+          <div>${order.created_at}</div>
+          <div style="font-size: 10px; color: #2E7D32; font-weight: 700; background: #E8F5E9; padding: 2px 5px; border-radius: 4px; margin-top: 3px; display: inline-block;">
+            📦 Ship after: ${shipDateStr} (10 Days)
+          </div>
+        </td>
         <td>
           <div style="font-weight: 700;">${order.customer_name}</div>
           <div style="font-size: 12px; color: var(--admin-text-muted);">📞 ${order.customer_phone}</div>
@@ -487,7 +525,7 @@ function renderAdminOrdersTable() {
 
 async function handleUpdateOrderStatus(orderId, newStatus, selectEl) {
   try {
-    const res = await fetch(`/api/orders/${orderId}/status`, {
+    const res = await authFetch(`/api/orders/${orderId}/status`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ order_status: newStatus })
@@ -520,7 +558,7 @@ async function handleSaveHeroPoster(e) {
   };
 
   try {
-    const res = await fetch('/api/settings', {
+    const res = await authFetch('/api/settings', {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(payload)
@@ -572,7 +610,7 @@ async function testRazorpayCredentials() {
   }
 
   try {
-    const res = await fetch('/api/admin/razorpay/test-keys', {
+    const res = await authFetch('/api/admin/razorpay/test-keys', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ key_id, key_secret })
@@ -619,7 +657,7 @@ async function handleSavePaymentSettings(e) {
   };
 
   try {
-    const res = await fetch('/api/settings', {
+    const res = await authFetch('/api/settings', {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(payload)
@@ -639,10 +677,7 @@ async function handleSavePaymentSettings(e) {
 // -------------------------------------------------------------
 async function fetchAdminSettings() {
   try {
-    const token = sessionStorage.getItem('dwk_admin_token') || '';
-    const res = await fetch('/api/settings', {
-      headers: { 'Authorization': `Bearer ${token}` }
-    });
+    const res = await authFetch('/api/settings');
     const data = await res.json();
 
     if (data.success && data.settings) {
@@ -704,7 +739,7 @@ async function handleSaveGeneralSettings(e) {
   };
 
   try {
-    const res = await fetch('/api/settings', {
+    const res = await authFetch('/api/settings', {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(payload)
@@ -727,7 +762,7 @@ async function handleChangeAdminCredentials(e) {
   const new_password = document.getElementById('newAdminPass').value.trim();
 
   try {
-    const res = await fetch('/api/admin/change-credentials', {
+    const res = await authFetch('/api/admin/change-credentials', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ current_password, new_username, new_password })
@@ -757,7 +792,7 @@ async function fetchAdminCategories() {
   tbody.innerHTML = `<tr><td colspan="6" style="text-align: center;">Loading categories...</td></tr>`;
 
   try {
-    const res = await fetch('/api/categories');
+    const res = await authFetch('/api/categories');
     const data = await res.json();
     if (data.success && data.categories) {
       if (data.categories.length === 0) {
@@ -793,7 +828,7 @@ async function handleCreateCategory(e) {
   const tagline = document.getElementById('newCatTagline').value.trim();
 
   try {
-    const res = await fetch('/api/categories', {
+    const res = await authFetch('/api/categories', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ name, slug, icon, tagline })
@@ -833,7 +868,7 @@ async function executeDeleteCategory() {
   btn.textContent = 'Deleting...';
 
   try {
-    const res = await fetch(`/api/categories/${pendingDeleteCategoryId}`, { method: 'DELETE' });
+    const res = await authFetch(`/api/categories/${pendingDeleteCategoryId}`, { method: 'DELETE' });
     const data = await res.json();
     if (data.success) {
       const row = document.getElementById(`catRow-${pendingDeleteCategoryId}`);
@@ -862,7 +897,7 @@ async function fetchAdminLabReports() {
   if (!tbody) return;
 
   try {
-    const res = await fetch('/api/lab-reports');
+    const res = await authFetch('/api/lab-reports');
     const data = await res.json();
     if (data.success && data.reports) {
       if (data.reports.length === 0) {
@@ -906,7 +941,7 @@ async function handleCreateLabReport(e) {
   const result_status = document.getElementById('newReportStatus').value.trim();
 
   try {
-    const res = await fetch('/api/lab-reports', {
+    const res = await authFetch('/api/lab-reports', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ title, batch_number, tested_date, lab_name, parameters, result_status })
@@ -947,7 +982,7 @@ async function executeDeleteLabReport() {
   btn.textContent = 'Deleting...';
 
   try {
-    const res = await fetch(`/api/lab-reports/${pendingDeleteLabReportId}`, { method: 'DELETE' });
+    const res = await authFetch(`/api/lab-reports/${pendingDeleteLabReportId}`, { method: 'DELETE' });
     const data = await res.json();
     if (data.success) {
       const row = document.getElementById(`labReportRow-${pendingDeleteLabReportId}`);
@@ -989,7 +1024,7 @@ async function uploadImageFromFile(fileInput, targetUrlInputId, previewImgId) {
   }
 
   try {
-    const res = await fetch('/api/upload', {
+    const res = await authFetch('/api/upload', {
       method: 'POST',
       body: formData
     });
@@ -1009,14 +1044,14 @@ async function uploadImageFromFile(fileInput, targetUrlInputId, previewImgId) {
 
       // Auto-save setting if updating UPI QR or Hero Poster
       if (targetUrlInputId === 'adminUpiQr') {
-        await fetch('/api/settings', {
+        await authFetch('/api/settings', {
           method: 'PUT',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ payment_upi_qr: data.url })
         });
         alert('✅ UPI QR Code uploaded & saved successfully! It is now active on checkout.');
       } else if (targetUrlInputId === 'heroPosterUrl') {
-        await fetch('/api/settings', {
+        await authFetch('/api/settings', {
           method: 'PUT',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ hero_poster_url: data.url })
@@ -1147,7 +1182,7 @@ async function fetchGoogleSheetsSettings() {
   }
 
   try {
-    const res = await fetch('/api/settings');
+    const res = await authFetch('/api/settings');
     const data = await res.json();
     if (data.success && data.settings) {
       const url = data.settings.google_sheets_webhook_url || '';
@@ -1177,7 +1212,7 @@ async function handleSaveGoogleSheetsWebhook(e) {
   const webhookUrl = document.getElementById('googleSheetsWebhookUrl').value.trim();
 
   try {
-    const res = await fetch('/api/settings', {
+    const res = await authFetch('/api/settings', {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ google_sheets_webhook_url: webhookUrl })
@@ -1210,7 +1245,7 @@ async function handleTestGoogleSheets() {
   feedback.textContent = 'Sending test ping to Google Sheet...';
 
   try {
-    const res = await fetch('/api/admin/google-sheets/test', {
+    const res = await authFetch('/api/admin/google-sheets/test', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ webhook_url: webhookUrl })
@@ -1245,7 +1280,7 @@ async function handleSyncAllGoogleSheets() {
   feedback.textContent = 'Transferring all orders to Google Sheet...';
 
   try {
-    const res = await fetch('/api/admin/google-sheets/sync-all', {
+    const res = await authFetch('/api/admin/google-sheets/sync-all', {
       method: 'POST'
     });
     const data = await res.json();
@@ -1290,7 +1325,7 @@ function copyGoogleAppsScriptCode() {
 // -------------------------------------------------------------
 async function fetchAdminCustomers() {
   try {
-    const res = await fetch('/api/admin/customers');
+    const res = await authFetch('/api/admin/customers');
     const data = await res.json();
     if (data.success) {
       adminState.customers = data.customers || [];
@@ -1375,7 +1410,7 @@ function renderAdminCustomersTable() {
 async function deleteAdminCustomer(id, name) {
   if (!confirm(`Are you sure you want to remove customer "${name}" (ID #${id})?`)) return;
   try {
-    const res = await fetch(`/api/admin/customers/${id}`, { method: 'DELETE' });
+    const res = await authFetch(`/api/admin/customers/${id}`, { method: 'DELETE' });
     const data = await res.json();
     if (data.success) {
       showAdminLiveToast(`Customer #${id} removed successfully.`);
@@ -1395,7 +1430,7 @@ async function deleteAdminCustomer(id, name) {
 // -------------------------------------------------------------
 async function fetchAdminSubscribers() {
   try {
-    const res = await fetch('/api/admin/subscribers');
+    const res = await authFetch('/api/admin/subscribers');
     const data = await res.json();
     if (data.success) {
       adminState.subscribers = data.subscribers || [];
@@ -1437,12 +1472,14 @@ function renderAdminSubscribersTable() {
 async function deleteAdminSubscriber(id, email) {
   if (!confirm(`Remove subscriber ${email}?`)) return;
   try {
-    const res = await fetch(`/api/admin/subscribers/${id}`, { method: 'DELETE' });
+    const res = await authFetch(`/api/admin/subscribers/${id}`, { method: 'DELETE' });
     const data = await res.json();
     if (data.success) {
       showAdminLiveToast('Subscriber removed');
       fetchAdminSubscribers();
       fetchDashboardStats();
+    } else {
+      alert(data.message || 'Error removing subscriber');
     }
   } catch (err) {
     console.error(err);
@@ -1451,7 +1488,7 @@ async function deleteAdminSubscriber(id, email) {
 
 async function fetchAdminInquiries() {
   try {
-    const res = await fetch('/api/admin/inquiries');
+    const res = await authFetch('/api/admin/inquiries');
     const data = await res.json();
     if (data.success) {
       adminState.inquiries = data.inquiries || [];

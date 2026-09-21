@@ -765,7 +765,7 @@
     }
 
     // ---------------------------------------------------------
-    // FLIPKART STYLE DYNAMIC LOCATION DELIVERY DATE CALCULATION
+    // FLIPKART STYLE DYNAMIC LOCATION & 10-DAY DELAYED DISPATCH CALCULATION
     // ---------------------------------------------------------
     function updateFlipkartDeliveryEstimate() {
       const state = document.getElementById('chkCustState') ? document.getElementById('chkCustState').value : 'Gujarat';
@@ -774,7 +774,9 @@
       const cleanState = (state || 'Gujarat').toLowerCase();
       const cleanPin = String(pincode || '').trim();
 
-      let days = 3;
+      // Policy: Orders are freshly harvested & artisanal, dispatched strictly 10 days after order placement
+      const DISPATCH_DELAY_DAYS = 10;
+      let transitDays = 3;
       let locationLabel = 'Gujarat (Local Farm Express)';
 
       if (
@@ -784,7 +786,7 @@
         cleanPin.startsWith('39') ||
         cleanPin.startsWith('37')
       ) {
-        days = 2; // Gujarat express delivery
+        transitDays = 2; // Gujarat express delivery
         locationLabel = 'Gujarat & Surrounding Hubs';
       } else if (
         cleanState.includes('rajasthan') ||
@@ -793,38 +795,49 @@
         cleanState.includes('delhi') ||
         cleanState.includes('haryana')
       ) {
-        days = 3;
+        transitDays = 3;
         locationLabel = 'Western & Northern States';
       } else {
-        days = 5;
+        transitDays = 5;
         locationLabel = 'Pan-India Express Air Cargo';
       }
 
-      const d = new Date();
-      d.setDate(d.getDate() + days);
+      const totalDays = DISPATCH_DELAY_DAYS + transitDays;
 
       const daysOfWeek = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
       const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
-      const formatted = `${daysOfWeek[d.getDay()]}, ${d.getDate()} ${months[d.getMonth()]}`;
-      checkoutState.estimatedDeliveryDate = formatted;
+      // Scheduled Dispatch Date (Order Date + 10 Days)
+      const dispatchDate = new Date();
+      dispatchDate.setDate(dispatchDate.getDate() + DISPATCH_DELAY_DAYS);
+      const formattedDispatch = `${daysOfWeek[dispatchDate.getDay()]}, ${dispatchDate.getDate()} ${months[dispatchDate.getMonth()]}`;
 
-      // Update banner
+      // Expected Delivery Date (Dispatch Date + Transit Days)
+      const deliveryDate = new Date();
+      deliveryDate.setDate(deliveryDate.getDate() + totalDays);
+      const formattedDelivery = `${daysOfWeek[deliveryDate.getDay()]}, ${deliveryDate.getDate()} ${months[deliveryDate.getMonth()]}`;
+
+      checkoutState.estimatedDispatchDate = formattedDispatch;
+      checkoutState.estimatedDeliveryDate = formattedDelivery;
+
+      // Update Flipkart style delivery banner
       const bannerDate = document.getElementById('fEstimatedDateText');
-      if (bannerDate) bannerDate.textContent = formatted;
+      if (bannerDate) bannerDate.textContent = formattedDelivery;
 
       const bannerDesc = document.getElementById('fDeliveryDescText');
       if (bannerDesc) {
-        bannerDesc.textContent = `Dispatched from Shamlaji Farm, Gujarat • Expected in ${days} business days (${locationLabel})`;
+        bannerDesc.innerHTML = `⚡ Dispatched <strong>10 days</strong> after order date (${formattedDispatch}) &bull; Expected Delivery via Express Cargo (${locationLabel})`;
       }
 
       // Update order summary
       const summaryDate = document.getElementById('chkSummaryDeliveryDate');
-      if (summaryDate) summaryDate.textContent = `${formatted} (FREE)`;
+      if (summaryDate) summaryDate.textContent = `${formattedDelivery} (FREE)`;
 
       // Update notice
       const noticeDate = document.getElementById('chkNoticeDeliveryDate');
-      if (noticeDate) noticeDate.textContent = formatted;
+      if (noticeDate) {
+        noticeDate.innerHTML = `${formattedDelivery} <span style="font-size: 11px; font-weight: normal; color: #555;">(Dispatched on ${formattedDispatch} after 10-day Vedic curing)</span>`;
+      }
     }
 
     async function submitDedicatedCheckout(event) {

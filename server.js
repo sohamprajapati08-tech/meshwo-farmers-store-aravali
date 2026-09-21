@@ -3,8 +3,11 @@ const express = require('express');
 const cors = require('cors');
 const path = require('path');
 const crypto = require('crypto');
+const jwt = require('jsonwebtoken');
 const Razorpay = require('razorpay');
 const db = require('./db');
+
+const JWT_SECRET = process.env.JWT_SECRET || 'meshwo_farmers_jwt_secure_secret_key_2026_aravalli_tribal_coop_987654';
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -111,8 +114,58 @@ const upload = multer({
   }
 });
 
+// =============================================================
+// JWT SECURITY MIDDLEWARE FOR SENSITIVE ADMIN ENDPOINTS
+// =============================================================
+function verifyAdminToken(req, res, next) {
+  try {
+    const authHeader = req.headers['authorization'] || req.headers['Authorization'] || '';
+    let token = null;
+
+    if (authHeader.startsWith('Bearer ')) {
+      token = authHeader.substring(7).trim();
+    } else if (authHeader.startsWith('Bearer') || authHeader.startsWith('bearer')) {
+      token = authHeader.split(' ')[1]?.trim();
+    } else if (authHeader.startsWith('dwk_adm_tok_') || authHeader.length > 20) {
+      token = authHeader.trim();
+    }
+
+    if (!token) {
+      return res.status(401).json({
+        success: false,
+        message: '401 Unauthorized: Access token missing or invalid. Please log in as Admin.'
+      });
+    }
+
+    jwt.verify(token, JWT_SECRET, (err, decoded) => {
+      if (err) {
+        return res.status(401).json({
+          success: false,
+          message: '401 Unauthorized: Session token expired or invalid. Please re-authenticate.'
+        });
+      }
+
+      if (!decoded || decoded.role !== 'Admin') {
+        return res.status(403).json({
+          success: false,
+          message: '403 Forbidden: Admin privileges required to access this resource.'
+        });
+      }
+
+      req.adminUser = decoded;
+      next();
+    });
+  } catch (error) {
+    console.error('JWT verification error:', error);
+    return res.status(401).json({
+      success: false,
+      message: '401 Unauthorized: Failed to authenticate token.'
+    });
+  }
+}
+
 // POST /api/upload - Admin File Upload (Images, QR codes, Banners, PDFs)
-app.post('/api/upload', upload.single('file'), (req, res) => {
+app.post('/api/upload', verifyAdminToken, upload.single('file'), (req, res) => {
   try {
     if (!req.file || req.file.size === 0) {
       if (req.file && req.file.path && fs.existsSync(req.file.path)) {
@@ -153,12 +206,22 @@ app.post('/api/admin/login', (req, res) => {
     const admin = db.prepare('SELECT * FROM admin_users WHERE username = ? AND password = ?').get(username, password);
 
     if (admin) {
-      const token = 'dwk_adm_tok_' + Buffer.from(`${admin.username}:${Date.now()}`).toString('base64');
+      const token = jwt.sign(
+        {
+          id: admin.id,
+          username: admin.username,
+          role: 'Admin'
+        },
+        JWT_SECRET,
+        { expiresIn: '7d' }
+      );
+
       res.json({
         success: true,
         message: 'Admin authenticated successfully',
         token,
-        username: admin.username
+        username: admin.username,
+        role: 'Admin'
       });
     } else {
       res.status(401).json({ success: false, message: 'Invalid Admin username or password' });
@@ -169,7 +232,7 @@ app.post('/api/admin/login', (req, res) => {
   }
 });
 
-app.post('/api/admin/change-credentials', (req, res) => {
+app.post('/api/admin/change-credentials', verifyAdminToken, (req, res) => {
   try {
     const { current_password, new_username, new_password } = req.body;
     if (!current_password || !new_username || !new_password) {
@@ -212,10 +275,18 @@ app.post('/api/customer/register', (req, res) => {
     const info = db.prepare('INSERT INTO customers (name, email, phone, password) VALUES (?, ?, ?, ?)')
       .run(name, email, phone || '', password);
 
+    const user = { id: info.lastInsertRowid, name, email, phone };
+    const token = jwt.sign(
+      { id: user.id, name: user.name, phone: user.phone, email: user.email, role: 'Customer' },
+      JWT_SECRET,
+      { expiresIn: '30d' }
+    );
+
     res.status(201).json({
       success: true,
       message: 'Account created successfully!',
-      user: { id: info.lastInsertRowid, name, email, phone }
+      token,
+      user
     });
   } catch (error) {
     console.error('Customer register error:', error);
@@ -233,9 +304,16 @@ app.post('/api/customer/login', (req, res) => {
     const user = db.prepare('SELECT id, name, email, phone FROM customers WHERE email = ? AND password = ?').get(email, password);
 
     if (user) {
+      const token = jwt.sign(
+        { id: user.id, name: user.name, phone: user.phone, email: user.email, role: 'Customer' },
+        JWT_SECRET,
+        { expiresIn: '30d' }
+      );
+
       res.json({
         success: true,
         message: 'Welcome back to Dwarkesh Farms!',
+        token,
         user
       });
     } else {
@@ -267,6 +345,12 @@ app.post('/api/customer/quick-login', (req, res) => {
       customer.name = name.trim();
     }
 
+    const token = jwt.sign(
+      { id: customer.id, name: customer.name, phone: customer.phone, email: customer.email, role: 'Customer' },
+      JWT_SECRET,
+      { expiresIn: '30d' }
+    );
+
     // Fetch previous orders placed by this customer phone
     const orders = db.prepare(`
       SELECT id, order_number, total, payment_method, payment_status, order_status, created_at, items_json
@@ -278,7 +362,8 @@ app.post('/api/customer/quick-login', (req, res) => {
     res.json({
       success: true,
       message: `Welcome ${customer.name}!`,
-      user: customer,
+      token,
+      user: { ...customer, token },
       orders: orders || []
     });
   } catch (error) {
@@ -419,7 +504,7 @@ app.get('/api/products/:id', (req, res) => {
 });
 
 // POST /api/products - Admin Create Product
-app.post('/api/products', (req, res) => {
+app.post('/api/products', verifyAdminToken, (req, res) => {
   try {
     const {
       title,
@@ -502,7 +587,7 @@ app.post('/api/products', (req, res) => {
 });
 
 // PUT /api/products/:id - Admin Update Product
-app.put('/api/products/:id', (req, res) => {
+app.put('/api/products/:id', verifyAdminToken, (req, res) => {
   try {
     const { id } = req.params;
     const existing = db.prepare('SELECT * FROM products WHERE id = ?').get(id);
@@ -585,7 +670,7 @@ app.put('/api/products/:id', (req, res) => {
 });
 
 // DELETE /api/products/:id - Admin Delete Product
-app.delete('/api/products/:id', (req, res) => {
+app.delete('/api/products/:id', verifyAdminToken, (req, res) => {
   try {
     const { id } = req.params;
     const existing = db.prepare('SELECT id, title FROM products WHERE id = ?').get(id);
@@ -931,7 +1016,7 @@ app.post('/api/razorpay/verify-payment', async (req, res) => {
 });
 
 // POST /api/admin/razorpay/test-keys - Admin Test Razorpay Keys
-app.post('/api/admin/razorpay/test-keys', async (req, res) => {
+app.post('/api/admin/razorpay/test-keys', verifyAdminToken, async (req, res) => {
   try {
     const { key_id, key_secret } = req.body;
     const targetKeyId = (key_id && key_id.trim()) || (db.prepare("SELECT value FROM settings WHERE key = 'payment_razorpay_key_id'").get() || {}).value;
@@ -1449,7 +1534,7 @@ app.post('/api/orders', (req, res) => {
 });
 
 // GET /api/orders - Admin View Orders
-app.get('/api/orders', (req, res) => {
+app.get('/api/orders', verifyAdminToken, (req, res) => {
   try {
     const { status } = req.query;
     let sql = 'SELECT * FROM orders';
@@ -1476,7 +1561,7 @@ app.get('/api/orders', (req, res) => {
 });
 
 // PUT /api/orders/:id/status - Admin Update Order Status
-app.put('/api/orders/:id/status', (req, res) => {
+app.put('/api/orders/:id/status', verifyAdminToken, (req, res) => {
   try {
     const { id } = req.params;
     const { order_status } = req.body;
@@ -1503,7 +1588,7 @@ app.put('/api/orders/:id/status', (req, res) => {
 // -------------------------------------------------------------
 // DASHBOARD STATS (Admin)
 // -------------------------------------------------------------
-app.get('/api/stats', (req, res) => {
+app.get('/api/stats', verifyAdminToken, (req, res) => {
   try {
     const totalProducts = db.prepare('SELECT COUNT(*) as count FROM products WHERE is_active = 1').get().count;
     const lowStockCount = db.prepare('SELECT COUNT(*) as count FROM products WHERE stock < 20 AND is_active = 1').get().count;
@@ -1543,7 +1628,7 @@ app.get('/api/stats', (req, res) => {
 // -------------------------------------------------------------
 // REGISTERED CUSTOMERS (Admin Management)
 // -------------------------------------------------------------
-app.get('/api/admin/customers', (req, res) => {
+app.get('/api/admin/customers', verifyAdminToken, (req, res) => {
   try {
     const customers = db.prepare(`
       SELECT 
@@ -1563,7 +1648,7 @@ app.get('/api/admin/customers', (req, res) => {
   }
 });
 
-app.delete('/api/admin/customers/:id', (req, res) => {
+app.delete('/api/admin/customers/:id', verifyAdminToken, (req, res) => {
   try {
     const { id } = req.params;
     db.prepare('DELETE FROM customers WHERE id = ?').run(id);
@@ -1596,7 +1681,7 @@ app.post('/api/newsletter', (req, res) => {
   }
 });
 
-app.get('/api/admin/subscribers', (req, res) => {
+app.get('/api/admin/subscribers', verifyAdminToken, (req, res) => {
   try {
     const subscribers = db.prepare('SELECT * FROM newsletter_subscribers ORDER BY id DESC').all();
     res.json({ success: true, count: subscribers.length, subscribers });
@@ -1606,7 +1691,7 @@ app.get('/api/admin/subscribers', (req, res) => {
   }
 });
 
-app.delete('/api/admin/subscribers/:id', (req, res) => {
+app.delete('/api/admin/subscribers/:id', verifyAdminToken, (req, res) => {
   try {
     const { id } = req.params;
     db.prepare('DELETE FROM newsletter_subscribers WHERE id = ?').run(id);
@@ -1635,7 +1720,7 @@ app.post('/api/contact', (req, res) => {
   }
 });
 
-app.get('/api/admin/inquiries', (req, res) => {
+app.get('/api/admin/inquiries', verifyAdminToken, (req, res) => {
   try {
     const inquiries = db.prepare('SELECT * FROM contact_inquiries ORDER BY id DESC').all();
     res.json({ success: true, count: inquiries.length, inquiries });
@@ -1651,8 +1736,18 @@ app.get('/api/admin/inquiries', (req, res) => {
 // -------------------------------------------------------------
 app.get('/api/settings', (req, res) => {
   try {
-    const authHeader = req.headers['authorization'] || '';
-    const isAdmin = authHeader.includes('dwk_adm_tok_') || req.query.admin === 'true';
+    const authHeader = req.headers['authorization'] || req.headers['Authorization'] || '';
+    let isAdmin = false;
+
+    if (authHeader.startsWith('Bearer ')) {
+      try {
+        const decoded = jwt.verify(authHeader.substring(7).trim(), JWT_SECRET);
+        if (decoded && decoded.role === 'Admin') isAdmin = true;
+      } catch (e) {}
+    } else if (authHeader.startsWith('dwk_adm_tok_')) {
+      isAdmin = true;
+    }
+
     const rows = db.prepare('SELECT key, value FROM settings').all();
     const settings = {};
     for (const r of rows) {
@@ -1669,7 +1764,7 @@ app.get('/api/settings', (req, res) => {
   }
 });
 
-app.put('/api/settings', (req, res) => {
+app.put('/api/settings', verifyAdminToken, (req, res) => {
   try {
     const settings = req.body;
     const upsert = db.prepare(`
@@ -1728,7 +1823,7 @@ async function syncToGoogleSheets(eventType, data) {
 }
 
 // POST /api/admin/google-sheets/test - Test connection
-app.post('/api/admin/google-sheets/test', async (req, res) => {
+app.post('/api/admin/google-sheets/test', verifyAdminToken, async (req, res) => {
   try {
     const { webhook_url } = req.body;
     const targetUrl = webhook_url || (db.prepare('SELECT value FROM settings WHERE key = ?').get('google_sheets_webhook_url') || {}).value;
@@ -1771,7 +1866,7 @@ app.post('/api/admin/google-sheets/test', async (req, res) => {
 });
 
 // POST /api/admin/google-sheets/sync-all - Sync all existing orders
-app.post('/api/admin/google-sheets/sync-all', async (req, res) => {
+app.post('/api/admin/google-sheets/sync-all', verifyAdminToken, async (req, res) => {
   try {
     const webhookRow = db.prepare('SELECT value FROM settings WHERE key = ?').get('google_sheets_webhook_url');
     const webhookUrl = webhookRow ? webhookRow.value.trim() : '';
@@ -1828,7 +1923,7 @@ app.get('/api/categories', (req, res) => {
   }
 });
 
-app.post('/api/categories', (req, res) => {
+app.post('/api/categories', verifyAdminToken, (req, res) => {
   try {
     const { name, slug, icon, tagline } = req.body;
     if (!name || !slug) {
@@ -1855,7 +1950,7 @@ app.post('/api/categories', (req, res) => {
   }
 });
 
-app.delete('/api/categories/:id', (req, res) => {
+app.delete('/api/categories/:id', verifyAdminToken, (req, res) => {
   try {
     const { id } = req.params;
     const cat = db.prepare('SELECT * FROM categories WHERE id = ?').get(id);
@@ -1893,7 +1988,7 @@ app.get('/api/lab-reports', (req, res) => {
   }
 });
 
-app.post('/api/lab-reports', (req, res) => {
+app.post('/api/lab-reports', verifyAdminToken, (req, res) => {
   try {
     const { title, batch_number, tested_date, parameters, result_status, lab_name, pdf_url } = req.body;
     if (!title || !batch_number) {
@@ -1927,7 +2022,7 @@ app.post('/api/lab-reports', (req, res) => {
   }
 });
 
-app.delete('/api/lab-reports/:id', (req, res) => {
+app.delete('/api/lab-reports/:id', verifyAdminToken, (req, res) => {
   try {
     const { id } = req.params;
     const report = db.prepare('SELECT * FROM lab_reports WHERE id = ?').get(id);
