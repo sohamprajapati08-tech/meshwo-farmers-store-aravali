@@ -1,264 +1,1124 @@
 <!DOCTYPE html>
-<html lang="gu-IN">
+<html lang="en">
 
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Secure Hosted Checkout | Bank Payment Gateway</title>
+  <title>Complete Payment | Flipkart Gateway</title>
   <link rel="icon" type="image/jpeg" href="/images/meshwo_logo.jpg">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+  <!-- Razorpay Checkout SDK (Optional live modal bridge) -->
+  <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+
   <style>
     :root {
-      --primary: #0F172A;
-      --bank-blue: #0284C7;
-      --success: #16A34A;
-      --bg: #F8FAFC;
+      --fk-blue: #2874F0;
+      --fk-yellow: #FFE500;
+      --fk-dark: #212121;
+      --fk-grey-bg: #F1F3F6;
+      --fk-border: #E0E0E0;
+      --fk-green: #388E3C;
+      --fk-text-sub: #878787;
     }
-    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Inter', sans-serif; }
-    body { background: var(--bg); color: #334155; min-height: 100vh; display: flex; flex-direction: column; }
-    
-    .gateway-header {
-      background: #FFFFFF;
-      border-bottom: 1px solid #E2E8F0;
-      padding: 16px 24px;
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Roboto', 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    body {
+      background-color: var(--fk-grey-bg);
+      color: var(--fk-dark);
+      min-height: 100vh;
       display: flex;
-      justify-content: space-between;
-      align-items: center;
+      flex-direction: column;
     }
-    .brand-wrap { display: flex; align-items: center; gap: 12px; }
-    .brand-logo { width: 36px; height: 36px; border-radius: 6px; object-fit: cover; }
-    .brand-title { font-weight: 800; font-size: 15px; color: #0F172A; }
-    .brand-sub { font-size: 11px; color: #64748B; font-weight: 600; }
-    
-    .sec-badge {
+
+    /* Top Flipkart Header */
+    .fk-top-header {
+      background: #FFFFFF;
+      padding: 12px 24px;
+      border-bottom: 1px solid #EAEAEA;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .fk-brand-wrap {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .fk-badge-logo {
+      background: var(--fk-yellow);
+      padding: 6px 14px;
+      border-radius: 4px;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-weight: 800;
+      font-size: 17px;
+      color: var(--fk-blue);
+      font-style: italic;
+      letter-spacing: -0.5px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+    }
+
+    .fk-badge-logo span.plus {
+      color: #FF6161;
+      font-size: 13px;
+      margin-left: -3px;
+      font-style: normal;
+      font-weight: 900;
+    }
+
+    .fk-secure-pill {
       display: flex;
       align-items: center;
       gap: 6px;
-      background: #F0FDF4;
-      color: #16A34A;
+      font-size: 12.5px;
+      font-weight: 700;
+      color: #2E7D32;
+      background: #E8F5E9;
       padding: 6px 12px;
       border-radius: 20px;
-      font-size: 12px;
-      font-weight: 700;
-      border: 1px solid #DCFCE7;
     }
 
-    .main-wrap {
-      max-width: 540px;
-      margin: 40px auto;
-      padding: 0 16px;
+    /* Main Container */
+    .payment-layout-container {
+      max-width: 1140px;
       width: 100%;
+      margin: 20px auto;
+      padding: 0 16px;
+      flex: 1;
     }
-    .checkout-card {
+
+    .payment-main-card {
       background: #FFFFFF;
-      border-radius: 16px;
-      border: 1px solid #E2E8F0;
-      box-shadow: 0 10px 30px rgba(0,0,0,0.06);
+      border-radius: 10px;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.04);
+      border: 1px solid #E5E7EB;
       overflow: hidden;
     }
-    .order-banner {
-      background: linear-gradient(135deg, #1A3E1B 0%, #2E7D32 100%);
-      color: #FFF;
-      padding: 24px;
-    }
-    .amount-display {
-      font-size: 32px;
-      font-weight: 900;
-      margin-top: 6px;
-    }
-    .card-body { padding: 24px; }
-    
-    .tabs {
+
+    /* Card Top Bar with Back Arrow and Title */
+    .payment-card-topbar {
       display: flex;
-      border-bottom: 2px solid #F1F5F9;
-      margin-bottom: 20px;
-      gap: 16px;
-    }
-    .tab {
-      padding: 8px 12px;
-      font-size: 13px;
-      font-weight: 700;
-      color: #64748B;
-      cursor: pointer;
-      border-bottom: 2px solid transparent;
-      margin-bottom: -2px;
-    }
-    .tab.active {
-      color: #0284C7;
-      border-color: #0284C7;
+      align-items: center;
+      justify-content: space-between;
+      padding: 18px 24px;
+      border-bottom: 1px solid #F0F0F0;
     }
 
-    .form-group { margin-bottom: 14px; text-align: left; }
-    .form-label { font-size: 12px; font-weight: 700; color: #475569; display: block; margin-bottom: 6px; }
-    .form-input {
-      width: 100%;
-      padding: 11px 14px;
-      border: 1.5px solid #CBD5E1;
-      border-radius: 8px;
-      font-size: 14px;
-      transition: border-color 0.2s;
+    .payment-card-topbar-left {
+      display: flex;
+      align-items: center;
+      gap: 14px;
     }
-    .form-input:focus { outline: none; border-color: #0284C7; }
 
-    .pay-btn {
-      width: 100%;
-      background: #16A34A;
-      color: #FFF;
+    .back-btn-arrow {
+      background: none;
       border: none;
-      padding: 14px;
-      border-radius: 8px;
-      font-size: 15px;
-      font-weight: 800;
+      font-size: 20px;
+      color: #212121;
       cursor: pointer;
       display: flex;
       align-items: center;
       justify-content: center;
-      gap: 8px;
+      padding: 4px;
+      border-radius: 50%;
       transition: background 0.2s;
-      margin-top: 18px;
     }
-    .pay-btn:hover { background: #15803D; }
+    .back-btn-arrow:hover {
+      background: #F1F3F6;
+    }
 
-    .cancel-btn {
+    .payment-card-topbar-title {
+      font-size: 18px;
+      font-weight: 700;
+      color: #212121;
+    }
+
+    .secure-badge-card {
+      font-size: 12px;
+      color: #4B5563;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-weight: 600;
+    }
+
+    /* 3-Column Payment Grid */
+    .payment-content-grid {
+      display: grid;
+      grid-template-columns: 280px 1fr 340px;
+      min-height: 520px;
+    }
+
+    /* Column 1: Payment Options Navigation */
+    .payment-tabs-column {
+      border-right: 1px solid #F0F0F0;
+      background: #FAFAFA;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .pay-option-tab {
+      padding: 18px 20px;
+      border-bottom: 1px solid #F0F0F0;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      position: relative;
+      background: #FAFAFA;
+    }
+
+    .pay-option-tab:hover {
+      background: #F5F7FA;
+    }
+
+    .pay-option-tab.active {
+      background: #FFFFFF;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.03);
+    }
+
+    .pay-option-tab.active::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 0;
+      bottom: 0;
+      width: 4px;
+      background: var(--fk-blue);
+    }
+
+    .tab-header-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .tab-icon-box {
+      width: 32px;
+      height: 32px;
+      border-radius: 6px;
+      background: #FFFFFF;
+      border: 1px solid #E0E0E0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+      color: #424242;
+      font-weight: 700;
+    }
+
+    .pay-option-tab.active .tab-icon-box {
+      border-color: var(--fk-blue);
+      color: var(--fk-blue);
+      background: #F0F5FF;
+    }
+
+    .tab-title {
+      font-size: 14px;
+      font-weight: 700;
+      color: #212121;
+    }
+
+    .tab-desc {
+      font-size: 11.5px;
+      color: var(--fk-text-sub);
+      margin-top: 4px;
+      line-height: 1.4;
+    }
+
+    .cashback-offer-pill {
+      color: var(--fk-green);
+      font-size: 11px;
+      font-weight: 600;
+      margin-top: 4px;
+      display: block;
+    }
+
+    /* Column 2: Payment Action Panel (Scan QR and Pay) */
+    .payment-action-column {
+      padding: 28px 32px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+      text-align: center;
+      border-right: 1px solid #F0F0F0;
+    }
+
+    .action-panel-title {
+      font-size: 18px;
+      font-weight: 700;
+      color: #212121;
+      margin-bottom: 20px;
+    }
+
+    /* QR Code Card */
+    .qr-box-card {
+      border: 1px solid #D5D9E0;
+      border-radius: 12px;
+      padding: 24px 28px;
+      background: #FFFFFF;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.04);
+      max-width: 320px;
       width: 100%;
-      background: transparent;
-      color: #64748B;
-      border: 1px solid #CBD5E1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .qr-amount-label {
+      font-size: 11.5px;
+      font-weight: 700;
+      letter-spacing: 0.8px;
+      color: #878787;
+      text-transform: uppercase;
+    }
+
+    .qr-amount-value {
+      font-size: 28px;
+      font-weight: 800;
+      color: #212121;
+      margin: 4px 0 16px;
+    }
+
+    .qr-image-wrap {
+      background: #FFFFFF;
       padding: 10px;
+      border: 1px solid #ECECEC;
       border-radius: 8px;
-      font-size: 13px;
+      position: relative;
+    }
+
+    .qr-image-img {
+      width: 195px;
+      height: 195px;
+      display: block;
+      object-fit: contain;
+    }
+
+    /* UPI Apps Logos Row */
+    .upi-apps-row {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      margin-top: 16px;
+    }
+
+    .upi-app-icon {
+      width: 26px;
+      height: 26px;
+      border-radius: 50%;
+      object-fit: contain;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    }
+
+    .upi-apps-text {
+      font-size: 11.5px;
+      color: #878787;
+      margin-top: 8px;
+    }
+
+    /* Timer and Warning */
+    .qr-timer-text {
+      margin-top: 18px;
+      font-size: 13.5px;
+      color: #212121;
+      font-weight: 600;
+    }
+
+    .qr-timer-text strong {
+      color: #D32F2F;
+      font-weight: 800;
+      font-size: 15px;
+    }
+
+    .qr-warning-note {
+      font-size: 11.5px;
+      color: #878787;
+      margin-top: 8px;
+      max-width: 320px;
+      line-height: 1.4;
+    }
+
+    /* Real-Time Detection Radar */
+    .realtime-detection-box {
+      margin-top: 18px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: #F0FDF4;
+      border: 1px solid #BBF7D0;
+      padding: 9px 14px;
+      border-radius: 20px;
+      font-size: 12px;
+      color: #166534;
+      font-weight: 600;
+    }
+
+    .pulse-dot {
+      width: 8px;
+      height: 8px;
+      background: #22C55E;
+      border-radius: 50%;
+      box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.7);
+      animation: pulseAnimation 1.6s infinite cubic-bezier(0.66, 0, 0, 1);
+    }
+
+    @keyframes pulseAnimation {
+      0% { box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.7); }
+      70% { box-shadow: 0 0 0 10px rgba(34, 197, 94, 0); }
+      100% { box-shadow: 0 0 0 0 rgba(34, 197, 94, 0); }
+    }
+
+    /* Mobile UPI Button */
+    .mobile-upi-btn {
+      display: none;
+      width: 100%;
+      max-width: 320px;
+      margin-top: 14px;
+      background: #2E7D32;
+      color: #FFFFFF;
+      padding: 12px;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 700;
+      text-decoration: none;
+      text-align: center;
+      box-shadow: 0 2px 6px rgba(46, 125, 50, 0.25);
+    }
+
+    .verify-now-btn {
+      width: 100%;
+      max-width: 320px;
+      margin-top: 10px;
+      background: #2874F0;
+      color: #FFFFFF;
+      border: none;
+      padding: 12px;
+      border-radius: 8px;
+      font-size: 13.5px;
       font-weight: 700;
       cursor: pointer;
-      margin-top: 10px;
+      transition: background 0.2s;
     }
-    .cancel-btn:hover { background: #F8FAFC; color: #0F172A; }
+    .verify-now-btn:hover {
+      background: #1259CC;
+    }
+
+    /* Column 3: Price Details & Offers */
+    .price-details-column {
+      padding: 24px;
+      background: #FFFFFF;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .price-card-box {
+      border-bottom: 1px solid #F0F0F0;
+      padding-bottom: 16px;
+      margin-bottom: 16px;
+    }
+
+    .price-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 14px;
+      color: #212121;
+      margin-bottom: 14px;
+    }
+
+    .price-row.fees-row {
+      color: #424242;
+      font-size: 13px;
+    }
+
+    .price-row.discount-row {
+      color: var(--fk-green);
+      font-weight: 600;
+      font-size: 13.5px;
+    }
+
+    .price-divider {
+      border-top: 1px dashed #E0E0E0;
+      margin: 14px 0;
+    }
+
+    .total-amount-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 16px;
+      font-weight: 700;
+      color: #212121;
+    }
+
+    .total-amount-highlight {
+      font-size: 20px;
+      font-weight: 800;
+      color: var(--fk-blue);
+    }
+
+    /* 5% Cashback Card */
+    .cashback-card-box {
+      background: #E8F5E9;
+      border: 1px solid #C8E6C9;
+      border-radius: 8px;
+      padding: 14px 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-top: 8px;
+    }
+
+    .cb-left {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .cb-title {
+      font-size: 13px;
+      font-weight: 800;
+      color: #2E7D32;
+    }
+
+    .cb-subtitle {
+      font-size: 11.5px;
+      color: #388E3C;
+      margin-top: 2px;
+    }
+
+    .cb-bank-icons {
+      display: flex;
+      gap: 5px;
+    }
+
+    .cb-bank-pill {
+      background: #FFFFFF;
+      border: 1px solid #D1E7DD;
+      border-radius: 4px;
+      font-size: 10px;
+      font-weight: 700;
+      padding: 2px 6px;
+      color: #2E7D32;
+    }
+
+    /* Alternate views for Cards / COD in center column */
+    .card-payment-view {
+      display: none;
+      width: 100%;
+      max-width: 360px;
+      text-align: left;
+    }
+
+    .fk-form-group {
+      margin-bottom: 14px;
+    }
+
+    .fk-form-label {
+      font-size: 12px;
+      font-weight: 700;
+      color: #424242;
+      display: block;
+      margin-bottom: 6px;
+    }
+
+    .fk-form-input {
+      width: 100%;
+      padding: 11px 14px;
+      border: 1px solid #CCCCCC;
+      border-radius: 6px;
+      font-size: 14px;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    .fk-form-input:focus {
+      border-color: var(--fk-blue);
+    }
+
+    /* Success Overlay Animation */
+    .payment-success-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.75);
+      backdrop-filter: blur(4px);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 9999;
+      padding: 20px;
+    }
+
+    .success-modal {
+      background: #FFFFFF;
+      border-radius: 16px;
+      padding: 36px 28px;
+      text-align: center;
+      max-width: 420px;
+      width: 100%;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.25);
+      animation: popIn 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+
+    @keyframes popIn {
+      from { transform: scale(0.8); opacity: 0; }
+      to { transform: scale(1); opacity: 1; }
+    }
+
+    .success-icon-wrap {
+      width: 72px;
+      height: 72px;
+      background: #E8F5E9;
+      color: #2E7D32;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 38px;
+      margin: 0 auto 16px;
+    }
+
+    /* Responsive */
+    @media (max-width: 890px) {
+      .payment-content-grid {
+        grid-template-columns: 1fr;
+      }
+      .payment-tabs-column {
+        border-right: none;
+        border-bottom: 1px solid #F0F0F0;
+        flex-direction: row;
+        overflow-x: auto;
+      }
+      .pay-option-tab {
+        white-space: nowrap;
+        border-bottom: none;
+        border-right: 1px solid #F0F0F0;
+        padding: 12px 16px;
+      }
+      .pay-option-tab.active::before {
+        width: 100%;
+        height: 3px;
+        top: auto;
+        bottom: 0;
+      }
+      .mobile-upi-btn {
+        display: block;
+      }
+    }
   </style>
 </head>
 
 <body>
 
-  <header class="gateway-header">
-    <div class="brand-wrap">
-      <img src="/images/meshwo_logo.jpg" alt="Logo" class="brand-logo">
-      <div>
-        <div class="brand-title">MESHWO FARMERS ARAVALLI</div>
-        <div class="brand-sub">Official Hosted Checkout Portal</div>
+  <!-- Top Flipkart Header -->
+  <header class="fk-top-header">
+    <div class="fk-brand-wrap">
+      <div class="fk-badge-logo">
+        Flipkart <span class="plus">✦</span>
       </div>
+      <span style="font-size: 13px; font-weight: 600; color: #616161;">Official Store Checkout</span>
     </div>
-    <div class="sec-badge">
-      <span>🔒 256-Bit SSL Encrypted</span>
+    <div class="fk-secure-pill">
+      <span>🔒 100% Safe &amp; Secure</span>
     </div>
   </header>
 
-  <main class="main-wrap">
-    <div class="checkout-card">
-      <div class="order-banner">
-        <div style="font-size: 12px; text-transform: uppercase; letter-spacing: 1px; opacity: 0.85;">Total Payable Amount</div>
-        <div class="amount-display" id="displayAmount">₹0</div>
-        <div style="font-size: 13px; margin-top: 6px; opacity: 0.9;">
-          Order Ref: <strong id="displayOrderNumber">MF-000000</strong>
+  <!-- Main Payment Container -->
+  <main class="payment-layout-container">
+    <div class="payment-main-card">
+      
+      <!-- Card Top Bar with Back Arrow and Title -->
+      <div class="payment-card-topbar">
+        <div class="payment-card-topbar-left">
+          <button class="back-btn-arrow" onclick="handleCancelPayment()" title="Go back">
+            <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="19" y1="12" x2="5" y2="12"></line>
+              <polyline points="12 19 5 12 12 5"></polyline>
+            </svg>
+          </button>
+          <h1 class="payment-card-topbar-title">Complete Payment</h1>
+        </div>
+        <div class="secure-badge-card">
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor" style="color: #2E7D32;">
+            <path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm-2 16l-4-4 1.41-1.41L10 14.17l6.59-6.59L18 9l-8 8z"/>
+          </svg>
+          <span>100% Secure</span>
         </div>
       </div>
 
-      <div class="card-body">
-        <div class="tabs">
-          <div class="tab active" onclick="switchTab('upi')">⚡ UPI / QR</div>
-          <div class="tab" onclick="switchTab('card')">💳 Debit &amp; Credit Cards</div>
-          <div class="tab" onclick="switchTab('netbanking')">🏦 NetBanking</div>
-        </div>
+      <!-- 3-Column Payment Content -->
+      <div class="payment-content-grid">
 
-        <!-- UPI Tab -->
-        <div id="tabContentUpi">
-          <div class="form-group">
-            <label class="form-label">Instant UPI Payment (GPay / PhonePe / Paytm)</label>
-            <input type="text" class="form-input" id="upiIdInput" value="customer@okhdfcbank" placeholder="yourname@upi">
-          </div>
-          <div style="background: #F8FAFC; border: 1px dashed #CBD5E1; border-radius: 8px; padding: 12px; text-align: center; margin-bottom: 12px;">
-            <span style="font-size: 12px; color: #64748B;">Supported Apps: Google Pay &bull; PhonePe &bull; Paytm &bull; BHIM UPI</span>
-          </div>
-        </div>
-
-        <!-- Card Tab -->
-        <div id="tabContentCard" style="display: none;">
-          <div class="form-group">
-            <label class="form-label">Card Number</label>
-            <input type="text" class="form-input" value="4532 •••• •••• 8891" placeholder="Card number">
-          </div>
-          <div style="display: flex; gap: 10px;">
-            <div class="form-group" style="flex: 1;">
-              <label class="form-label">Valid Thru</label>
-              <input type="text" class="form-input" value="08/29" placeholder="MM/YY">
-            </div>
-            <div class="form-group" style="flex: 1;">
-              <label class="form-label">CVV</label>
-              <input type="password" class="form-input" value="789" placeholder="CVV">
+        <!-- Column 1: Payment Tabs -->
+        <nav class="payment-tabs-column">
+          
+          <!-- UPI Tab -->
+          <div class="pay-option-tab active" id="tabUpi" onclick="switchPaymentTab('upi')">
+            <div class="tab-header-row">
+              <div class="tab-icon-box">UPI</div>
+              <div>
+                <div class="tab-title">UPI</div>
+                <div class="tab-desc">Pay by any UPI app</div>
+              </div>
             </div>
           </div>
-        </div>
 
-        <!-- NetBanking Tab -->
-        <div id="tabContentNetbanking" style="display: none;">
-          <div class="form-group">
-            <label class="form-label">Select Bank</label>
-            <select class="form-input">
-              <option>State Bank of India (SBI)</option>
-              <option selected>HDFC Bank</option>
-              <option>ICICI Bank</option>
-              <option>Axis Bank</option>
-              <option>Kotak Mahindra Bank</option>
-            </select>
+          <!-- Cards Tab -->
+          <div class="pay-option-tab" id="tabCard" onclick="switchPaymentTab('card')">
+            <div class="tab-header-row">
+              <div class="tab-icon-box">💳</div>
+              <div>
+                <div class="tab-title">Credit / Debit / ATM Card</div>
+                <div class="tab-desc">Add and secure cards as per RBI guidelines</div>
+                <span class="cashback-offer-pill">Get upto 5% cashback &bull; 2 offers available</span>
+              </div>
+            </div>
           </div>
-        </div>
 
-        <!-- Buttons -->
-        <button type="button" class="pay-btn" id="payNowBtn" onclick="handleSimulatedPayment()">
-          <span>🔒 AUTHORIZE &amp; PAY NOW &rarr;</span>
-        </button>
+          <!-- Cash on Delivery Tab -->
+          <div class="pay-option-tab" id="tabCod" onclick="switchPaymentTab('cod')">
+            <div class="tab-header-row">
+              <div class="tab-icon-box">💵</div>
+              <div>
+                <div class="tab-title">Cash on Delivery</div>
+                <div class="tab-desc">Pay cash when order arrives</div>
+              </div>
+            </div>
+          </div>
 
-        <button type="button" class="cancel-btn" onclick="handleCancelPayment()">
-          ✕ Cancel and Return to Store
-        </button>
+          <!-- Gift Card Tab -->
+          <div class="pay-option-tab" id="tabGift" onclick="switchPaymentTab('gift')">
+            <div class="tab-header-row">
+              <div class="tab-icon-box">🎁</div>
+              <div>
+                <div class="tab-title">Have a Flipkart Gift Card?</div>
+                <div class="tab-desc">Apply voucher code</div>
+              </div>
+            </div>
+          </div>
 
-        <div style="font-size: 11px; text-align: center; color: #94A3B8; margin-top: 16px;">
-          Certified Payment Gateway &bull; Compliant with RBI Security Guidelines &bull; Meshwo Farmers Cooperative
-        </div>
+          <!-- EMI Tab -->
+          <div class="pay-option-tab" style="opacity: 0.65; cursor: not-allowed;" title="EMI not available for this cart value">
+            <div class="tab-header-row">
+              <div class="tab-icon-box">📅</div>
+              <div>
+                <div class="tab-title">EMI</div>
+                <div class="tab-desc">Unavailable ❔</div>
+              </div>
+            </div>
+          </div>
+
+        </nav>
+
+        <!-- Column 2: Payment Action Center (Scan QR and Pay) -->
+        <section class="payment-action-column" id="panelUpiQr">
+          <h2 class="action-panel-title">Scan QR and Pay</h2>
+
+          <!-- Inner White Card -->
+          <div class="qr-box-card">
+            <span class="qr-amount-label">AMOUNT</span>
+            <div class="qr-amount-value" id="displayQrAmount">₹0</div>
+
+            <div class="qr-image-wrap">
+              <img id="dynamicUpiQrImg" class="qr-image-img" src="" alt="Dynamic UPI QR Code">
+            </div>
+
+            <!-- UPI Apps Logos -->
+            <div class="upi-apps-row">
+              <span style="font-size: 18px;" title="Google Pay">🟢</span>
+              <span style="font-size: 18px;" title="PhonePe">🟣</span>
+              <span style="font-size: 18px;" title="Paytm">🔵</span>
+              <span style="font-size: 18px;" title="BHIM">🔷</span>
+            </div>
+            <div class="upi-apps-text">or any other UPI app</div>
+          </div>
+
+          <!-- Direct Mobile Intent Link -->
+          <a id="mobileUpiIntentBtn" href="#" class="mobile-upi-btn">
+            ⚡ Pay Directly in PhonePe / GPay
+          </a>
+
+          <!-- QR Countdown Timer -->
+          <div class="qr-timer-text">
+            QR valid for <strong id="countdownTimerDisplay">04:59</strong> minutes
+          </div>
+
+          <div class="qr-warning-note">
+            Do not hit back or close this screen until the payment is complete
+          </div>
+
+          <!-- Real-Time Auto-Verification Status -->
+          <div class="realtime-detection-box">
+            <div class="pulse-dot"></div>
+            <span>Auto-detecting payment from bank...</span>
+          </div>
+
+          <!-- Manual Verification Button -->
+          <button type="button" class="verify-now-btn" id="btnManualVerify" onclick="triggerManualVerification()">
+            ⚡ I Have Paid &bull; Verify Instantly &rarr;
+          </button>
+        </section>
+
+        <!-- Card View (Hidden by default) -->
+        <section class="payment-action-column" id="panelCard" style="display: none;">
+          <h2 class="action-panel-title">Credit / Debit / ATM Card</h2>
+          <div class="card-payment-view" style="display: block;">
+            <div class="fk-form-group">
+              <label class="fk-form-label">Card Number</label>
+              <input type="text" class="fk-form-input" placeholder="XXXX XXXX XXXX XXXX" maxlength="19" value="4532 •••• •••• 8891">
+            </div>
+            <div style="display: flex; gap: 10px;">
+              <div class="fk-form-group" style="flex: 1;">
+                <label class="fk-form-label">Valid Thru</label>
+                <input type="text" class="fk-form-input" placeholder="MM/YY" maxlength="5" value="08/29">
+              </div>
+              <div class="fk-form-group" style="flex: 1;">
+                <label class="fk-form-label">CVV</label>
+                <input type="password" class="fk-form-input" placeholder="CVV" maxlength="4" value="789">
+              </div>
+            </div>
+            <button type="button" class="verify-now-btn" style="width: 100%; max-width: none;" onclick="triggerCardPayment()">
+              🔒 Pay Securely &rarr;
+            </button>
+            <div style="font-size: 11px; color: #878787; text-align: center; margin-top: 10px;">
+              🛡️ Encrypted with RBI compliant tokenization
+            </div>
+          </div>
+        </section>
+
+        <!-- COD View (Hidden by default) -->
+        <section class="payment-action-column" id="panelCod" style="display: none;">
+          <h2 class="action-panel-title">Cash on Delivery</h2>
+          <div style="max-width: 320px; text-align: center;">
+            <p style="font-size: 14px; color: #424242; margin-bottom: 20px;">
+              You can pay via cash or UPI directly to the courier partner when your parcel is delivered.
+            </p>
+            <button type="button" class="verify-now-btn" style="width: 100%; max-width: none; background: #2E7D32;" onclick="confirmCodOrder()">
+              📦 Confirm Cash on Delivery Order &rarr;
+            </button>
+          </div>
+        </section>
+
+        <!-- Column 3: Price Details & Offers -->
+        <aside class="price-details-column">
+          <div class="price-card-box">
+            
+            <div class="price-row">
+              <span>MRP (incl. of all taxes)</span>
+              <span id="displayMrpTotal">₹0</span>
+            </div>
+
+            <div class="price-row fees-row">
+              <span>Fees ⌃</span>
+              <span></span>
+            </div>
+            <div class="price-row" style="padding-left: 12px; font-size: 12.5px; color: #616161;">
+              <span>Protect Promise Fee</span>
+              <span id="displayShippingFee">FREE</span>
+            </div>
+
+            <div class="price-row discount-row" style="margin-top: 6px;">
+              <span>Discounts ⌃</span>
+              <span></span>
+            </div>
+            <div class="price-row discount-row" style="padding-left: 12px; font-size: 12.5px;">
+              <span>MRP Discount</span>
+              <span id="displayMrpDiscount">-₹0</span>
+            </div>
+            <div class="price-row discount-row" style="padding-left: 12px; font-size: 12.5px;" id="rowCouponDiscount">
+              <span>Coupons for you</span>
+              <span id="displayCouponDiscount">-₹0</span>
+            </div>
+
+            <div class="price-divider"></div>
+
+            <div class="total-amount-row">
+              <span>Total Amount</span>
+              <span class="total-amount-highlight" id="displayTotalAmount">₹0</span>
+            </div>
+
+          </div>
+
+          <!-- 5% Cashback Box -->
+          <div class="cashback-card-box">
+            <div class="cb-left">
+              <span class="cb-title">5% Cashback</span>
+              <span class="cb-subtitle">Claim now with payment offers</span>
+            </div>
+            <div class="cb-bank-icons">
+              <span class="cb-bank-pill">AXIS</span>
+              <span class="cb-bank-pill">SBI</span>
+              <span class="cb-bank-pill">HDFC</span>
+            </div>
+          </div>
+
+          <div style="margin-top: 24px; font-size: 11.5px; color: #878787; line-height: 1.5;">
+            🔒 Safe and Secure Payments. Easy returns. 100% Authentic products from Vedic Aravalli tribal collective.
+          </div>
+        </aside>
+
       </div>
     </div>
   </main>
 
+  <!-- Success Overlay Pop-up -->
+  <div class="payment-success-overlay" id="paymentSuccessModal">
+    <div class="success-modal">
+      <div class="success-icon-wrap">✓</div>
+      <h3 style="font-size: 20px; font-weight: 800; color: #212121; margin-bottom: 8px;">Payment Successful!</h3>
+      <p style="font-size: 14px; color: #616161; margin-bottom: 16px;" id="successModalDesc">
+        ₹0 received in bank account. Your order is confirmed!
+      </p>
+      <div style="font-size: 13px; font-weight: 700; color: var(--fk-blue);">
+        Redirecting to Order Details in 2 seconds...
+      </div>
+    </div>
+  </div>
+
   <script>
+    // State
     const urlParams = new URLSearchParams(window.location.search);
     const orderNumber = urlParams.get('order_number') || 'MF-000000';
-    const amount = urlParams.get('amount') || '0';
+    let orderAmount = parseFloat(urlParams.get('amount') || '0');
+    let merchantUpiId = 'sohamprajapati08@okicici';
+    let merchantName = 'Meshwo Farmers Aravalli';
+    let countdownRemaining = 5 * 60; // 5 minutes
+    let pollingInterval = null;
+    let timerInterval = null;
+    let isPaymentComplete = false;
 
-    document.getElementById('displayOrderNumber').textContent = orderNumber;
-    document.getElementById('displayAmount').textContent = `₹${parseFloat(amount).toLocaleString('en-IN')}`;
+    // Initialize Page
+    window.addEventListener('DOMContentLoaded', async () => {
+      await fetchStoreSettings();
+      await fetchOrderDetails();
+      startCountdownTimer();
+      startPaymentStatusPolling();
+    });
 
-    function switchTab(tab) {
-      document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-      event.target.classList.add('active');
-
-      document.getElementById('tabContentUpi').style.display = tab === 'upi' ? 'block' : 'none';
-      document.getElementById('tabContentCard').style.display = tab === 'card' ? 'block' : 'none';
-      document.getElementById('tabContentNetbanking').style.display = tab === 'netbanking' ? 'block' : 'none';
+    async function fetchStoreSettings() {
+      try {
+        const res = await fetch('/api/settings');
+        const data = await res.json();
+        if (data.success && data.settings) {
+          if (data.settings.payment_upi_id) merchantUpiId = data.settings.payment_upi_id;
+          if (data.settings.business_merchant_name) merchantName = data.settings.business_merchant_name;
+        }
+      } catch (e) {
+        console.warn('Settings load error:', e);
+      }
     }
 
-    function handleSimulatedPayment() {
-      const btn = document.getElementById('payNowBtn');
+    async function fetchOrderDetails() {
+      try {
+        const res = await fetch(`/api/checkout/order-status/${encodeURIComponent(orderNumber)}`);
+        const data = await res.json();
+
+        if (data.success) {
+          orderAmount = parseFloat(data.total) || orderAmount;
+          renderPriceSummary(data);
+          generateDynamicUpiQr(orderAmount);
+
+          if (data.is_paid) {
+            handleSuccessfulPayment(data.total);
+          }
+        } else {
+          // Fallback if order not in DB yet
+          renderPriceSummary({ total: orderAmount, subtotal: orderAmount, shipping_fee: 0, discount: 0 });
+          generateDynamicUpiQr(orderAmount);
+        }
+      } catch (e) {
+        console.warn('Order status fetch warning:', e);
+        renderPriceSummary({ total: orderAmount, subtotal: orderAmount, shipping_fee: 0, discount: 0 });
+        generateDynamicUpiQr(orderAmount);
+      }
+    }
+
+    function renderPriceSummary(data) {
+      const subtotal = data.subtotal || orderAmount;
+      const total = data.total || orderAmount;
+      const discount = data.discount || 0;
+      const shipping = data.shipping_fee || 0;
+
+      // Simulated realistic MRP (typically 30-40% higher)
+      const simulatedMrp = Math.round(subtotal * 1.35) + 150;
+      const mrpDiscount = simulatedMrp - subtotal;
+
+      document.getElementById('displayQrAmount').textContent = `₹${total.toLocaleString('en-IN')}`;
+      document.getElementById('displayTotalAmount').textContent = `₹${total.toLocaleString('en-IN')}`;
+      document.getElementById('displayMrpTotal').textContent = `₹${simulatedMrp.toLocaleString('en-IN')}`;
+      document.getElementById('displayMrpDiscount').textContent = `-₹${mrpDiscount.toLocaleString('en-IN')}`;
+      
+      const shippingEl = document.getElementById('displayShippingFee');
+      if (shippingEl) {
+        shippingEl.textContent = shipping === 0 ? 'FREE' : `₹${shipping}`;
+        shippingEl.style.color = shipping === 0 ? 'var(--fk-green)' : '#212121';
+      }
+
+      const couponRow = document.getElementById('rowCouponDiscount');
+      const couponEl = document.getElementById('displayCouponDiscount');
+      if (discount > 0) {
+        couponRow.style.display = 'flex';
+        couponEl.textContent = `-₹${discount.toLocaleString('en-IN')}`;
+      } else {
+        couponRow.style.display = 'none';
+      }
+    }
+
+    function generateDynamicUpiQr(amt) {
+      const cleanAmt = parseFloat(amt).toFixed(2);
+      const upiUri = `upi://pay?pa=${encodeURIComponent(merchantUpiId)}&pn=${encodeURIComponent(merchantName)}&am=${cleanAmt}&cu=INR&tn=Order%20${encodeURIComponent(orderNumber)}`;
+      
+      // High-resolution crisp QR code
+      const qrImg = document.getElementById('dynamicUpiQrImg');
+      qrImg.src = `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(upiUri)}`;
+
+      // Mobile button link
+      const mobileBtn = document.getElementById('mobileUpiIntentBtn');
+      if (mobileBtn) {
+        mobileBtn.href = upiUri;
+      }
+    }
+
+    // Countdown Timer (04:59 ... 00:00)
+    function startCountdownTimer() {
+      const display = document.getElementById('countdownTimerDisplay');
+      timerInterval = setInterval(() => {
+        if (countdownRemaining <= 0) {
+          clearInterval(timerInterval);
+          display.textContent = '00:00 (Expired)';
+          display.style.color = '#DC2626';
+          return;
+        }
+
+        countdownRemaining--;
+        const mins = Math.floor(countdownRemaining / 60);
+        const secs = countdownRemaining % 60;
+        display.textContent = `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+      }, 1000);
+    }
+
+    // Polling every 2.5s to auto-detect payment completion
+    function startPaymentStatusPolling() {
+      pollingInterval = setInterval(async () => {
+        if (isPaymentComplete) return;
+
+        try {
+          const res = await fetch(`/api/checkout/order-status/${encodeURIComponent(orderNumber)}`);
+          if (!res.ok) return;
+          const data = await res.json();
+
+          if (data.success && data.is_paid) {
+            handleSuccessfulPayment(data.total);
+          }
+        } catch (e) {
+          // ignore network hiccups
+        }
+      }, 2500);
+    }
+
+    async function triggerManualVerification() {
+      const btn = document.getElementById('btnManualVerify');
       btn.disabled = true;
-      btn.innerHTML = '<span>⏳ Processing Bank Transaction...</span>';
+      btn.innerHTML = '<span>⏳ Verifying Bank Transfer with UPI Server...</span>';
+
+      try {
+        const res = await fetch('/api/checkout/confirm-payment', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            order_number: orderNumber,
+            method: 'UPI_QR_AUTO',
+            amount: orderAmount
+          })
+        });
+
+        const data = await res.json();
+        if (data.success) {
+          handleSuccessfulPayment(orderAmount);
+        } else {
+          alert('Verification pending. Please complete the transfer in your UPI app.');
+          btn.disabled = false;
+          btn.innerHTML = '⚡ I Have Paid &bull; Verify Instantly &rarr;';
+        }
+      } catch (err) {
+        console.error('Manual verify error:', err);
+        btn.disabled = false;
+        btn.innerHTML = '⚡ I Have Paid &bull; Verify Instantly &rarr;';
+      }
+    }
+
+    function triggerCardPayment() {
+      handleSuccessfulPayment(orderAmount);
+    }
+
+    async function confirmCodOrder() {
+      try {
+        const res = await fetch('/api/checkout/confirm-payment', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            order_number: orderNumber,
+            method: 'COD',
+            amount: orderAmount
+          })
+        });
+        window.location.href = `/order-success.html?order_number=${encodeURIComponent(orderNumber)}&gateway=cod`;
+      } catch (e) {
+        window.location.href = `/order-success.html?order_number=${encodeURIComponent(orderNumber)}&gateway=cod`;
+      }
+    }
+
+    function handleSuccessfulPayment(paidAmt) {
+      if (isPaymentComplete) return;
+      isPaymentComplete = true;
+
+      clearInterval(pollingInterval);
+      clearInterval(timerInterval);
+
+      // Clear cart
+      const user = JSON.parse(localStorage.getItem('dwarkesh_user') || 'null');
+      if (user && user.phone) {
+        localStorage.removeItem(`dwarkesh_cart_${user.phone}`);
+      }
+      localStorage.removeItem('dwarkesh_cart');
+
+      // Show Flipkart success modal
+      const modal = document.getElementById('paymentSuccessModal');
+      const desc = document.getElementById('successModalDesc');
+      if (desc) desc.textContent = `₹${parseFloat(paidAmt || orderAmount).toLocaleString('en-IN')} received in bank account. Your order is confirmed!`;
+      modal.style.display = 'flex';
 
       setTimeout(() => {
-        const fakePaymentId = 'pay_' + Math.random().toString(36).substring(2, 12);
-        // Redirect to success URL
-        window.location.href = `/order-success.html?order_number=${encodeURIComponent(orderNumber)}&payment_id=${fakePaymentId}&status=paid`;
-      }, 1200);
+        window.location.href = `/order-success.html?order_number=${encodeURIComponent(orderNumber)}&status=paid&payment_id=BANK_UPI_VERIFIED`;
+      }, 1800);
+    }
+
+    function switchPaymentTab(tab) {
+      document.querySelectorAll('.pay-option-tab').forEach(t => t.classList.remove('active'));
+      const activeTabEl = document.getElementById(`tab${tab.charAt(0).toUpperCase() + tab.slice(1)}`);
+      if (activeTabEl) activeTabEl.classList.add('active');
+
+      document.getElementById('panelUpiQr').style.display = (tab === 'upi') ? 'flex' : 'none';
+      document.getElementById('panelCard').style.display = (tab === 'card') ? 'flex' : 'none';
+      document.getElementById('panelCod').style.display = (tab === 'cod') ? 'flex' : 'none';
     }
 
     function handleCancelPayment() {
-      window.location.href = `/checkout.html?status=cancelled&order_number=${encodeURIComponent(orderNumber)}`;
+      if (confirm('Are you sure you want to cancel payment? You can return to cart.')) {
+        window.location.href = `/checkout.html?status=cancelled&order_number=${encodeURIComponent(orderNumber)}`;
+      }
     }
   </script>
 </body>

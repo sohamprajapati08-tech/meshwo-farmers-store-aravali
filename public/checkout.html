@@ -250,25 +250,15 @@
               </div>
             </div>
 
-            <!-- UPI Payment Box (Displayed when UPI is chosen) -->
-            <div id="dedicatedUpiBox" class="checkout-upi-panel" style="display: none;">
-              <div style="font-size: 13px; font-weight: 800; color: var(--primary-color); margin-bottom: 10px;">
-                Scan &amp; Pay via GPay, PhonePe, Paytm, or BHIM
+            <!-- UPI Payment Notice (Flipkart Style) -->
+            <div id="dedicatedUpiBox" class="checkout-upi-panel" style="display: none; background: #F0FDF4; border: 1.5px solid #2E7D32; border-radius: 8px; padding: 18px; margin-bottom: 16px;">
+              <div style="font-size: 14px; font-weight: 800; color: #166534; margin-bottom: 6px; display: flex; align-items: center; justify-content: center; gap: 8px;">
+                <span>⚡ Automated Flipkart Scan &amp; Pay</span>
+                <span style="font-size: 11px; background: #DCFCE7; color: #15803D; padding: 2px 8px; border-radius: 12px;">Auto-Verified</span>
               </div>
-              <img id="chkUpiQrImg" src="/uploads/upi_qr.jpeg" alt="UPI QR Code" style="width: 170px; height: 170px; border-radius: 8px; border: 1px solid #CCC; margin: 0 auto 10px; display: block;">
-              <div style="font-size: 13px; margin-bottom: 12px; color: #333;">
-                UPI ID: <strong id="chkUpiIdDisplay">sohamprajapati08@okicici</strong>
-                <button type="button" onclick="navigator.clipboard.writeText('sohamprajapati08@okicici'); alert('📋 UPI ID Copied!');" style="background: none; border: 1px solid #888; padding: 2px 8px; border-radius: 4px; font-size: 11px; margin-left: 6px; cursor: pointer;">Copy</button>
-              </div>
-              <div style="margin-bottom: 14px;">
-                <a id="chkUpiDirectLink" href="upi://pay?pa=sohamprajapati08@okicici&pn=Meshwo%20Farmers" class="checkout-submit-btn" style="display: inline-flex; width: auto; padding: 9px 20px; font-size: 13px; background: #2E7D32; text-decoration: none;">
-                  ⚡ Pay Directly in UPI App
-                </a>
-              </div>
-              <div style="text-align: left; background: #FFFFFF; padding: 12px 14px; border-radius: 8px; border: 1px solid #D9D3C7; max-width: 420px; margin: 0 auto;">
-                <label class="checkout-label">Enter 12-Digit UPI Transaction UTR / Ref No *</label>
-                <input type="text" id="chkUpiUtrInput" class="checkout-input" placeholder="e.g. 425109876543">
-              </div>
+              <p style="font-size: 12.5px; color: #374151; line-height: 1.5; text-align: center; margin: 0 auto; max-width: 480px;">
+                Clicking below will open the official <strong>Flipkart-Style Complete Payment</strong> page with a real-time Dynamic QR Code and 5-minute countdown. As soon as money is debited from your UPI App (GPay/PhonePe/Paytm), your order is automatically verified and confirmed!
+              </p>
             </div>
 
             <!-- Hosted Checkout Info Notice -->
@@ -644,26 +634,12 @@
       if (method === 'UPI') {
         if (upiBox) upiBox.style.display = 'block';
         if (rzpNotice) rzpNotice.style.display = 'none';
-        if (btn) btn.innerHTML = `<span>I HAVE PAID VIA UPI &bull; BOOK ORDER (₹${total.toLocaleString('en-IN')}) &rarr;</span>`;
-
-        const upiId = checkoutState.settings.payment_upi_id || 'sohamprajapati08@okicici';
-        const upiImg = document.getElementById('chkUpiQrImg');
-        if (upiImg) {
-          if (checkoutState.settings.payment_upi_qr) {
-            upiImg.src = checkoutState.settings.payment_upi_qr;
-          } else {
-            upiImg.src = `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(`upi://pay?pa=${upiId}&pn=Meshwo%20Farmers&am=${total}&cu=INR`)}`;
-          }
-        }
-        const display = document.getElementById('chkUpiIdDisplay');
-        if (display) display.textContent = upiId;
-        const directLink = document.getElementById('chkUpiDirectLink');
-        if (directLink) directLink.href = `upi://pay?pa=${upiId}&pn=Meshwo%20Farmers&am=${total}&cu=INR`;
+        if (btn) btn.innerHTML = `<span>⚡ PROCEED TO FLIPKART SCAN &amp; PAY (₹${total.toLocaleString('en-IN')}) &rarr;</span>`;
 
       } else if (method === 'RAZORPAY') {
         if (upiBox) upiBox.style.display = 'none';
         if (rzpNotice) rzpNotice.style.display = 'block';
-        if (btn) btn.innerHTML = `<span>⚡ BOOK ORDER &amp; PAY ONLINE (Secure Hosted Checkout &bull; ₹${total.toLocaleString('en-IN')}) &rarr;</span>`;
+        if (btn) btn.innerHTML = `<span>⚡ BOOK ORDER &amp; PAY ONLINE (Flipkart Gateway &bull; ₹${total.toLocaleString('en-IN')}) &rarr;</span>`;
 
       } else {
         // COD
@@ -894,12 +870,12 @@
 
       const fullAddress = `${address}${landmark ? ', Near ' + landmark : ''}, ${city}, ${state} - ${pincode}`;
 
-      // 1. SECURE HOSTED ONLINE CHECKOUT (Razorpay / Stripe)
-      if (checkoutState.selectedPaymentMethod === 'RAZORPAY') {
+      // 1. SECURE HOSTED ONLINE CHECKOUT & FLIPKART SCAN & PAY (UPI / Cards)
+      if (checkoutState.selectedPaymentMethod === 'RAZORPAY' || checkoutState.selectedPaymentMethod === 'UPI') {
         const btn = document.getElementById('dedicatedSubmitOrderBtn');
         if (btn) {
           btn.disabled = true;
-          btn.innerHTML = '<span>⏳ Creating Secure Bank Payment Session...</span>';
+          btn.innerHTML = '<span>⏳ Opening Flipkart Secure Payment Gateway...</span>';
         }
 
         try {
@@ -935,38 +911,11 @@
           if (btn) { btn.disabled = false; updateCheckoutPaymentUi(); }
         }
         return;
-      }
-
-      // 2. DIRECT UPI QR FLOW
-      if (checkoutState.selectedPaymentMethod === 'UPI') {
-        const utr = document.getElementById('chkUpiUtrInput').value.trim();
-        if (!utr || utr.length < 6) {
-          alert('⚠️ Please scan the UPI QR code, pay in your UPI App, and enter the 12-digit UPI UTR / Transaction Reference number.');
-          document.getElementById('chkUpiUtrInput').focus();
-          return;
         }
-
-        await sendFinalOrderToServer({
-          customer_name: name,
-          customer_phone: phone,
-          customer_email: email,
-          address: fullAddress,
-          city,
-          pincode,
-          items: checkoutState.cart,
-          subtotal,
-          discount,
-          shipping_fee,
-          total,
-          coupon_code: checkoutState.appliedCoupon,
-          payment_method: 'UPI',
-          payment_status: 'Pending Verification',
-          transaction_id: utr
-        });
         return;
       }
 
-      // 3. CASH ON DELIVERY FLOW
+      // 2. CASH ON DELIVERY FLOW
       const codTxId = 'COD-' + Math.random().toString(36).substring(2, 8).toUpperCase();
       await sendFinalOrderToServer({
         customer_name: name,

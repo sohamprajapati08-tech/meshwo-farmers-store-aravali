@@ -627,6 +627,56 @@
           </p>
 
           <form onsubmit="handleSavePaymentSettings(event)">
+            <!-- Bank Account & Settlement Details (Where and whose account money goes) -->
+            <div style="background: #F0FDF4; border: 1.5px solid #22C55E; border-radius: 8px; padding: 20px; margin-bottom: 20px;">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; flex-wrap: wrap; gap: 8px;">
+                <h3 style="font-size: 16px; color: #166534; margin: 0; display: flex; align-items: center; gap: 8px;">
+                  <span>🏦 બેંક એકાઉન્ટ અને સેટલમેન્ટ વિગતો (ગ્રાહકના પૈસા કયા અને કોના ખાતામાં જશે?)</span>
+                </h3>
+                <span style="font-size: 11.5px; background: #DCFCE7; color: #15803D; padding: 4px 10px; border-radius: 12px; font-weight: 800;">
+                  🔒 100% Direct Bank Deposit
+                </span>
+              </div>
+              <p style="font-size: 12.5px; color: #374151; margin-bottom: 16px; line-height: 1.5;">
+                જ્યારે પણ કોઈ ગ્રાહક Flipkart Style Dynamic QR સ્કેન કરશે અથવા UPI / Cards થી ઓર્ડર કરશે, ત્યારે તેના પૈસા સીધા નીચે આપેલા બેંક ખાતામાં અને UPI ID પર જમા થશે.
+              </p>
+
+              <div class="admin-grid-2">
+                <div class="admin-form-group">
+                  <label class="admin-form-label">ખાતાધારકનું પૂરું નામ (Account Holder Name)</label>
+                  <input type="text" id="adminBankHolder" class="admin-form-input" placeholder="e.g. Meshwo Farmers Producer Co. / Soham Prajapati">
+                </div>
+                <div class="admin-form-group">
+                  <label class="admin-form-label">બેંકનું નામ (Bank Name)</label>
+                  <input type="text" id="adminBankName" class="admin-form-input" placeholder="e.g. State Bank of India (SBI) / HDFC Bank">
+                </div>
+                <div class="admin-form-group">
+                  <label class="admin-form-label">બેંક ખાતા નંબર (Account Number)</label>
+                  <input type="text" id="adminBankAccNumber" class="admin-form-input" placeholder="e.g. 39845019284">
+                </div>
+                <div class="admin-form-group">
+                  <label class="admin-form-label">બેંક IFSC કોડ (IFSC Code)</label>
+                  <input type="text" id="adminBankIfsc" class="admin-form-input" placeholder="e.g. SBIN0001234">
+                </div>
+                <div class="admin-form-group">
+                  <label class="admin-form-label">ખાતાનો પ્રકાર (Account Type)</label>
+                  <select id="adminBankAccType" class="admin-form-input">
+                    <option value="Current / Business Account">Current / Business Account (ચાલુ ખાતું)</option>
+                    <option value="Savings Account">Savings Account (બચત ખાતું)</option>
+                  </select>
+                </div>
+                <div class="admin-form-group">
+                  <label class="admin-form-label">સ્ટોર / બિઝનેસનું નામ (Merchant Display Name)</label>
+                  <input type="text" id="adminMerchantName" class="admin-form-input" placeholder="e.g. Meshwo Farmers Store Aravalli">
+                </div>
+              </div>
+
+              <!-- Settlement Assurance Badge -->
+              <div style="margin-top: 14px; background: #FFFFFF; border: 1px dashed #86EFAC; border-radius: 6px; padding: 12px 14px; font-size: 12px; color: #166534; line-height: 1.5;">
+                ✅ <strong>લાઈવ સેટલમેન્ટ નિયમ:</strong> ગ્રાહકો જે પણ QR કોડ સ્કેન કરશે તે સીધા આ જ બેંક ખાતા સાથે જોડાયેલા UPI ID પર જશે. જો તમે Razorpay ઉપયોગ કરો છો તો Razorpay ડેશબોર્ડમાં પણ આ જ બેંક એકાઉન્ટ લિંક રાખવું જેથી તમામ સેટલમેન્ટ 24 કલાકમાં તમારા ખાતામાં આવી જાય.
+              </div>
+            </div>
+
             <!-- UPI Settings -->
             <div style="background: #F8FAF6; border: 1px solid var(--admin-border); border-radius: 8px; padding: 18px; margin-bottom: 18px;">
               <h3 style="font-size: 15px; color: var(--admin-primary); margin-bottom: 12px;">📱 UPI / QR Code Settings</h3>

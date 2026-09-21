@@ -647,8 +647,19 @@ async function handleSavePaymentSettings(e) {
   const rzpActive = document.getElementById('adminRazorpayActive') ? String(document.getElementById('adminRazorpayActive').checked) : 'true';
 
   const payload = {
+    // Bank Account & Settlement Details
+    bank_account_holder: (document.getElementById('adminBankHolder')?.value || '').trim(),
+    bank_name: (document.getElementById('adminBankName')?.value || '').trim(),
+    bank_account_number: (document.getElementById('adminBankAccNumber')?.value || '').trim(),
+    bank_ifsc: (document.getElementById('adminBankIfsc')?.value || '').trim(),
+    bank_account_type: (document.getElementById('adminBankAccType')?.value || 'Current / Business Account').trim(),
+    business_merchant_name: (document.getElementById('adminMerchantName')?.value || '').trim(),
+
+    // UPI & QR
     payment_upi_id: document.getElementById('adminUpiId').value.trim(),
     payment_upi_qr: document.getElementById('adminUpiQr').value.trim(),
+
+    // Razorpay & Gateways
     payment_razorpay_key_id: rzpKeyId,
     payment_razorpay_key: rzpKeyId,
     payment_razorpay_key_secret: rzpKeySecret,
@@ -664,7 +675,7 @@ async function handleSavePaymentSettings(e) {
     });
     const data = await res.json();
     if (data.success) {
-      alert('✅ Payment gateways saved! Real-time Razorpay checkout & UPI are updated.');
+      alert('✅ Bank Account & Payment Gateway Settings Saved! ગ્રાહકોના પૈસા સીધા આ બેંક ખાતામાં જમા થશે.');
     }
   } catch (err) {
     console.error(err);
@@ -701,6 +712,14 @@ async function fetchAdminSettings() {
       if (s.hero_poster_title) document.getElementById('heroPosterTitle').value = s.hero_poster_title;
       if (s.hero_poster_subtitle) document.getElementById('heroPosterSubtitle').value = s.hero_poster_subtitle;
       if (s.hero_poster_button_text) document.getElementById('heroPosterButtonText').value = s.hero_poster_button_text;
+
+      // Bank Account & Settlement fields
+      if (document.getElementById('adminBankHolder')) document.getElementById('adminBankHolder').value = s.bank_account_holder || 'Meshwo Farmers Producer Co.';
+      if (document.getElementById('adminBankName')) document.getElementById('adminBankName').value = s.bank_name || 'State Bank of India (SBI)';
+      if (document.getElementById('adminBankAccNumber')) document.getElementById('adminBankAccNumber').value = s.bank_account_number || '39845019284';
+      if (document.getElementById('adminBankIfsc')) document.getElementById('adminBankIfsc').value = s.bank_ifsc || 'SBIN0001234';
+      if (document.getElementById('adminBankAccType') && s.bank_account_type) document.getElementById('adminBankAccType').value = s.bank_account_type;
+      if (document.getElementById('adminMerchantName')) document.getElementById('adminMerchantName').value = s.business_merchant_name || 'Meshwo Farmers Store Aravalli';
 
       // Payment fields
       if (s.payment_upi_id) document.getElementById('adminUpiId').value = s.payment_upi_id;
