@@ -282,7 +282,18 @@
 
         document.getElementById('verifyingSpinner').style.display = 'none';
 
-        if (data.success && data.order && (data.is_paid || data.order.payment_method === 'COD' || (data.order.payment_status && data.order.payment_status.toLowerCase().includes('paid')))) {
+        function isGenuinelyPaidClient(status, isPaidFlag) {
+          if (isPaidFlag !== true) return false;
+          if (!status) return false;
+          const s = String(status).trim().toLowerCase();
+          if (s.includes('unpaid') || s.includes('pending') || s.includes('fail') || s.includes('cancel')) return false;
+          return s.startsWith('paid');
+        }
+
+        const isLegitPaid = data.order && isGenuinelyPaidClient(data.order.payment_status, data.is_paid);
+        const isLegitCod = data.order && data.order.payment_method === 'COD';
+
+        if (data.success && data.order && (isLegitPaid || isLegitCod)) {
           const ord = data.order;
           document.getElementById('verifiedSuccessContent').style.display = 'block';
           document.getElementById('succOrderNumber').textContent = `Order ID: ${ord.order_number}`;
@@ -295,7 +306,7 @@
 
           const pill = document.getElementById('succPaymentPill');
           const pillText = document.getElementById('succPaymentStatusText');
-          if (ord.payment_status && ord.payment_status.toLowerCase().includes('paid')) {
+          if (isLegitPaid) {
             pill.className = 'payment-status-pill';
             pillText.textContent = `Payment Confirmed (${ord.payment_status})`;
           } else {

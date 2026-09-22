@@ -934,6 +934,15 @@
       }
     }
 
+    function isGenuinelyPaidClient(data) {
+      if (!data || data.is_paid !== true) return false;
+      const s = String(data.payment_status || '').trim().toLowerCase();
+      if (s.includes('unpaid') || s.includes('pending') || s.includes('fail') || s.includes('cancel')) {
+        return false;
+      }
+      return s.startsWith('paid');
+    }
+
     async function fetchOrderDetails() {
       try {
         const res = await fetch(`/api/checkout/order-status/${encodeURIComponent(orderNumber)}`);
@@ -944,7 +953,7 @@
           renderPriceSummary(data);
           generateDynamicUpiQr(orderAmount);
 
-          if (data.is_paid) {
+          if (isGenuinelyPaidClient(data)) {
             handleSuccessfulPayment(data.total);
           }
         } else {
@@ -1033,7 +1042,7 @@
           if (!res.ok) return;
           const data = await res.json();
 
-          if (data.success && data.is_paid) {
+          if (data.success && isGenuinelyPaidClient(data)) {
             handleSuccessfulPayment(data.total);
           }
         } catch (e) {

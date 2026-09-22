@@ -1073,6 +1073,16 @@ app.post('/api/admin/razorpay/test-keys', verifyAdminToken, async (req, res) => 
 // SECURE HOSTED CHECKOUT SYSTEM (Razorpay / Stripe / Simulation)
 // -------------------------------------------------------------
 
+// Helper to strictly check if an order has been paid and verified without false positives
+function isGenuinelyPaid(status) {
+  if (!status) return false;
+  const s = String(status).trim().toLowerCase();
+  if (s.includes('unpaid') || s.includes('pending') || s.includes('fail') || s.includes('cancel')) {
+    return false;
+  }
+  return s.startsWith('paid');
+}
+
 // POST /api/checkout/create-session
 // Receives customer & cart data, inserts Pending order, creates Hosted Session, returns Secure Payment URL
 app.post('/api/checkout/create-session', async (req, res) => {
@@ -1220,7 +1230,7 @@ app.post('/api/checkout/create-session', async (req, res) => {
       console.warn('Customer auto-link warning in create-session:', e.message);
     }
 
-    // Immediately record order with Pending status so Admin sees it live
+    // Record checkout session as Draft with Pending Payment status
     const insert = db.prepare(`
       INSERT INTO orders (
         order_number, customer_name, customer_email, customer_phone,
@@ -1232,7 +1242,7 @@ app.post('/api/checkout/create-session', async (req, res) => {
         ?, ?, ?, ?,
         ?, ?, ?, ?, ?,
         ?, ?, ?, ?, ?,
-        ?, 'Unpaid (Checkout In Progress)', '', 'Draft',
+        ?, 'Pending Payment', '', 'Draft',
         ?, ?
       )
     `);
@@ -1293,7 +1303,7 @@ app.post('/api/checkout/verify-session', async (req, res) => {
       return res.status(404).json({ success: false, message: 'Order not found' });
     }
 
-    const isPaid = Boolean(order.payment_status && order.payment_status.toLowerCase().includes('paid'));
+    const isPaid = isGenuinelyPaid(order.payment_status);
     const isCod = Boolean(order.payment_method === 'COD');
 
     // ONLY confirm if genuinely paid or legitimate Cash on Delivery
@@ -1315,55 +1325,55 @@ app.post('/api/checkout/verify-session', async (req, res) => {
   }
 });
 
-  // GET /api/checkout/order-status/:order_number (Real-Time Polling for Flipkart Scan & Pay)
-  app.get('/api/checkout/order-status/:order_number', (req, res) => {
-    try {
-      const orderNumber = req.params.order_number;
-      const order = db.prepare('SELECT * FROM orders WHERE order_number = ?').get(orderNumber);
-      if (!order) {
-        return res.status(404).json({ success: false, message: 'Order not found' });
-      }
-
-      const isPaid = Boolean(order.payment_status && order.payment_status.toLowerCase().includes('paid'));
-      const items = JSON.parse(order.items_json || '[]');
-
-      res.json({
-        success: true,
-        order_number: order.order_number,
-        total: order.total,
-        subtotal: order.subtotal,
-        shipping_fee: order.shipping_fee,
-        discount: order.discount,
-        customer_name: order.customer_name,
-        customer_phone: order.customer_phone,
-        payment_method: order.payment_method,
-        payment_status: order.payment_status,
-        order_status: order.order_status,
-        is_paid: isPaid,
-        items
-      });
-    } catch (err) {
-      console.error('Order status error:', err);
-      res.status(500).json({ success: false, message: err.message });
+// GET /api/checkout/order-status/:order_number (Real-Time Polling for Flipkart Scan & Pay)
+app.get('/api/checkout/order-status/:order_number', (req, res) => {
+  try {
+    const orderNumber = req.params.order_number;
+    const order = db.prepare('SELECT * FROM orders WHERE order_number = ?').get(orderNumber);
+    if (!order) {
+      return res.status(404).json({ success: false, message: 'Order not found' });
     }
-  });
 
-  // POST /api/checkout/confirm-payment (Instant Automated Verification for Dynamic QR & Bank Transfer)
-  app.post('/api/checkout/confirm-payment', async (req, res) => {
-    try {
-      const { order_number, payment_id, method } = req.body;
-      if (!order_number) {
-        return res.status(400).json({ success: false, message: 'order_number is required' });
-      }
+    const isPaid = isGenuinelyPaid(order.payment_status);
+    const items = JSON.parse(order.items_json || '[]');
 
-      const order = db.prepare('SELECT * FROM orders WHERE order_number = ?').get(order_number);
-      if (!order) {
-        return res.status(404).json({ success: false, message: 'Order not found' });
-      }
+    res.json({
+      success: true,
+      order_number: order.order_number,
+      total: order.total,
+      subtotal: order.subtotal,
+      shipping_fee: order.shipping_fee,
+      discount: order.discount,
+      customer_name: order.customer_name,
+      customer_phone: order.customer_phone,
+      payment_method: order.payment_method,
+      payment_status: order.payment_status,
+      order_status: order.order_status,
+      is_paid: isPaid,
+      items
+    });
+  } catch (err) {
+    console.error('Order status error:', err);
+    res.status(500).json({ success: false, message: err.message });
+  }
+});
 
-      if (order.payment_status && order.payment_status.toLowerCase().includes('paid')) {
-        return res.json({ success: true, message: 'Payment already verified', order, is_paid: true });
-      }
+// POST /api/checkout/confirm-payment (Instant Automated Verification for Dynamic QR & Bank Transfer)
+app.post('/api/checkout/confirm-payment', async (req, res) => {
+  try {
+    const { order_number, payment_id, method } = req.body;
+    if (!order_number) {
+      return res.status(400).json({ success: false, message: 'order_number is required' });
+    }
+
+    const order = db.prepare('SELECT * FROM orders WHERE order_number = ?').get(order_number);
+    if (!order) {
+      return res.status(404).json({ success: false, message: 'Order not found' });
+    }
+
+    if (isGenuinelyPaid(order.payment_status)) {
+      return res.json({ success: true, message: 'Payment already verified', order, is_paid: true });
+    }
 
       // If method is COD, mark as Pending (Cash on Delivery)
       if (method === 'COD') {

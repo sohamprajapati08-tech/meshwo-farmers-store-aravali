@@ -510,11 +510,11 @@ function renderAdminOrdersTable() {
         <td><strong style="color: var(--admin-primary); font-size: 14px;">₹${order.total.toLocaleString('en-IN')}</strong></td>
         <td>
           <div style="font-weight: 700; font-size: 12px;">${order.payment_method}</div>
-          <div style="font-size: 10.5px; margin-top: 3px; font-weight: 600; color: ${order.payment_status && order.payment_status.toLowerCase().includes('paid') ? '#16A34A' : '#D97706'};">
+          <div style="font-size: 10.5px; margin-top: 3px; font-weight: 600; color: ${order.payment_status && String(order.payment_status).toLowerCase().startsWith('paid') && !String(order.payment_status).toLowerCase().includes('pending') && !String(order.payment_status).toLowerCase().includes('unpaid') ? '#16A34A' : '#D97706'};">
             ${order.payment_status || 'Pending'}
           </div>
           ${order.transaction_id ? `<div style="font-size: 10px; background: #FEF3C7; color: #92400E; padding: 2px 6px; border-radius: 4px; margin-top: 4px; font-weight: 700;">UTR: ${order.transaction_id}</div>` : ''}
-          ${order.payment_method === 'UPI' && (!order.payment_status || !order.payment_status.toLowerCase().includes('paid')) ? `
+          ${order.payment_method === 'UPI' && (!order.payment_status || !String(order.payment_status).toLowerCase().startsWith('paid') || String(order.payment_status).toLowerCase().includes('pending')) ? `
             <button type="button" class="btn-admin" style="font-size: 10px; padding: 3px 8px; background: #16A34A; color: #FFF; margin-top: 5px; font-weight: 700; border-radius: 4px;" onclick="handleApproveUpiOrder(${order.id})">
               ✓ Confirm Money Received
             </button>
