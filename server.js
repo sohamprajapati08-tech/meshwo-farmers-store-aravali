@@ -357,13 +357,12 @@ app.post('/api/customer/quick-login', (req, res) => {
       { expiresIn: '30d' }
     );
 
-    // Fetch previous orders placed by this customer phone (excluding uncompleted Draft checkouts)
+    // Fetch previous orders placed by this customer phone
     const orders = db.prepare(`
       SELECT id, order_number, total, payment_method, payment_status, order_status, created_at, items_json
       FROM orders 
       WHERE (customer_phone = ? OR customer_phone LIKE ?)
-        AND order_status != 'Draft'
-      ORDER BY id DESC LIMIT 15
+      ORDER BY id DESC LIMIT 20
     `).all(cleanPhone, `%${cleanPhone}%`);
 
     res.json({
@@ -391,7 +390,6 @@ app.get('/api/customer/orders/:phone', (req, res) => {
       SELECT id, order_number, total, payment_method, payment_status, order_status, created_at, items_json
       FROM orders 
       WHERE (customer_phone = ? OR customer_phone = ? OR customer_phone LIKE ?)
-        AND order_status != 'Draft'
       ORDER BY id DESC LIMIT 50
     `).all(cleanPhone, rawPhone, `%${cleanPhone}%`);
 
@@ -1222,7 +1220,7 @@ app.post('/api/checkout/create-session', async (req, res) => {
       console.warn('Customer auto-link warning in create-session:', e.message);
     }
 
-    // Insert uncompleted checkout session as Draft (Will ONLY become an actual order when PAID)
+    // Immediately record order with Pending status so Admin sees it live
     const insert = db.prepare(`
       INSERT INTO orders (
         order_number, customer_name, customer_email, customer_phone,
@@ -1234,7 +1232,7 @@ app.post('/api/checkout/create-session', async (req, res) => {
         ?, ?, ?, ?,
         ?, ?, ?, ?, ?,
         ?, ?, ?, ?, ?,
-        ?, 'Draft (Unpaid)', '', 'Draft',
+        ?, 'Pending Payment (UPI / Online)', '', 'Pending',
         ?, ?
       )
     `);
@@ -1706,16 +1704,20 @@ app.post('/api/orders', (req, res) => {
   }
 });
 
-// GET /api/orders - Admin View Orders
+// GET /api/orders - Admin View Orders (Shows ALL placed orders live)
 app.get('/api/orders', verifyAdminToken, (req, res) => {
   try {
     const { status } = req.query;
-    let sql = "SELECT * FROM orders WHERE order_status != 'Draft'";
+    let sql = "SELECT * FROM orders WHERE 1=1";
     const params = [];
 
     if (status && status !== 'all') {
-      sql += ' AND order_status = ?';
-      params.push(status);
+      if (status === 'Pending') {
+        sql += " AND (order_status = 'Pending' OR order_status = 'Pending Verification')";
+      } else {
+        sql += ' AND order_status = ?';
+        params.push(status);
+      }
     }
 
     sql += ' ORDER BY id DESC';

@@ -285,13 +285,13 @@
                 Update order delivery status live (Pending, Processing, Shipped, Delivered, Cancelled).
               </p>
             </div>
-            <select id="adminOrderStatusFilter" class="admin-form-select" style="max-width: 200px;" onchange="fetchAdminOrders(this.value)">
-              <option value="all">All Statuses</option>
-              <option value="Pending">Pending</option>
-              <option value="Processing">Processing</option>
-              <option value="Shipped">Shipped</option>
-              <option value="Delivered">Delivered</option>
-              <option value="Cancelled">Cancelled</option>
+            <select id="adminOrderStatusFilter" class="admin-form-select" style="max-width: 260px;" onchange="fetchAdminOrders(this.value)">
+              <option value="all">📦 All Orders (તમામ ઓર્ડર્સ)</option>
+              <option value="Pending">⏳ Pending &amp; UPI Verification (ચકાસણી બાકી)</option>
+              <option value="Processing">⚡ Processing / Paid (તૈયાર થતા)</option>
+              <option value="Shipped">🚚 Shipped (રવાના)</option>
+              <option value="Delivered">✅ Delivered (પહોંચી ગયા)</option>
+              <option value="Cancelled">❌ Cancelled (રદ)</option>
             </select>
           </div>
 
