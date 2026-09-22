@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 40" width="120" height="40">
+  <g fill="none" fill-rule="evenodd">
+    <!-- Arrow elements -->
+    <path d="M26.5 6.5L34 20l-7.5 13.5h-8L26 20 18.5 6.5h8z" fill="#097939"/>
+    <path d="M17.5 6.5L25 20l-7.5 13.5H10L17 20 10 6.5h7.5z" fill="#ED7524"/>
+    <!-- UPI Text -->
+    <text x="42" y="27" font-family="'Arial Black', 'Inter', sans-serif" font-weight="900" font-style="italic" font-size="20" fill="#2E384D" letter-spacing="1">UPI</text>
+  </g>
+</svg>

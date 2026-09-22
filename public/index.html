@@ -1155,13 +1155,11 @@
               </div>
               <div class="pay-select-card" onclick="selectPaymentMethod('UPI', this)"
                 style="border: 1px solid var(--border-color); background: #FFF; padding: 12px; border-radius: 8px; cursor: pointer; text-align: center;">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
-                  style="width: 22px; height: 22px; margin: 0 auto 4px; display: block; color: var(--primary-color);">
-                  <rect x="3" y="3" width="7" height="7"></rect>
-                  <rect x="14" y="3" width="7" height="7"></rect>
-                  <rect x="14" y="14" width="7" height="7"></rect>
-                  <rect x="3" y="14" width="7" height="7"></rect>
-                </svg>
+                <div style="display: flex; align-items: center; justify-content: center; gap: 4px; margin-bottom: 4px;">
+                  <img src="/images/payment/gpay_icon.svg" width="16" height="16" alt="GPay">
+                  <img src="/images/payment/phonepe_icon.svg" width="16" height="16" alt="PhonePe">
+                  <img src="/images/payment/paytm_icon.svg" width="16" height="16" alt="Paytm">
+                </div>
                 <div style="font-weight: 700; font-size: 12px; margin-top: 4px;">Direct UPI / QR</div>
               </div>
             </div>
@@ -1183,8 +1181,11 @@
             <div style="margin-bottom: 12px;">
               <a id="upiMobilePayLink" href="upi://pay?pa=sohamprajapati08@okicici&pn=Meshwo%20Farmers"
                 class="checkout-btn"
-                style="display: inline-block; width: auto; padding: 8px 18px; font-size: 12px; margin-top: 0; background: #2E7D32;">⚡
-                Pay in UPI App (GPay/PhonePe/Paytm)</a>
+                style="display: inline-flex; align-items: center; justify-content: center; gap: 8px; width: auto; padding: 8px 18px; font-size: 12px; margin-top: 0; background: #2E7D32;">
+                <img src="/images/payment/phonepe_icon.svg" width="16" height="16" alt="PhonePe">
+                <img src="/images/payment/gpay_icon.svg" width="16" height="16" alt="GPay">
+                <span>Pay in UPI App (GPay/PhonePe/Paytm)</span>
+              </a>
             </div>
             <div
               style="text-align: left; background: #FFF; padding: 10px 14px; border-radius: 6px; border: 1px solid #E0E0E0;">
@@ -1274,19 +1275,19 @@
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 14px;">
               <div class="rzp-upi-app selected" id="rzpAppGpay" onclick="selectRzpUpiApp('gpay', this)"
                 style="border: 1.5px solid #0C75EB; background: #F0F7FF; padding: 10px 12px; border-radius: 8px; cursor: pointer; display: flex; align-items: center; gap: 8px; font-size: 12px; font-weight: 700; color: #0C2340;">
-                <span style="display: inline-flex; width: 18px; height: 18px; border-radius: 50%; background: #34A853; color: #FFF; font-size: 11px; align-items: center; justify-content: center; font-weight: 900;">G</span> <span>Google Pay</span>
+                <img src="/images/payment/gpay_icon.svg" width="20" height="20" alt="Google Pay" style="border-radius: 4px;"> <span>Google Pay</span>
               </div>
               <div class="rzp-upi-app" id="rzpAppPhonepe" onclick="selectRzpUpiApp('phonepe', this)"
                 style="border: 1px solid #DDD; background: #FFF; padding: 10px 12px; border-radius: 8px; cursor: pointer; display: flex; align-items: center; gap: 8px; font-size: 12px; font-weight: 600; color: #444;">
-                <span style="display: inline-flex; width: 18px; height: 18px; border-radius: 50%; background: #5f259f; color: #FFF; font-size: 11px; align-items: center; justify-content: center; font-weight: 900;">Pe</span> <span>PhonePe</span>
+                <img src="/images/payment/phonepe_icon.svg" width="20" height="20" alt="PhonePe" style="border-radius: 4px;"> <span>PhonePe</span>
               </div>
               <div class="rzp-upi-app" id="rzpAppPaytm" onclick="selectRzpUpiApp('paytm', this)"
                 style="border: 1px solid #DDD; background: #FFF; padding: 10px 12px; border-radius: 8px; cursor: pointer; display: flex; align-items: center; gap: 8px; font-size: 12px; font-weight: 600; color: #444;">
-                <span style="display: inline-flex; width: 18px; height: 18px; border-radius: 50%; background: #00BAF2; color: #FFF; font-size: 10px; align-items: center; justify-content: center; font-weight: 900;">Py</span> <span>Paytm UPI</span>
+                <img src="/images/payment/paytm_icon.svg" width="20" height="20" alt="Paytm" style="border-radius: 4px;"> <span>Paytm UPI</span>
               </div>
               <div class="rzp-upi-app" id="rzpAppBhim" onclick="selectRzpUpiApp('bhim', this)"
                 style="border: 1px solid #DDD; background: #FFF; padding: 10px 12px; border-radius: 8px; cursor: pointer; display: flex; align-items: center; gap: 8px; font-size: 12px; font-weight: 600; color: #444;">
-                <span style="display: inline-flex; width: 18px; height: 18px; border-radius: 50%; background: #00796B; color: #FFF; font-size: 10px; align-items: center; justify-content: center; font-weight: 900;">B</span> <span>BHIM UPI</span>
+                <img src="/images/payment/bhim.svg" width="20" height="20" alt="BHIM UPI" style="border-radius: 4px;"> <span>BHIM UPI</span>
               </div>
             </div>
 

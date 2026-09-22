@@ -239,25 +239,31 @@
 
               <!-- Direct UPI / QR -->
               <div class="checkout-pay-card selected" id="payMethodCardUPI" onclick="selectDedicatedPaymentMethod('UPI')">
-                <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.8" style="color: #2E7D32;">
-                  <rect x="3" y="3" width="7" height="7"></rect>
-                  <rect x="14" y="3" width="7" height="7"></rect>
-                  <rect x="14" y="14" width="7" height="7"></rect>
-                  <rect x="3" y="14" width="7" height="7"></rect>
-                </svg>
+                <div style="display: flex; align-items: center; justify-content: center; gap: 6px; margin-bottom: 6px;">
+                  <img src="/images/payment/gpay_icon.svg" width="22" height="22" alt="Google Pay">
+                  <img src="/images/payment/phonepe_icon.svg" width="22" height="22" alt="PhonePe">
+                  <img src="/images/payment/paytm_icon.svg" width="22" height="22" alt="Paytm">
+                  <img src="/images/payment/upi_icon.svg" width="22" height="22" alt="UPI">
+                </div>
                 <div class="checkout-pay-card-title">Direct UPI / QR</div>
-                <div class="checkout-pay-card-subtitle">Instant GPay/PhonePe</div>
+                <div class="checkout-pay-card-subtitle">PhonePe / GPay / Paytm</div>
               </div>
             </div>
 
             <!-- UPI Payment Notice (Flipkart Style) -->
             <div id="dedicatedUpiBox" class="checkout-upi-panel" style="display: block; background: #F0FDF4; border: 1.5px solid #2E7D32; border-radius: 8px; padding: 18px; margin-bottom: 16px;">
-              <div style="font-size: 14px; font-weight: 800; color: #166534; margin-bottom: 6px; display: flex; align-items: center; justify-content: center; gap: 8px;">
-                <span>⚡ Automated Flipkart Scan &amp; Pay</span>
-                <span style="font-size: 11px; background: #DCFCE7; color: #15803D; padding: 2px 8px; border-radius: 12px;">Auto-Verified</span>
+              <div style="display: flex; align-items: center; justify-content: center; gap: 10px; margin-bottom: 10px;">
+                <img src="/images/payment/upi.svg" height="24" alt="UPI" style="display: block;">
+                <span style="font-size: 11px; background: #DCFCE7; color: #15803D; padding: 3px 10px; border-radius: 12px; font-weight: 800;">⚡ Instant Bank Auto-Verified</span>
+              </div>
+              <div style="display: flex; align-items: center; justify-content: center; gap: 14px; margin-bottom: 10px; flex-wrap: wrap;">
+                <img src="/images/payment/gpay.svg" height="22" alt="Google Pay">
+                <img src="/images/payment/phonepe.svg" height="22" alt="PhonePe">
+                <img src="/images/payment/paytm.svg" height="20" alt="Paytm">
+                <img src="/images/payment/bhim.svg" height="20" alt="BHIM">
               </div>
               <p style="font-size: 12.5px; color: #374151; line-height: 1.5; text-align: center; margin: 0 auto; max-width: 480px;">
-                Clicking below will open the official <strong>Flipkart-Style Complete Payment</strong> page with a real-time Dynamic QR Code and 5-minute countdown. As soon as money is debited from your UPI App (GPay/PhonePe/Paytm), your order is automatically verified and confirmed!
+                Clicking below will open the official <strong>Flipkart-Style Complete Payment</strong> page with a real-time Dynamic QR Code and 5-minute countdown. As soon as money is debited from your UPI App (PhonePe/GPay/Paytm), your order is automatically verified and confirmed!
               </p>
             </div>
 

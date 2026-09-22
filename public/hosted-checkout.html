@@ -667,10 +667,12 @@
           <!-- UPI Tab -->
           <div class="pay-option-tab active" id="tabUpi" onclick="switchPaymentTab('upi')">
             <div class="tab-header-row">
-              <div class="tab-icon-box">UPI</div>
+              <div class="tab-icon-box" style="padding: 2px;">
+                <img src="/images/payment/upi_icon.svg" width="26" height="26" alt="UPI" style="display: block;">
+              </div>
               <div>
-                <div class="tab-title">UPI</div>
-                <div class="tab-desc">Pay by any UPI app</div>
+                <div class="tab-title">UPI &bull; PhonePe / GPay / Paytm</div>
+                <div class="tab-desc">Scan &amp; Pay via any UPI app</div>
               </div>
             </div>
           </div>
@@ -737,17 +739,19 @@
 
             <!-- UPI Apps Logos -->
             <div class="upi-apps-row">
-              <span style="font-size: 18px;" title="Google Pay">🟢</span>
-              <span style="font-size: 18px;" title="PhonePe">🟣</span>
-              <span style="font-size: 18px;" title="Paytm">🔵</span>
-              <span style="font-size: 18px;" title="BHIM">🔷</span>
+              <img src="/images/payment/gpay_icon.svg" alt="Google Pay" class="upi-app-icon" title="Google Pay">
+              <img src="/images/payment/phonepe_icon.svg" alt="PhonePe" class="upi-app-icon" title="PhonePe">
+              <img src="/images/payment/paytm_icon.svg" alt="Paytm" class="upi-app-icon" title="Paytm">
+              <img src="/images/payment/upi_icon.svg" alt="BHIM UPI" class="upi-app-icon" title="BHIM UPI">
             </div>
-            <div class="upi-apps-text">or any other UPI app</div>
+            <div class="upi-apps-text">Pay via GPay, PhonePe, Paytm, BHIM or any UPI app</div>
           </div>
 
           <!-- Direct Mobile Intent Link -->
-          <a id="mobileUpiIntentBtn" href="#" class="mobile-upi-btn">
-            ⚡ Pay Directly in PhonePe / GPay
+          <a id="mobileUpiIntentBtn" href="#" class="mobile-upi-btn" style="display: flex; align-items: center; justify-content: center; gap: 8px;">
+            <img src="/images/payment/phonepe_icon.svg" width="22" height="22" alt="PhonePe" style="border-radius: 4px;">
+            <img src="/images/payment/gpay_icon.svg" width="22" height="22" alt="GPay" style="border-radius: 4px;">
+            <span>⚡ Pay Directly in PhonePe / GPay</span>
           </a>
 
           <!-- QR Countdown Timer -->

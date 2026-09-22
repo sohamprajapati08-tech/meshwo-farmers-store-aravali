@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 40" width="100" height="40">
+  <!-- Google "G" logo -->
+  <g transform="translate(8, 6)">
+    <path d="M14 6.7c1.8 0 3.4.6 4.7 1.8l3.5-3.5C20.1 3 17.3 2 14 2 8.5 2 3.8 5.2 1.6 9.8l4.1 3.2C6.7 9.4 10.1 6.7 14 6.7z" fill="#EA4335"/>
+    <path d="M25.6 14.3c0-.9-.1-1.8-.3-2.6H14v5.1h6.6c-.3 1.6-1.2 2.9-2.5 3.8l4 3.1c2.4-2.2 3.8-5.4 3.8-9.4z" fill="#4285F4"/>
+    <path d="M5.7 17.1c-.3-.8-.4-1.7-.4-2.6s.1-1.8.4-2.6L1.6 8.7C.6 10.7 0 12.8 0 15.1s.6 4.4 1.6 6.4l4.1-3.2-.1-1.2z" fill="#FBBC05"/>
+    <path d="M14 26.2c3.8 0 7-1.3 9.3-3.4l-4-3.1c-1.1.8-2.6 1.4-4.3 1.4-3.9 0-7.3-2.7-8.3-6.3L1.6 18c2.2 4.6 6.9 8.2 12.4 8.2z" fill="#34A853"/>
+  </g>
+  <!-- Pay Text -->
+  <text x="38" y="26" font-family="'Product Sans', 'Inter', -apple-system, Roboto, sans-serif" font-weight="700" font-size="20" fill="#5F6368" letter-spacing="-0.5">Pay</text>
+</svg>
