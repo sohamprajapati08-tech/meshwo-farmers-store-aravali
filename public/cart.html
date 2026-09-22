@@ -489,7 +489,7 @@
       const sThresh = parseFloat(sSettings.free_shipping_threshold);
       const threshold = !isNaN(sThresh) ? sThresh : 999;
       const sFee = parseFloat(sSettings.standard_shipping_fee);
-      const standardFee = !isNaN(sFee) ? sFee : 99;
+      const standardFee = !isNaN(sFee) ? sFee : 0;
 
       if (!cart || cart.length === 0) {
         if (itemsCard) itemsCard.style.display = 'none';
@@ -630,6 +630,20 @@
           if (d && d.settings) {
             window.cartSettings = d.settings;
             if (window.state) window.state.settings = d.settings;
+            renderCartPage();
+          }
+        }).catch(e => console.warn(e));
+
+      fetch('/api/products')
+        .then(r => r.json())
+        .then(d => {
+          if (d && d.success && Array.isArray(d.products)) {
+            if (window.state) {
+              window.state.products = d.products;
+              if (typeof syncCartWithLiveProducts === 'function') {
+                syncCartWithLiveProducts();
+              }
+            }
             renderCartPage();
           }
         }).catch(e => console.warn(e));

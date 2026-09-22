@@ -823,39 +823,38 @@
 
         <!-- Column 3: Price Details & Offers -->
         <aside class="price-details-column">
+          <!-- Real Ordered Products from Server -->
+          <div class="hosted-order-items-box" id="hostedOrderItemsBox" style="background: #FFF; border-radius: 8px; border: 1px solid #E0E0E0; padding: 14px; margin-bottom: 16px; box-shadow: 0 1px 4px rgba(0,0,0,0.06);">
+            <div style="font-size: 13px; font-weight: 700; color: #212121; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #F0F0F0; padding-bottom: 8px;">
+              <span>🌾 Ordered Products</span>
+              <span id="displayOrderItemsCount" style="color: #666; font-size: 11.5px; font-weight: 500;"></span>
+            </div>
+            <div id="displayOrderItemsList" style="display: flex; flex-direction: column; gap: 8px; max-height: 220px; overflow-y: auto;">
+              <!-- Rendered dynamically from server database -->
+            </div>
+          </div>
+
           <div class="price-card-box">
             
             <div class="price-row">
-              <span>MRP (incl. of all taxes)</span>
+              <span>Items Total (Real Price)</span>
               <span id="displayMrpTotal">₹0</span>
             </div>
 
             <div class="price-row fees-row">
-              <span>Fees ⌃</span>
-              <span></span>
-            </div>
-            <div class="price-row" style="padding-left: 12px; font-size: 12.5px; color: #616161;">
-              <span>Protect Promise Fee</span>
-              <span id="displayShippingFee">FREE</span>
+              <span>Delivery Charges</span>
+              <span id="displayShippingFee" style="color: var(--fk-green); font-weight: 700;">FREE</span>
             </div>
 
-            <div class="price-row discount-row" style="margin-top: 6px;">
-              <span>Discounts ⌃</span>
-              <span></span>
-            </div>
-            <div class="price-row discount-row" style="padding-left: 12px; font-size: 12.5px;">
-              <span>MRP Discount</span>
-              <span id="displayMrpDiscount">-₹0</span>
-            </div>
-            <div class="price-row discount-row" style="padding-left: 12px; font-size: 12.5px;" id="rowCouponDiscount">
-              <span>Coupons for you</span>
-              <span id="displayCouponDiscount">-₹0</span>
+            <div class="price-row discount-row" style="margin-top: 6px;" id="rowCouponDiscount">
+              <span>Coupon Discount</span>
+              <span id="displayCouponDiscount" style="color: var(--fk-green); font-weight: 700;">-₹0</span>
             </div>
 
             <div class="price-divider"></div>
 
             <div class="total-amount-row">
-              <span>Total Amount</span>
+              <span>Total Payable</span>
               <span class="total-amount-highlight" id="displayTotalAmount">₹0</span>
             </div>
 
@@ -965,19 +964,41 @@
     }
 
     function renderPriceSummary(data) {
+      const items = Array.isArray(data.items) ? data.items : [];
       const subtotal = data.subtotal || orderAmount;
       const total = data.total || orderAmount;
       const discount = data.discount || 0;
       const shipping = data.shipping_fee || 0;
 
-      // Simulated realistic MRP (typically 30-40% higher)
-      const simulatedMrp = Math.round(subtotal * 1.35) + 150;
-      const mrpDiscount = simulatedMrp - subtotal;
+      // Render actual items from server
+      const itemsContainer = document.getElementById('displayOrderItemsList');
+      const countEl = document.getElementById('displayOrderItemsCount');
+      if (itemsContainer && items.length > 0) {
+        if (countEl) countEl.textContent = `${items.length} item${items.length > 1 ? 's' : ''}`;
+        itemsContainer.innerHTML = items.map(item => `
+          <div style="display: flex; align-items: center; gap: 10px; padding: 6px 0; border-bottom: 1px dashed #EEE;">
+            <img src="${item.image_url || '/images/products/wild_forest_honey.jpg'}" alt="${item.title}" style="width: 42px; height: 42px; border-radius: 6px; object-fit: cover; border: 1px solid #E0E0E0;" onerror="this.src='/images/products/wild_forest_honey.jpg'">
+            <div style="flex: 1; min-width: 0;">
+              <div style="font-size: 12px; font-weight: 700; color: #212121; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${item.title}</div>
+              <div style="font-size: 11px; color: #777;">${item.selectedVariant || item.variantLabel || 'Standard'} &bull; Qty: ${item.quantity || 1}</div>
+            </div>
+            <div style="text-align: right; flex-shrink: 0;">
+              <div style="font-size: 13px; font-weight: 800; color: #212121;">₹${((item.price || 0) * (item.quantity || 1)).toLocaleString('en-IN')}</div>
+              ${(item.original_price && item.original_price > item.price) ? `<div style="font-size: 10.5px; color: #999; text-decoration: line-through;">₹${(item.original_price * (item.quantity || 1)).toLocaleString('en-IN')}</div>` : ''}
+            </div>
+          </div>
+        `).join('');
+      } else if (itemsContainer) {
+        itemsContainer.innerHTML = `
+          <div style="font-size: 12px; color: #555; padding: 4px 0;">
+            Order #${encodeURIComponent(orderNumber)}
+          </div>
+        `;
+      }
 
       document.getElementById('displayQrAmount').textContent = `₹${total.toLocaleString('en-IN')}`;
       document.getElementById('displayTotalAmount').textContent = `₹${total.toLocaleString('en-IN')}`;
-      document.getElementById('displayMrpTotal').textContent = `₹${simulatedMrp.toLocaleString('en-IN')}`;
-      document.getElementById('displayMrpDiscount').textContent = `-₹${mrpDiscount.toLocaleString('en-IN')}`;
+      document.getElementById('displayMrpTotal').textContent = `₹${subtotal.toLocaleString('en-IN')}`;
       
       const shippingEl = document.getElementById('displayShippingFee');
       if (shippingEl) {

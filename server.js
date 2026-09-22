@@ -719,69 +719,97 @@ app.get('/api/categories', (req, res) => {
 // -------------------------------------------------------------
 function calculateServerCartTotal(items, coupon_code) {
   let subtotal = 0;
+  let originalSubtotal = 0;
   const verifiedItems = [];
+
+  const allProducts = db.prepare('SELECT * FROM products').all();
 
   for (const it of (items || [])) {
     const targetId = it.id || it.productId;
     let prod = null;
+
     if (targetId) {
-      prod = db.prepare('SELECT * FROM products WHERE id = ?').get(targetId);
+      prod = allProducts.find(p => Number(p.id) === Number(targetId));
     }
     if (!prod && it.slug) {
-      prod = db.prepare('SELECT * FROM products WHERE slug = ?').get(it.slug);
+      prod = allProducts.find(p => p.slug === it.slug);
     }
     if (!prod && it.title) {
-      prod = db.prepare('SELECT * FROM products WHERE title = ? OR title LIKE ?').get(it.title, `%${it.title}%`);
+      const cleanTitle = it.title.trim().toLowerCase();
+      prod = allProducts.find(p => p.title.trim().toLowerCase() === cleanTitle);
+      if (!prod) {
+        prod = allProducts.find(p => p.title.toLowerCase().includes(cleanTitle) || cleanTitle.includes(p.title.toLowerCase()));
+      }
     }
-    if (!prod) {
-      console.warn(`[Server Cart] Product not found in DB: ID ${targetId}, Title ${it.title}`);
-      continue;
+    // Fuzzy keyword matching if still not found
+    if (!prod && it.title) {
+      const tLow = it.title.toLowerCase();
+      const keywords = ['honey', 'laddu', 'oil', 'kesuda', 'neem', 'amla', 'aloe', 'moringa', 'turmeric', 'ginger'];
+      for (const kw of keywords) {
+        if (tLow.includes(kw)) {
+          prod = allProducts.find(p => p.title.toLowerCase().includes(kw) || p.slug.toLowerCase().includes(kw));
+          if (prod) break;
+        }
+      }
     }
 
-    let itemPrice = Number(prod.price);
+    let itemPrice = prod ? Number(prod.price) : Number(it.price || 0);
+    let originalPrice = prod ? Number(prod.original_price || prod.price) : Number(it.original_price || it.price || 0);
+    let itemTitle = prod ? prod.title : (it.title || 'Organic Product');
+    let itemImage = prod ? prod.image_url : (it.image_url || '/images/products/wild_forest_honey.jpg');
     const targetVariant = (it.selectedVariant || it.variantLabel || it.variant || '').trim().toLowerCase();
     const cleanTarget = targetVariant.replace(/\s+/g, '');
 
-    if (targetVariant && prod.variants_json) {
+    if (prod && prod.variants_json) {
       try {
         const variants = JSON.parse(prod.variants_json);
-        // 1. Direct match or normalized whitespace match
-        let match = variants.find(v => {
-          const vLabel = (v.label || '').trim().toLowerCase();
-          return vLabel === targetVariant || vLabel.replace(/\s+/g, '') === cleanTarget;
-        });
-        // 2. Fallback partial inclusion match (e.g., '500g Eco-Pouch' matching '500 g')
-        if (!match && cleanTarget) {
-          match = variants.find(v => {
-            const vClean = (v.label || '').trim().toLowerCase().replace(/\s+/g, '');
-            return vClean && (cleanTarget.includes(vClean) || vClean.includes(cleanTarget));
-          });
-        }
-        if (match && match.price) {
-          itemPrice = Number(match.price);
+        if (Array.isArray(variants) && variants.length > 0) {
+          let match = null;
+          if (targetVariant && targetVariant !== 'standard') {
+            match = variants.find(v => {
+              const vLabel = (v.label || '').trim().toLowerCase();
+              return vLabel === targetVariant || vLabel.replace(/\s+/g, '') === cleanTarget;
+            });
+            if (!match && cleanTarget) {
+              match = variants.find(v => {
+                const vClean = (v.label || '').trim().toLowerCase().replace(/\s+/g, '');
+                return vClean && (cleanTarget.includes(vClean) || vClean.includes(cleanTarget));
+              });
+            }
+          }
+          if (match) {
+            itemPrice = Number(match.price);
+            originalPrice = Number(match.original_price || match.price);
+          } else if (!targetVariant || targetVariant === 'standard') {
+            itemPrice = Number(variants[0].price);
+            originalPrice = Number(variants[0].original_price || variants[0].price);
+          }
         }
       } catch (e) {}
     }
 
     const quantity = Math.max(1, parseInt(it.quantity) || 1);
     subtotal += itemPrice * quantity;
+    originalSubtotal += originalPrice * quantity;
+
     verifiedItems.push({
       ...it,
-      id: prod.id,
-      productId: prod.id,
+      id: prod ? prod.id : targetId,
+      productId: prod ? prod.id : targetId,
       selectedVariant: it.selectedVariant || it.variantLabel || 'Standard',
       variantLabel: it.variantLabel || it.selectedVariant || 'Standard',
       price: itemPrice,
+      original_price: originalPrice,
       quantity,
-      title: prod.title,
-      image_url: prod.image_url
+      title: itemTitle,
+      image_url: itemImage
     });
   }
 
   const freeThresholdRow = db.prepare("SELECT value FROM settings WHERE key = 'free_shipping_threshold'").get();
   const freeThreshold = (freeThresholdRow && !isNaN(parseFloat(freeThresholdRow.value))) ? parseFloat(freeThresholdRow.value) : 999;
   const standardShippingRow = db.prepare("SELECT value FROM settings WHERE key = 'standard_shipping_fee'").get();
-  const standardShipping = (standardShippingRow && !isNaN(parseFloat(standardShippingRow.value))) ? parseFloat(standardShippingRow.value) : 99;
+  const standardShipping = (standardShippingRow && !isNaN(parseFloat(standardShippingRow.value))) ? parseFloat(standardShippingRow.value) : 0;
   const shipping_fee = (subtotal >= freeThreshold || subtotal === 0) ? 0 : standardShipping;
 
   let discount = 0;
@@ -791,7 +819,7 @@ function calculateServerCartTotal(items, coupon_code) {
   }
 
   const total = Math.max(0, subtotal - discount + shipping_fee);
-  return { subtotal, shipping_fee, discount, total, verifiedItems };
+  return { subtotal, originalSubtotal, shipping_fee, discount, total, verifiedItems };
 }
 
 // -------------------------------------------------------------

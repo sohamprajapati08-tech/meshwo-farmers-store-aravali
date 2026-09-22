@@ -458,6 +458,15 @@
           }
         }).catch(e => console.warn(e));
 
+      // 1.1 Fetch live products from server to sync prices and variants with real server DB
+      fetch('/api/products')
+        .then(r => r.json())
+        .then(data => {
+          if (data && data.success && Array.isArray(data.products)) {
+            syncCheckoutCartWithLiveServer(data.products);
+          }
+        }).catch(e => console.warn(e));
+
       // 2. Load cart from local storage
       const user = JSON.parse(localStorage.getItem('dwarkesh_user') || 'null');
       let cartKey = 'dwarkesh_cart';
@@ -551,6 +560,56 @@
       updateCartBadgeCount();
     }
 
+    function syncCheckoutCartWithLiveServer(liveProducts) {
+      if (!checkoutState.cart || !checkoutState.cart.length || !liveProducts || !liveProducts.length) return;
+      let changed = false;
+      checkoutState.cart.forEach(item => {
+        const prod = liveProducts.find(p =>
+          Number(p.id) === Number(item.productId || item.id) ||
+          (p.title && item.title && (
+            p.title.trim().toLowerCase() === item.title.trim().toLowerCase() ||
+            p.title.toLowerCase().includes((item.title || '').toLowerCase()) ||
+            (item.title || '').toLowerCase().includes(p.title.toLowerCase())
+          ))
+        );
+        if (prod) {
+          item.id = prod.id;
+          item.productId = prod.id;
+          item.title = prod.title;
+          if (prod.image_url) item.image_url = prod.image_url;
+
+          let variants = prod.variants || [];
+          if (typeof variants === 'string') {
+            try { variants = JSON.parse(variants); } catch (e) { variants = []; }
+          }
+          const vLabel = (item.variantLabel || item.selectedVariant || '').trim().toLowerCase();
+          if (vLabel && vLabel !== 'standard' && variants.length > 0) {
+            const match = variants.find(v => (v.label || '').trim().toLowerCase() === vLabel);
+            if (match) {
+              item.price = Number(match.price);
+              item.original_price = Number(match.original_price || match.price);
+              item.variantLabel = match.label;
+              item.selectedVariant = match.label;
+            } else {
+              item.price = Number(prod.price);
+            }
+          } else if (variants.length > 0) {
+            item.price = Number(variants[0].price);
+            item.original_price = Number(variants[0].original_price || variants[0].price);
+            item.variantLabel = variants[0].label;
+            item.selectedVariant = variants[0].label;
+          } else {
+            item.price = Number(prod.price);
+          }
+          changed = true;
+        }
+      });
+      if (changed) {
+        localStorage.setItem('dwarkesh_cart', JSON.stringify(checkoutState.cart));
+        renderCheckoutOrderSummary();
+      }
+    }
+
     function renderCheckoutOrderSummary() {
       const itemsList = document.getElementById('chkSummaryItemsList');
       const itemsCountLabel = document.getElementById('chkItemsCountLabel');
@@ -580,7 +639,7 @@
       const sThresh = parseFloat(checkoutState.settings.free_shipping_threshold);
       const threshold = !isNaN(sThresh) ? sThresh : 999;
       const sFee = parseFloat(checkoutState.settings.standard_shipping_fee);
-      const standardFee = !isNaN(sFee) ? sFee : 99;
+      const standardFee = !isNaN(sFee) ? sFee : 0;
       const shipping = subtotal >= threshold ? 0 : standardFee;
       const discount = checkoutState.appliedCoupon ? Math.round((subtotal * 10) / 100) : 0;
       const total = Math.max(0, subtotal - discount + shipping);
@@ -869,7 +928,7 @@
       const sThresh = parseFloat(checkoutState.settings.free_shipping_threshold);
       const threshold = !isNaN(sThresh) ? sThresh : 999;
       const sFee = parseFloat(checkoutState.settings.standard_shipping_fee);
-      const standardFee = !isNaN(sFee) ? sFee : 99;
+      const standardFee = !isNaN(sFee) ? sFee : 0;
       const shipping_fee = subtotal >= threshold ? 0 : standardFee;
       const discount = checkoutState.appliedCoupon ? Math.round((subtotal * 10) / 100) : 0;
       const total = Math.max(0, subtotal - discount + shipping_fee);
