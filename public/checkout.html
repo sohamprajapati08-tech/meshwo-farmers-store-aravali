@@ -217,7 +217,7 @@
 
             <div class="checkout-pay-methods-grid">
               <!-- COD -->
-              <div class="checkout-pay-card selected" id="payMethodCardCOD" onclick="selectDedicatedPaymentMethod('COD')">
+              <div class="checkout-pay-card" id="payMethodCardCOD" onclick="selectDedicatedPaymentMethod('COD')">
                 <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.8" style="color: var(--primary-color);">
                   <rect x="2" y="6" width="20" height="12" rx="2"></rect>
                   <circle cx="12" cy="12" r="2"></circle>
@@ -238,7 +238,7 @@
               </div>
 
               <!-- Direct UPI / QR -->
-              <div class="checkout-pay-card" id="payMethodCardUPI" onclick="selectDedicatedPaymentMethod('UPI')">
+              <div class="checkout-pay-card selected" id="payMethodCardUPI" onclick="selectDedicatedPaymentMethod('UPI')">
                 <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.8" style="color: #2E7D32;">
                   <rect x="3" y="3" width="7" height="7"></rect>
                   <rect x="14" y="3" width="7" height="7"></rect>
@@ -251,7 +251,7 @@
             </div>
 
             <!-- UPI Payment Notice (Flipkart Style) -->
-            <div id="dedicatedUpiBox" class="checkout-upi-panel" style="display: none; background: #F0FDF4; border: 1.5px solid #2E7D32; border-radius: 8px; padding: 18px; margin-bottom: 16px;">
+            <div id="dedicatedUpiBox" class="checkout-upi-panel" style="display: block; background: #F0FDF4; border: 1.5px solid #2E7D32; border-radius: 8px; padding: 18px; margin-bottom: 16px;">
               <div style="font-size: 14px; font-weight: 800; color: #166534; margin-bottom: 6px; display: flex; align-items: center; justify-content: center; gap: 8px;">
                 <span>⚡ Automated Flipkart Scan &amp; Pay</span>
                 <span style="font-size: 11px; background: #DCFCE7; color: #15803D; padding: 2px 8px; border-radius: 12px;">Auto-Verified</span>
@@ -268,7 +268,7 @@
 
             <!-- Place / Book Order CTA Button -->
             <button type="submit" id="dedicatedSubmitOrderBtn" class="checkout-submit-btn">
-              <span>BOOK ORDER (Cash on Delivery) &rarr;</span>
+              <span>⚡ PROCEED TO PAYMENT (Flipkart Gateway) &rarr;</span>
             </button>
 
             <!-- Trust Line -->
@@ -430,7 +430,7 @@
   <script>
     let checkoutState = {
       cart: [],
-      selectedPaymentMethod: 'COD',
+      selectedPaymentMethod: 'UPI',
       appliedCoupon: null,
       settings: {
         free_shipping_threshold: 999,

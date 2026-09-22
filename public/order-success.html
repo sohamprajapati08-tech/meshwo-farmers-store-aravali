@@ -218,21 +218,27 @@
         </div>
       </div>
 
-      <!-- Error State -->
-      <div id="verifyErrorContent" style="display: none; padding: 30px 10px;">
-        <div style="font-size: 48px; margin-bottom: 12px;">⚠️</div>
-        <h2 style="font-family: var(--font-heading); color: #C2410C; font-size: 22px; margin-bottom: 8px;">
-          Payment Status Notice
+      <!-- Incomplete Payment / Error State -->
+      <div id="verifyErrorContent" style="display: none; padding: 30px 10px; text-align: center;">
+        <div style="font-size: 52px; margin-bottom: 14px;">❌</div>
+        <h2 style="font-family: var(--font-heading); color: #DC2626; font-size: 24px; margin-bottom: 8px;">
+          પેમેન્ટ પૂર્ણ થયેલ નથી! ઓર્ડર પ્લેસ થયો નથી.
         </h2>
-        <p id="verifyErrorMsg" style="color: #666; font-size: 14px; max-width: 480px; margin: 0 auto 20px; line-height: 1.6;">
-          We could not automatically confirm your payment token. If money was deducted, our team will verify it manually.
+        <div style="font-size: 13px; font-weight: 700; color: #991B1B; margin-bottom: 12px;">
+          (Order Not Placed &bull; Payment Incomplete)
+        </div>
+        <p id="verifyErrorMsg" style="color: #4B5563; font-size: 14px; max-width: 500px; margin: 0 auto 24px; line-height: 1.6;">
+          તમારા બેંક કે UPI માંથી પૈસા કપાયા નથી. સિસ્ટમની સુરક્ષા નીતિ મુજબ, જ્યાં સુધી સાચા પૈસા જમા ન થાય ત્યાં સુધી ઓર્ડર કન્ફર્મ થતો નથી.
         </p>
-        <div style="display: flex; gap: 10px; justify-content: center;">
-          <a href="/checkout.html" class="checkout-submit-btn" style="width: auto; padding: 10px 22px; text-decoration: none; background: #555;">
+        <div style="display: flex; gap: 12px; justify-content: center; flex-wrap: wrap;">
+          <a id="retryPaymentBtn" href="/checkout.html" class="checkout-submit-btn" style="width: auto; padding: 12px 24px; text-decoration: none; background: #0C75EB;">
+            💳 હમણાં પેમેન્ટ પૂર્ણ કરો &rarr;
+          </a>
+          <a href="/checkout.html" class="checkout-submit-btn" style="width: auto; padding: 12px 22px; text-decoration: none; background: #4B5563;">
             Return to Checkout
           </a>
-          <a href="https://wa.me/916356785785" target="_blank" class="checkout-submit-btn" style="width: auto; padding: 10px 22px; text-decoration: none; background: #25D366;">
-            Contact Support
+          <a href="https://wa.me/916356785785" target="_blank" class="checkout-submit-btn" style="width: auto; padding: 12px 22px; text-decoration: none; background: #25D366;">
+            💬 WhatsApp Support
           </a>
         </div>
       </div>
@@ -276,7 +282,7 @@
 
         document.getElementById('verifyingSpinner').style.display = 'none';
 
-        if (data.success && data.order) {
+        if (data.success && data.order && (data.is_paid || data.order.payment_method === 'COD' || (data.order.payment_status && data.order.payment_status.toLowerCase().includes('paid')))) {
           const ord = data.order;
           document.getElementById('verifiedSuccessContent').style.display = 'block';
           document.getElementById('succOrderNumber').textContent = `Order ID: ${ord.order_number}`;
@@ -294,7 +300,7 @@
             pillText.textContent = `Payment Confirmed (${ord.payment_status})`;
           } else {
             pill.className = 'payment-status-pill pending';
-            pillText.textContent = `Payment Status: ${ord.payment_status || 'Processing'}`;
+            pillText.textContent = `Payment Status: ${ord.payment_status || 'Cash on Delivery'}`;
           }
 
           // Parse and render items
@@ -354,14 +360,24 @@
 
         } else {
           document.getElementById('verifyErrorContent').style.display = 'block';
-          document.getElementById('verifyErrorMsg').textContent = data.message || 'Could not verify payment status with server.';
+          if (data.message) {
+            document.getElementById('verifyErrorMsg').textContent = data.message;
+          }
+          const retryBtn = document.getElementById('retryPaymentBtn');
+          if (retryBtn) {
+            retryBtn.href = `/hosted-checkout.html?order_number=${encodeURIComponent(orderNumber)}`;
+          }
         }
 
       } catch (err) {
         console.error(err);
         document.getElementById('verifyingSpinner').style.display = 'none';
         document.getElementById('verifyErrorContent').style.display = 'block';
-        document.getElementById('verifyErrorMsg').textContent = 'Network or verification error. Our team will verify your payment manually.';
+        document.getElementById('verifyErrorMsg').textContent = 'ઓર્ડર ચકાસણીમાં ખામી આવી છે. જો તમારા બેંકમાંથી પૈસા કપાયા ન હોય તો ઓર્ડર પ્લેસ થયો નથી.';
+        const retryBtn = document.getElementById('retryPaymentBtn');
+        if (retryBtn) {
+          retryBtn.href = `/hosted-checkout.html?order_number=${encodeURIComponent(orderNumber)}`;
+        }
       }
     });
   </script>

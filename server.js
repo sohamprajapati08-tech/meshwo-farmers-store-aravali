@@ -1232,7 +1232,7 @@ app.post('/api/checkout/create-session', async (req, res) => {
         ?, ?, ?, ?,
         ?, ?, ?, ?, ?,
         ?, ?, ?, ?, ?,
-        ?, 'Pending Payment (UPI / Online)', '', 'Pending',
+        ?, 'Unpaid (Checkout In Progress)', '', 'Draft',
         ?, ?
       )
     `);
@@ -1279,7 +1279,7 @@ app.post('/api/checkout/create-session', async (req, res) => {
 });
 
 // POST /api/checkout/verify-session
-// When user returns to Success URL, verify and update status to 'Paid'
+// When user returns to Success URL, strictly verify if order is genuinely Paid or valid COD
 app.post('/api/checkout/verify-session', async (req, res) => {
   try {
     const { order_number, session_id, payment_id, status } = req.body;
@@ -1293,56 +1293,27 @@ app.post('/api/checkout/verify-session', async (req, res) => {
       return res.status(404).json({ success: false, message: 'Order not found' });
     }
 
-    // If already marked as Paid, return existing order
-    if (order.payment_status && order.payment_status.toLowerCase().includes('paid')) {
-      return res.json({ success: true, message: 'Order is already paid', order });
+    const isPaid = Boolean(order.payment_status && order.payment_status.toLowerCase().includes('paid'));
+    const isCod = Boolean(order.payment_method === 'COD');
+
+    // ONLY confirm if genuinely paid or legitimate Cash on Delivery
+    if (isPaid || isCod) {
+      return res.json({ success: true, message: 'Order verified', order, is_paid: isPaid });
     }
 
-    const effectiveTxId = payment_id || session_id || order.payment_session_id || `TXN_${Date.now()}`;
-    const newPaymentStatus = 'Paid (100% Bank Verified)';
-    const newOrderStatus = 'Processing';
+    // STRICT: If payment is not completed, order is NOT confirmed
+    return res.status(400).json({
+      success: false,
+      is_paid: false,
+      message: '❌ પેમેન્ટ પૂર્ણ થયેલ નથી! જ્યાં સુધી પૈસા જમા ન થાય ત્યાં સુધી ઓર્ડર કન્ફર્મ થશે નહીં.',
+      order
+    });
 
-    db.prepare(`
-      UPDATE orders 
-      SET payment_status = ?, order_status = ?, transaction_id = ?
-      WHERE order_number = ?
-    `).run(newPaymentStatus, newOrderStatus, effectiveTxId, order_number);
-
-    const updatedOrder = db.prepare('SELECT * FROM orders WHERE order_number = ?').get(order_number);
-
-    // Sync to Google Sheets in background
-    try {
-      const items = JSON.parse(updatedOrder.items_json || '[]');
-      const orderDataForSheet = {
-        order_number: updatedOrder.order_number,
-        customer_name: updatedOrder.customer_name,
-        customer_email: updatedOrder.customer_email || '',
-        customer_phone: updatedOrder.customer_phone,
-        full_address: `${updatedOrder.address}, ${updatedOrder.city || ''} ${updatedOrder.pincode || ''}`.trim(),
-        items_summary: items.map(it => `${it.title} (${it.selectedVariant || 'Standard'}) x${it.quantity}`).join(' | '),
-        subtotal: updatedOrder.subtotal,
-        discount: updatedOrder.discount,
-        shipping_fee: updatedOrder.shipping_fee,
-        total: updatedOrder.total,
-        payment_method: updatedOrder.payment_method,
-        payment_status: newPaymentStatus,
-        transaction_id: effectiveTxId,
-        order_status: newOrderStatus
-      };
-      syncToGoogleSheets('NEW_ORDER', orderDataForSheet).catch(err => console.error('[Google Sheets BG Sync]', err.message));
-    } catch (e) {}
-
-      res.json({
-        success: true,
-        message: 'Payment verified and status updated to Paid!',
-        order: updatedOrder
-      });
-
-    } catch (error) {
-      console.error('Verify checkout session error:', error);
-      res.status(500).json({ success: false, message: 'Verification error: ' + error.message });
-    }
-  });
+  } catch (error) {
+    console.error('Verify checkout session error:', error);
+    res.status(500).json({ success: false, message: 'Verification error: ' + error.message });
+  }
+});
 
   // GET /api/checkout/order-status/:order_number (Real-Time Polling for Flipkart Scan & Pay)
   app.get('/api/checkout/order-status/:order_number', (req, res) => {
@@ -1708,7 +1679,7 @@ app.post('/api/orders', (req, res) => {
 app.get('/api/orders', verifyAdminToken, (req, res) => {
   try {
     const { status } = req.query;
-    let sql = "SELECT * FROM orders WHERE 1=1";
+    let sql = "SELECT * FROM orders WHERE order_status != 'Draft'";
     const params = [];
 
     if (status && status !== 'all') {
