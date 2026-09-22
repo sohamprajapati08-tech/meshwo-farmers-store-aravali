@@ -775,39 +775,31 @@
             </div>
           </div>
 
-          <div style="margin-top: 14px; font-size: 11.5px; color: #878787;">
-            — OR PAY VIA GATEWAY —
+          <!-- Razorpay / Gateway Payment Button (Shown only when Razorpay is configured) -->
+          <div id="razorpayGatewayBlock" style="display: none;">
+            <div style="margin-top: 14px; font-size: 11.5px; color: #878787;">
+              — OR PAY VIA GATEWAY —
+            </div>
+            <button type="button" class="verify-now-btn" id="btnRazorpayLaunch" style="background: #0C75EB; margin-top: 8px;" onclick="launchRazorpayRealPayment()">
+              💳 Pay via Razorpay Gateway (Cards &amp; NetBanking) &rarr;
+            </button>
           </div>
-
-          <!-- Razorpay / Bank Verified Payment Button -->
-          <button type="button" class="verify-now-btn" id="btnRazorpayLaunch" style="background: #0C75EB; margin-top: 8px;" onclick="launchRazorpayRealPayment()">
-            💳 Pay via Razorpay Gateway (Cards &amp; NetBanking) &rarr;
-          </button>
         </section>
 
         <!-- Card View (Hidden by default) -->
         <section class="payment-action-column" id="panelCard" style="display: none;">
           <h2 class="action-panel-title">Credit / Debit / ATM Card</h2>
-          <div class="card-payment-view" style="display: block;">
-            <div class="fk-form-group">
-              <label class="fk-form-label">Card Number</label>
-              <input type="text" class="fk-form-input" placeholder="XXXX XXXX XXXX XXXX" maxlength="19" value="4532 •••• •••• 8891">
-            </div>
-            <div style="display: flex; gap: 10px;">
-              <div class="fk-form-group" style="flex: 1;">
-                <label class="fk-form-label">Valid Thru</label>
-                <input type="text" class="fk-form-input" placeholder="MM/YY" maxlength="5" value="08/29">
-              </div>
-              <div class="fk-form-group" style="flex: 1;">
-                <label class="fk-form-label">CVV</label>
-                <input type="password" class="fk-form-input" placeholder="CVV" maxlength="4" value="789">
-              </div>
-            </div>
-            <button type="button" class="verify-now-btn" style="width: 100%; max-width: none;" onclick="triggerCardPayment()">
-              🔒 Pay Securely &rarr;
+          <div style="max-width: 340px; text-align: center; background: #F8FAFC; border: 1.5px dashed #CBD5E1; border-radius: 12px; padding: 26px 20px; margin: 10px auto;">
+            <div style="font-size: 38px; margin-bottom: 12px;">💳</div>
+            <div style="font-weight: 800; color: #1E293B; font-size: 15px; margin-bottom: 8px;">કાર્ડ પેમેન્ટ સુવિધા અપડેટ થઈ રહી છે</div>
+            <p style="font-size: 12.5px; color: #64748B; line-height: 1.5; margin-bottom: 20px;">
+              ઝડપી અને ૧૦૦% સુરક્ષિત ઓર્ડર માટે કૃપા કરીને નીચે આપેલા બટનથી <strong>PhonePe / GPay / Paytm UPI</strong> દ્વારા પેમેન્ટ કરો.
+            </p>
+            <button type="button" class="verify-now-btn" style="width: 100%; max-width: none; background: #2E7D32;" onclick="switchPaymentTab('upi')">
+              ⚡ Pay via UPI / QR Code &rarr;
             </button>
-            <div style="font-size: 11px; color: #878787; text-align: center; margin-top: 10px;">
-              🛡️ Encrypted with RBI compliant tokenization
+            <div style="font-size: 11px; color: #878787; text-align: center; margin-top: 12px;">
+              🛡️ Zero Transaction Fees &bull; Instant Verification
             </div>
           </div>
         </section>
@@ -1061,6 +1053,12 @@
           if (data.settings.payment_upi_id) merchantUpiId = data.settings.payment_upi_id;
           if (data.settings.business_merchant_name) merchantName = data.settings.business_merchant_name;
           if (data.settings.payment_razorpay_key_id) razorpayKeyId = data.settings.payment_razorpay_key_id;
+
+          const isRzpLive = Boolean(razorpayKeyId && !razorpayKeyId.includes('DwarkeshFarms2026') && !razorpayKeyId.includes('rzp_test_Dwarkesh'));
+          const rzpBlock = document.getElementById('razorpayGatewayBlock');
+          if (rzpBlock && isRzpLive) {
+            rzpBlock.style.display = 'block';
+          }
         }
       } catch (e) {
         console.warn('Settings load error:', e);
@@ -1088,17 +1086,21 @@
         const data = await res.json();
 
         if (!data.success || !data.order) {
-          alert('⚠️ Payment Gateway Error: ' + (data.message || 'Could not initiate bank gateway. Please check Admin settings.'));
-          if (btn) { btn.disabled = false; btn.innerHTML = '💳 Pay via Razorpay (UPI, Cards &amp; NetBanking) &rarr;'; }
+          switchPaymentTab('upi');
+          alert('કૃપા કરીને ઉપર આપેલા Dynamic UPI QR કોડ અથવા PhonePe / Google Pay / Paytm દ્વારા પેમેન્ટ પૂર્ણ કરો.');
+          if (btn) { btn.disabled = false; btn.innerHTML = '💳 Pay via Razorpay Gateway (Cards &amp; NetBanking) &rarr;'; }
           return;
         }
 
         const activeKey = data.key_id || razorpayKeyId;
 
-        // Check if Razorpay key is still the dummy one
+        // If Razorpay live keys are not configured, guide customer to instant UPI payment
         if (!activeKey || activeKey.includes('DwarkeshFarms2026') || activeKey.includes('rzp_test_Dwarkesh')) {
-          alert('⚠️ Razorpay Live API Key ખૂટે છે:\n\nતમારા બેંક ખાતામાં સાચા પૈસા ઓટોમેટિક જમા કરવા માટે:\n૧. dashboard.razorpay.com પરથી તમારી Live Key ID અને Key Secret મેળવો.\n૨. Admin Panel -> Tab 5: Payment Gateways માં પેસ્ટ કરીને Save કરો.\n\nજ્યાં સુધી Live Key નહિ હોય ત્યાં સુધી બેંકમાંથી સાચા પૈસા કપાશે નહિ!');
-          if (btn) { btn.disabled = false; btn.innerHTML = '💳 Pay via Razorpay (UPI, Cards &amp; NetBanking) &rarr;'; }
+          switchPaymentTab('upi');
+          const upiBox = document.getElementById('panelUpiQr');
+          if (upiBox) upiBox.scrollIntoView({ behavior: 'smooth' });
+          alert('કૃપા કરીને ઉપર આપેલા Dynamic UPI QR કોડ અથવા PhonePe / Google Pay / Paytm દ્વારા પેમેન્ટ કરો.');
+          if (btn) { btn.disabled = false; btn.innerHTML = '💳 Pay via Razorpay Gateway (Cards &amp; NetBanking) &rarr;'; }
           return;
         }
 
